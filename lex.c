@@ -619,6 +619,7 @@ void check_escape(FILE* sourceFile, T_token* actToken)
                     }
                     else
                     {
+			f_addChar('\\',actToken);
                         f_addChar(substring[0],actToken);
                         f_addChar(substring[1],actToken);
                         f_addChar(nextChar,actToken);
