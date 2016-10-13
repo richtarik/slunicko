@@ -1,0 +1,400 @@
+class 			 type_num: 36
+identifier: Main
+"{" 			 type_num: 24
+static 			 type_num: 42
+void 			 type_num: 37
+identifier: run
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+int 			 type_num: 39
+identifier: a
+";" 	Semicolon 	 type_num: 17
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Zadejte cislo pro vypocet faktorialu: 
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: a
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: readInt
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+int 			 type_num: 39
+identifier: vysl
+";" 	Semicolon 	 type_num: 17
+if 			 type_num: 31
+"(" 	Parenthes. left  type_num: 20
+identifier: a
+"<" 	Less 		 type_num: 11
+Int: 0
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Faktorial nelze spocitat!
+
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+else 			 type_num: 32
+"{" 			 type_num: 24
+identifier: vysl
+"=" 	Assignment 	 type_num: 0
+Int: 1
+";" 	Semicolon 	 type_num: 17
+while 			 type_num: 28
+"(" 	Parenthes. left  type_num: 20
+identifier: a
+">" 	Greater 	 type_num: 10
+Int: 0
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+identifier: vysl
+"=" 	Assignment 	 type_num: 0
+identifier: vysl
+"*" 	Multiplication 	 type_num: 3
+identifier: a
+";" 	Semicolon 	 type_num: 17
+identifier: a
+"=" 	Assignment 	 type_num: 0
+identifier: a
+"-" 	Subtraction	 type_num: 2
+Int: 1
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Vysledek je: 
+"+" 	Addition 	 type_num: 1
+identifier: vysl
+"+" 	Addition 	 type_num: 1
+String: 
+
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+class 			 type_num: 36
+identifier: Main
+"{" 			 type_num: 24
+static 			 type_num: 42
+void 			 type_num: 37
+identifier: run
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+int 			 type_num: 39
+identifier: a
+";" 	Semicolon 	 type_num: 17
+int 			 type_num: 39
+identifier: vysl
+";" 	Semicolon 	 type_num: 17
+int 			 type_num: 39
+identifier: neg
+";" 	Semicolon 	 type_num: 17
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Zadejte cislo pro vypocet faktorialu: 
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: a
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: readInt
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+if 			 type_num: 31
+"(" 	Parenthes. left  type_num: 20
+identifier: a
+"<" 	Less 		 type_num: 11
+Int: 0
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Faktorial nelze spocitat!
+
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+else 			 type_num: 32
+"{" 			 type_num: 24
+identifier: vysl
+"=" 	Assignment 	 type_num: 0
+identifier: factorial
+"(" 	Parenthes. left  type_num: 20
+identifier: a
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: neg
+"=" 	Assignment 	 type_num: 0
+Int: 0
+"-" 	Subtraction	 type_num: 2
+identifier: vysl
+";" 	Semicolon 	 type_num: 17
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Vysledek: 
+"+" 	Addition 	 type_num: 1
+identifier: vysl
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String:  (zaporny: 
+"+" 	Addition 	 type_num: 1
+identifier: neg
+"+" 	Addition 	 type_num: 1
+String: )
+
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+static 			 type_num: 42
+int 			 type_num: 39
+identifier: factorial
+"(" 	Parenthes. left  type_num: 20
+int 			 type_num: 39
+identifier: n
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+int 			 type_num: 39
+identifier: temp_result
+";" 	Semicolon 	 type_num: 17
+int 			 type_num: 39
+identifier: decremented_n
+"=" 	Assignment 	 type_num: 0
+identifier: n
+"-" 	Subtraction	 type_num: 2
+Int: 1
+";" 	Semicolon 	 type_num: 17
+if 			 type_num: 31
+"(" 	Parenthes. left  type_num: 20
+identifier: n
+"<" 	Less 		 type_num: 11
+Int: 2
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+return 			 type_num: 33
+Int: 1
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+else 			 type_num: 32
+"{" 			 type_num: 24
+identifier: temp_result
+"=" 	Assignment 	 type_num: 0
+identifier: factorial
+"(" 	Parenthes. left  type_num: 20
+identifier: decremented_n
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: temp_result
+"=" 	Assignment 	 type_num: 0
+identifier: n
+"*" 	Multiplication 	 type_num: 3
+identifier: temp_result
+";" 	Semicolon 	 type_num: 17
+return 			 type_num: 33
+identifier: temp_result
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+class 			 type_num: 36
+identifier: Main
+"{" 			 type_num: 24
+static 			 type_num: 42
+int 			 type_num: 39
+identifier: x
+";" 	Semicolon 	 type_num: 17
+static 			 type_num: 42
+void 			 type_num: 37
+identifier: run
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+String: String
+identifier: str1
+";" 	Semicolon 	 type_num: 17
+identifier: str1
+"=" 	Assignment 	 type_num: 0
+String: Toto je nejaky text
+";" 	Semicolon 	 type_num: 17
+String: String
+identifier: str2
+";" 	Semicolon 	 type_num: 17
+identifier: str2
+"=" 	Assignment 	 type_num: 0
+identifier: str1
+"+" 	Addition 	 type_num: 1
+String: , ktery jeste trochu obohatime
+";" 	Semicolon 	 type_num: 17
+identifier: Main
+"." 	Dot 		 type_num: 19
+identifier: x
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: find
+"(" 	Parenthes. left  type_num: 20
+identifier: str2
+"," 	Colon 		 type_num: 18
+String: text
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Pozice retezce "text" v retezci str2: 
+"+" 	Addition 	 type_num: 1
+identifier: x
+"+" 	Addition 	 type_num: 1
+String: 
+
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: Game
+"." 	Dot 		 type_num: 19
+identifier: play
+"(" 	Parenthes. left  type_num: 20
+identifier: str1
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+class 			 type_num: 36
+identifier: Game
+"{" 			 type_num: 24
+static 			 type_num: 42
+void 			 type_num: 37
+identifier: play
+"(" 	Parenthes. left  type_num: 20
+String: String
+identifier: str
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Zadejte nejakou posloupnost vsech malych pismen a-h, 
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: pricemz se pismena nesmeji v posloupnosti opakovat:
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: str
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: readString
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: str
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: sort
+"(" 	Parenthes. left  type_num: 20
+identifier: str
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+int 			 type_num: 39
+identifier: cmp
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: compare
+"(" 	Parenthes. left  type_num: 20
+identifier: str
+"," 	Colon 		 type_num: 18
+String: abcdefgh
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+if 			 type_num: 31
+"(" 	Parenthes. left  type_num: 20
+identifier: cmp
+"!=" 	Not equal 	 type_num: 9
+Int: 0
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+while 			 type_num: 28
+"(" 	Parenthes. left  type_num: 20
+identifier: cmp
+"!=" 	Not equal 	 type_num: 9
+Int: 0
+")" 	Parenthes. right type_num: 21
+"{" 			 type_num: 24
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: print
+"(" 	Parenthes. left  type_num: 20
+String: Spatne zadana posloupnost, zkuste znovu:
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: str
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: readString
+"(" 	Parenthes. left  type_num: 20
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: str
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: sort
+"(" 	Parenthes. left  type_num: 20
+identifier: str
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+identifier: cmp
+"=" 	Assignment 	 type_num: 0
+identifier: ifj16
+"." 	Dot 		 type_num: 19
+identifier: compare
+"(" 	Parenthes. left  type_num: 20
+identifier: str
+"," 	Colon 		 type_num: 18
+String: abcdefgh
+")" 	Parenthes. right type_num: 21
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+else 			 type_num: 32
+"{" 			 type_num: 24
+"}" 			 type_num: 25
+return 			 type_num: 33
+";" 	Semicolon 	 type_num: 17
+"}" 			 type_num: 25
+"}" 			 type_num: 25
+koniec

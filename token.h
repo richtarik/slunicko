@@ -1,0 +1,127 @@
+///* File: token.h             */
+///* Autor: Milos Molitoris    */
+///* Login: xmolit00           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 29.09.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
+#ifndef TOKENS_H
+#define TOKENS_H
+
+/* todo Tokens for: ???
+ifj16
+
+readInt
+readDouble
+readString
+
+length
+substr
+compare
+find
+sort
+
+*/
+#endif // TOKENS_H
+
+
+/**
+  zdroj: https://en.wikipedia.org/wiki/Operators_in_C_and_C%2B%2B
+  */
+typedef enum {
+
+    //Arithmetic operators
+    token_asg,          // number 0 // "=" // Assignment
+    token_add,          // number 1 // "+" // Addition
+    token_sub,          // number 2 // "-" // Subtraction
+    token_mul,          // number 3 // "*" // Multiplication
+    token_div,          // number 4 // "/" // Division
+    token_mod,          // number 5 // "%" // Modulo
+
+    token_inc,          // number 6 // "++" // Increment
+    token_dec,          // number 7 // "--" // Decrement
+
+    //Comparison operators/relational operators
+
+    token_equ,          // number 8 // "==" // Equal
+    token_neq,          // number 9 // "!=" // Not equal
+    token_gre,          // number 10 // ">" // Greater
+    token_les,          // number 11 // "<" // Less
+    token_goe,          // number 12 // ">=" // Greater or equal
+    token_loe,          // number 13 // "<=" // Less or equal
+
+    //Logical operators //TODO state
+    token_or,           // number 14 // "||" // Or
+    token_and,          // number 15 // "&&" // And
+    token_not,          // number 16 // "!" // Not
+
+    //Bitwise operators
+
+    //...TODO
+
+    //other symbols ?? todo
+    token_sem,          // number  // ";" // Semicolon
+    token_col,          // number  // "," // Colon
+    token_dot,          // number  // "." //
+
+    token_pal,          // number  // "(" // Parenthesis left
+    token_par,          // number  // ")" // Parenthesis right
+
+    token_brl,          // number  // "[" // Bracket left
+    token_brr,          // number  // "]" // Bracket right
+
+    token_zlz,          // number  // "{" //
+    token_zrz,          // number 25 // "}" //
+
+    // KEYWORDS
+    /*boolean, break, class, continue, do, double, else, false, for,
+      if, int, return, String, static, true, void, while */
+
+    token_break,        // number  //
+    token_continue,     // number  //
+    token_while,        // number  //
+    token_for,          // number  //
+    token_do,           // number 30 //
+
+    //token_switch,
+    //token_case,
+
+    token_if,           // number  //
+    token_else,         // number  //
+
+    //token_function,
+    token_return,       // number  //
+
+    token_true,         // number  //
+    token_false,        // number  //
+    //token_null,
+
+    token_class,
+    token_void,
+
+    token_double,
+    token_int,
+    token_String,
+
+    token_boolean,
+    token_static,
+  //token_char,
+
+    token_class_identifier,
+    token_identifier,
+    token_number_int,
+    token_number_double,
+    token_error,
+    token_EOF
+
+} token_type;
+
+
+typedef struct T_Token {
+    token_type type;
+    unsigned int valMaxsize;
+    unsigned int valActsize;
+    char *value;
+} T_token;
