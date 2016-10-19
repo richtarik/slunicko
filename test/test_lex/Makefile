@@ -18,10 +18,10 @@ test_lex: test_lex.o lex.o keywords.o
 test_lex.o: test_lex.c ../../lex.h
 	$(CC) $(CFLAGS) -c -o test_lex.o test_lex.c
 
-keywords.o: ../../keywords.c ../../keywords.h ../../token.h
+keywords.o: ../../keywords.c ../../keywords.h ../../struct.h
 	$(CC) $(CFLAGS) -c -o keywords.o ../../keywords.c
 
-lex.o: ../../lex.c ../../token.h ../../lex.h
+lex.o: ../../lex.c ../../struct.h ../../lex.h
 	$(CC) $(CFLAGS) -c -o lex.o ../../lex.c
 	
 
