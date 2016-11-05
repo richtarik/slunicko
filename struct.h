@@ -125,3 +125,23 @@ typedef struct T_Token {
     unsigned int valActsize;
     char *value;
 } T_token;
+
+//struktura triadresnyho kodu
+typedef struct {
+    void *result;
+    void *address1;
+    void *address2;
+    int operation;
+} T_address_code;
+
+//definice seznamu instrukci
+typedef struct item_list {
+    T_address_code Instrukcion;
+    struct item_list *next_item;
+} T_item_list;
+
+//definice obousmerneho seznamu
+typedef struct {
+    struct item_list *First;
+    struct item_list *Active;
+} T_instr_list;

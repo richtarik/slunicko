@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <ctype.h> // isdigit,isspace,...
 
-#include "token.h"
+#include "struct.h"
 
 #define ALLOC_BLOCK 50
 
