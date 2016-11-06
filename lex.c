@@ -10,21 +10,33 @@
 
 #include "lex.h"
 
-//TODO string biele znaky /n /"->ok  ->-> \ddd sekvence OK
-//TODO number prerusi  nacitavanie vsetko -> riesenie isalpha -> error _ $ -> OK
 //TODO free
+//TODO Token init and check reallock ... reallock all token no only data
 
 /*TODO Prebytecné pocátecní císlice  0 v nenulovém císle vedou v rozšírení BASE na oktalovou reprezentaci celého císla.
 */
 // ignotuje pociatecne 0 aj u celych cisel -> problem pri rozsireni na oktal. TODO repair
 // OK Pro celou cást desetinného literálu i exponent platí, že prebytecné pocátecní císlice 0 jsou ignorovány. OK
 
+T_token* token_buffer=NULL; // TODO = NULL ok ?
+
+void get_back_token(T_token *token)
+{
+    token_buffer = token;
+}
 
 void get_token(T_token *token,FILE* filename)
 {
     lexikal_state state=state_Start;
     int actChar;
     int nty;
+
+    if(token_buffer != NULL)
+    {
+        token=token_buffer;
+        token_buffer=NULL;
+        return token;
+    }
 
     while(1)
     {

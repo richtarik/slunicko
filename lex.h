@@ -19,6 +19,7 @@
 
 #define ALLOC_BLOCK 50
 
+void get_back_token(T_token *token);
 void get_token(T_token *token,FILE* filename);
 void check_escape(FILE* sourceFile, T_token *actToken);
 bool check_String(FILE* sourceFile, T_token *actToken);

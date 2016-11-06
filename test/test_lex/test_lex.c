@@ -216,14 +216,14 @@ void f_print_type(T_token *tokenik)
 				case 39:
 				    printf("int \t\t\t type_num: %d\n",tokenik->type);
 				    break;
-				case 40:
-				    printf("String \t\t\t type_num: %d\n",tokenik->type);
-				    break;
 				case 41:
 				    printf("boolean \t\t type_num: %d\n",tokenik->type);
 				    break;
 				case 42:
 				    printf("static \t\t\t type_num: %d\n",tokenik->type);
+				    break;
+				case 48:
+				    printf("String_type \t\t\t type_num: %d\n",tokenik->type);
 				    break;
 
 				/* case xx:
