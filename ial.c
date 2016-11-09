@@ -203,7 +203,7 @@ void ht_item_clear(ht_item_ptr item)
 /*
  * Funkce pro vlozeni noveho itemu
  */ 
-ht_table_item_ptr ht_insert(ht_item_ptr item, hash_table_ptr ht)
+bool ht_insert(ht_item_ptr item, hash_table_ptr ht)
 {
 	int idx = hash_function(item->key, ht->size);
 	
@@ -222,10 +222,10 @@ ht_table_item_ptr ht_insert(ht_item_ptr item, hash_table_ptr ht)
 	}
 	else
 	{
-		return tmp;
+		return true;
 	}
 	
-	return NULL;
+	return false;
 }
 
 /*

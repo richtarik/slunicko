@@ -25,6 +25,7 @@ String *sort(String *s);
  * Tabulka symbolu
  */
 union ht_value {
+	bool value_bool;
 	int value_int;
 	double value_double;
 	String *value_String;
@@ -54,7 +55,7 @@ unsigned int hash_function(const char *str, unsigned htab_size);
 hash_table_ptr ht_init(unsigned size);
 void ht_free(hash_table_ptr ht);
 void ht_item_clear(ht_item_ptr item);
-ht_table_item_ptr ht_insert(ht_item_ptr item, hash_table_ptr ht);
+bool ht_insert(ht_item_ptr item, hash_table_ptr ht);
 ht_table_item_ptr ht_search(char *key, hash_table_ptr ht);
 
 #endif
