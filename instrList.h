@@ -1,3 +1,12 @@
+///* File: instrList.h         */
+///* Autor: Petr Mynarcik      */
+///* Login: xmynar05           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 09.10.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "struct.h"
 
 void listInit(T_instr_list *L);

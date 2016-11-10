@@ -1,27 +1,37 @@
+///* File: generator.c         */
+///* Autor: Petr Mynarcik      */
+///* Login: xmynar05           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 09.11.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "generator.h"
 #include "instrList.h"
 #include "interpret.h"
+#include "error.h"
 
 static unsigned int labelTemp = 1;
 static unsigned int functionTemp = 1;
 static unsigned int *label = &labelTemp;
 static unsigned int *functionLabel = &functionTemp;
 static T_instr_list *iList;
-static stack *func_stack;
+static int_stack *func_stack;
 
-//inicializace zásobníku
+//inicializace zasobniku
 void stackInit(int_stack *S) {
 	S->item = malloc(sizeof(int));
 	S->top = -1;
 }
 
-//volžení hodnoty na vrchol zásobníku
+//vlozeni hodnoty na vrchol zasobniku
 void stackPush(int_stack *S, int *item) {
 	S->top++;
 	S->item[S->top] = *item;
 }
 
-//odstranìní položky z vrcholu zásobníku
+//odstraneni položky z vrcholu zasobniku
 void stackRemove(int_stack *S) {
 	if (stackEmpty(S)) {
 		return;
@@ -29,21 +39,23 @@ void stackRemove(int_stack *S) {
 	S->top--;
 }
 
-//vrácení položky z vrcholu zásobníku
+//vraceni polozky z vrcholu zasobniku
 int stackTop(int_stack *S) {
 	if (stackEmpty(S)) {
+		error_f(ERROR_INTERN);
 		return -1;
 	}
 	return S->item[S->top];
 }
 
-//vrací true pokud je zásobník prázdný
+//vraci true pokud je zasobnik prazdny
 bool stackEmpty(int_stack *S) {
 	return (S->top < 0);
 }
 
-//provede operaci POP na zásobníku
+//provede operaci POP na zasobniku
 int stackPop(int_stack *S) {
+	error_f(ERROR_INTERN);
 	if (stackEmpty(S)) {
 		return -1
 	}
@@ -52,7 +64,7 @@ int stackPop(int_stack *S) {
 	return tmp;
 }
 
-//Provádí generaci a optimalizaci vnitøního kódu pro interpretaci
+//Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
 int generator(T_instr_list *L, bool isRoot) {
 	if (!L) {
 		return 1;
@@ -79,6 +91,10 @@ int generator(T_instr_list *L, bool isRoot) {
 	}
 	while (1) {
 		T = listGetItem(L);
+		if (T == NULL) {
+			error_f(ERROR_INTERN);
+			return -1;
+		}
 		switch (T->operation) {
 
 			//Aritmeticke operace
@@ -143,6 +159,7 @@ int generator(T_instr_list *L, bool isRoot) {
 					if (error) {
 						listFree(L);
 						listFree(iList);
+						error_f(ERROR_INTERN);
 						return error:
 					}
 					R->operation = T_LABEL;
@@ -159,6 +176,7 @@ int generator(T_instr_list *L, bool isRoot) {
 				if (error) {
 					listFree(L);
 					listFree(iList);
+					error_f(ERROR_INTERN);
 					return error:
 				}
 				R->operation = T_JMPZD;
@@ -169,6 +187,7 @@ int generator(T_instr_list *L, bool isRoot) {
 				if (error) {
 					listFree(L);
 					listFree(iList);
+					error_f(ERROR_INTERN);
 					return error:
 				}
 				S->operation = T_JMPU;
@@ -189,6 +208,7 @@ int generator(T_instr_list *L, bool isRoot) {
 				if (error) {
 					listFree(L);
 					listFree(iList);
+					error_f(ERROR_INTERN);
 					return error:
 				}
 				listInsert(iList, S);
@@ -214,6 +234,7 @@ int generator(T_instr_list *L, bool isRoot) {
 	if (isRoot) {
 		error = interpret(iList);
 		listFree(iList);
+		error_f(ERROR_INTERN);
 		return error;
 	}
 	else {

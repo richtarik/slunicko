@@ -1,6 +1,16 @@
+///* File: interpret.c         */
+///* Autor: Petr Mynarcik      */
+///* Login: xmynar05           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 10.11.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "interpret.h"
 #include "instrList.h"
 
+//Provadi samotnou interpretaci predanych instrukci - pocetni operaca a instrukce skoku
 int interpret(T_instr_list *L) {
 	bool Flag = false;
 	T_address_code T = malloc(sizeof(T_address_code));
@@ -9,6 +19,9 @@ int interpret(T_instr_list *L) {
 
 	while (1) {
 		T = listGetItem(L);
+		if (T == NULL) {
+			return -1;
+		}
 		switch (I->operation) {
 			/*Nejdøív musí bıt všechny aritmetickı a podobnı další všechny operace, èeká se na strukturu z parseru*/
 

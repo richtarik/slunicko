@@ -1,4 +1,4 @@
-///* File: token.h             */
+///* File: struct.h            */
 ///* Autor: Milos Molitoris    */
 ///* Login: xmolit00           */
 ///*                           */
@@ -145,3 +145,9 @@ typedef struct {
     struct item_list *First;
     struct item_list *Active;
 } T_instr_list;
+
+//struktura zasobniku integeru pro generator vnitrniho kodu
+typedef struct {
+	int *item;
+	int top;
+}int_stack;

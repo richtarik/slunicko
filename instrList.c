@@ -1,14 +1,23 @@
+///* File: instrList.c         */
+///* Autor: Petr Mynarcik      */
+///* Login: xmynar05           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 09.10.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "instrList.h"
 #include "struct.h"
 
 //inicializace seznamu
-void listInit (T_intsr_list *L) {
+void listInit (T_instr_list *L) {
 	L->First = NULL;
 	L->Active = NULL;
 }
 
 //vlozeni prvku do seznamu
-void listInsert (T_intsr_list *L, T_address_code *I) {
+void listInsert (T_instr_list *L, T_address_code *I) {
 	T_item_list *newItem;
 	newItem = malloc(sizeof(T_item_list));
 
