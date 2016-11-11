@@ -10,6 +10,11 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
+FILE* sourceFile;
+
 /* todo Tokens for: ???
 ifj16
 

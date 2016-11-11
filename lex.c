@@ -9,6 +9,7 @@
 ///* ------- VUT FIT --------- */
 
 #include "lex.h"
+//#include "struct.h"
 
 //TODO free
 //TODO Token init and check reallock ... reallock all token no only data
@@ -34,10 +35,10 @@ void free_token(T_token *token)
 
 bool Init_token(T_token *token)
 {
-    token->value = malloc(sizeof(char) * base_token_size + 1); //rezerva pre znak koniec stringu
+    token->value = malloc(sizeof(char) * (base_token_size + 1) ); //rezerva pre znak koniec stringu
     if(token->value == NULL)
     {
-        fprintf(stderr,"ERROR low memory\n");
+        fprintf(stderr,"ERROR low memory first init\n");
         free_token(token);
         return false;
     }
@@ -46,27 +47,12 @@ bool Init_token(T_token *token)
     return true;
 }
 
-bool realoc_to_base_token(T_token *token)
-{
-    if(token->valMaxsize == base_token_size)
-        return true;
-
-    token->value=realloc(token->value,sizeof(char) * (base_token_size + 1));
-    if(token->value == NULL)
-    {
-        fprintf(stderr,"ERROR low memory\n");
-        free_token(token);
-        return false;
-    }
-    token->valMaxsize=base_token_size;
-    return true;
-}
-
 void get_token(T_token *token,FILE* filename)
 {
     lexikal_state state=state_Start;
     int actChar;
     int nty;
+    token->valActsize=0;
 
     if(token_buffer != NULL)
     {
@@ -74,11 +60,7 @@ void get_token(T_token *token,FILE* filename)
         token_buffer=NULL;
         return;
     }
-    if( !realoc_to_base_token(token) )
-    {
-        token->type=token_error;
-        return;
-    }
+
     while(1)
     {
         actChar= fgetc(filename);
