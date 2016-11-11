@@ -170,3 +170,8 @@ int strCompare(String *s1, String *s2)
 	
 	return 0;
 }
+
+void strPrint(String *s)
+{
+	printf("%s", s->str);
+}
