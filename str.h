@@ -22,12 +22,12 @@ typedef struct
 int strInit(String *s);
 void strFree(String *s);
 int strReadInt();
-double strReadDouble(); // bude doplneno
-String *strReadString(); // dopsat!!!
-void strPrint(); // dopsat!!! + parametry!!!
+double strReadDouble();
+String *strReadString();
+void strPrint(String *s);
 int strLength(String *s);
 int strCopy(String *s1, String *s2);
 String *strSubstr(String *s, int i, int n);
-int strCompare(String *s1, String *s2); // upravit??
+int strCompare(String *s1, String *s2);
 
 #endif
