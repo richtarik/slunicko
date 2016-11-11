@@ -101,22 +101,22 @@ typedef enum {
 
     token_double,       // number 38 //
     token_int,          // number 39 //
-    token_String,
+    token_String,       // number 40 //
 
-    token_boolean,      // number 40 //
-    token_static,       // number 41 //
+    token_boolean,      // number 41 //
+    token_static,       // number 42 //
     //token_char,
 
     // ID
-    token_class_identifier, // number 42 //
-    token_identifier,       // number 43 //
-    token_number_int,       // number 44 //
-    token_number_double,    // number 45 //
+    token_class_identifier, // number 43 //
+    token_identifier,       // number 44 //
+    token_number_int,       // number 45 //
+    token_number_double,    // number 46 //
 
     // ERROR, EOF
-    token_error,            // number 46 //
-    token_EOF,              // number 47 //
-    token_String_type
+    token_error,            // number 47 //
+    token_EOF,              // number 48 //
+    token_String_type       // number 49 //
 
 } token_type;
 

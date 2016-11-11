@@ -18,7 +18,11 @@
 #include "struct.h"
 
 #define ALLOC_BLOCK 50
+#define base_token_size 50
 
+bool Init_token(T_token *token);
+bool realoc_to_base_token(T_token *token);
+void free_token(T_token *token);
 void get_back_token(T_token *token);
 void get_token(T_token *token,FILE* filename);
 void check_escape(FILE* sourceFile, T_token *actToken);
@@ -46,6 +50,7 @@ typedef enum
     state_Double_dot,
     state_Double,
     state_Double_exp,
+    state_Double_exp_1,
     state_Double_exp_sign,
 
 } lexikal_state;

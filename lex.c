@@ -24,6 +24,43 @@ void get_back_token(T_token *token)
 {
     token_buffer = token;
 }
+void free_token(T_token *token)
+{
+    token->value[0]='\0';
+    free(token->value);
+    token->valMaxsize=0;
+    token->valActsize=0;
+}
+
+bool Init_token(T_token *token)
+{
+    token->value = malloc(sizeof(char) * base_token_size + 1); //rezerva pre znak koniec stringu
+    if(token->value == NULL)
+    {
+        fprintf(stderr,"ERROR low memory\n");
+        free_token(token);
+        return false;
+    }
+    token->valMaxsize=base_token_size;
+    token->valActsize=0;
+    return true;
+}
+
+bool realoc_to_base_token(T_token *token)
+{
+    if(token->valMaxsize == base_token_size)
+        return true;
+
+    token->value=realloc(token->value,sizeof(char) * (base_token_size + 1));
+    if(token->value == NULL)
+    {
+        fprintf(stderr,"ERROR low memory\n");
+        free_token(token);
+        return false;
+    }
+    token->valMaxsize=base_token_size;
+    return true;
+}
 
 void get_token(T_token *token,FILE* filename)
 {
@@ -35,9 +72,13 @@ void get_token(T_token *token,FILE* filename)
     {
         token=token_buffer;
         token_buffer=NULL;
-        return token;
+        return;
     }
-
+    if( !realoc_to_base_token(token) )
+    {
+        token->type=token_error;
+        return;
+    }
     while(1)
     {
         actChar= fgetc(filename);
@@ -118,8 +159,9 @@ void get_token(T_token *token,FILE* filename)
 			 actChar= fgetc(filename);
 			 if( isspace(actChar) )
 			 {
-			     printf("ERRor po bodke nesmie ist medzera\n"); //todo chybova hlaska;
-			     token->type=token_error;
+			    fprintf(stderr,"ERRor po bodke nesmie ist medzera\n"); //todo chybova hlaska;
+                free_token(token);
+			    token->type=token_error;
 			 }
 			 else
 			 {
@@ -157,6 +199,7 @@ void get_token(T_token *token,FILE* filename)
                          state=state_And;
                          break;
                      default:
+                         free_token(token);
                          token->type= token_error;
                          return;
                          //TODO iny znak chyba
@@ -212,6 +255,7 @@ void get_token(T_token *token,FILE* filename)
                     }
                     else
                     {// EOF
+                        free_token(token);
                         token->type=token_error;
                         return;
                     }    //TODO ?? LEXX error - predcasny EOF //printf error
@@ -281,8 +325,9 @@ void get_token(T_token *token,FILE* filename)
                 else
                 {
                     ungetc(actChar,filename);
+                    free_token(token);
                     token->type= token_error;
-                    //TODO chyba alebo bitove operacie ?
+                    fprintf(stderr, "ERROR nepovoleny znak | nieje ||\n");
                     return;
                 }
             case state_And:
@@ -294,6 +339,8 @@ void get_token(T_token *token,FILE* filename)
                 else
                 {
                     ungetc(actChar,filename);
+                    free_token(token);
+                    fprintf(stderr, "ERROR nepovoleny znak & nieje &&\n");
                     token->type= token_error;
                     //TODO chyba alebo bitove operacie
                     return;
@@ -327,7 +374,8 @@ void get_token(T_token *token,FILE* filename)
                 }
                 else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
                 {
-                    printf("Error bad Number_state_int\n"); //TODO dopisat chybovu hlasku
+                    free_token(token);
+                    fprintf(stderr, "ERROR znak nieje sucast cisla state_Number\n");
                     token->type=token_error;
                     return;
                 }
@@ -343,7 +391,7 @@ void get_token(T_token *token,FILE* filename)
                     }
                 }
                 else
-                {// iny -> nepovolenz znak v dalsom nacitany nastane chyba
+                {// iny -> nepovolenz znak v dalsom nacitany nastane chyba ak bude nejaky operator vsetko je ok
                     ungetc(actChar,filename);
                     token->type=token_number_int;
                     token->value[token->valActsize] = '\0';
@@ -364,13 +412,14 @@ void get_token(T_token *token,FILE* filename)
                 } // TODO skontroluj ci po bodke musi ist znak
                 else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
                 {
-                    printf("Error bad Number_state_Double_dot\n"); //TODO dopisat chybovu hlasku
+                    free_token(token);
+                    fprintf(stderr, "ERROR znak nieje sucast cisla state_Double_dot\n");
                     token->type=token_error;
                     return;
 
                 }
                 else
-                {  // TODO chyba ak pride operator ok je to cislo ale ak pride abcd alebo ostatne znaky -> error
+                {  // TODO chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
                     ungetc(actChar,filename);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
@@ -401,13 +450,14 @@ void get_token(T_token *token,FILE* filename)
                 }
                 else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
                 {
-                    printf("Error bad Number_state_double\n"); //TODO dopisat chybovu hlasku
+                    free_token(token);
+                    fprintf(stderr, "ERROR znak nieje sucast cisla state_Double\n");
                     token->type=token_error;
                     return;
 
                 }
                 else
-                {  // TODO chyba ak pride operator ok je to cislo ale ak pride abcd alebo ostatne znaky -> error
+                {  //ak pride operator ok je to cislo ale ak pride iny znaky -> error
                     ungetc(actChar,filename);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
@@ -416,7 +466,7 @@ void get_token(T_token *token,FILE* filename)
                 }
             case state_Double_exp_1:
 	    // musi byt nejake cislo alebo znak inak chyba!!
-		nty=token->valActsize;
+		        nty=token->valActsize;
                 if(isdigit(actChar) )
                 {
                     state=state_Double_exp;
@@ -441,7 +491,8 @@ void get_token(T_token *token,FILE* filename)
                 }
                 else
                 {
-                    printf("Error bad Number_state_double_e  po E musi ist cislo\n"); //TODO dopisat chybovu hlasku
+                    free_token(token);
+                    fprintf(stderr, "ERROR po znaku E/e musi ist cislo alebo znamienko state_Double_exp_1\n");
                     token->type=token_error;
                     return;
                 }
@@ -450,24 +501,24 @@ void get_token(T_token *token,FILE* filename)
                 if(isdigit(actChar) )
                 {
                     state=state_Double_exp;
-		    if(token->value[nty] == '0') //todo Ok? preskakuje 0 za e-/+
+		            if(token->value[nty] == '0') //todo Ok? preskakuje 0 za e-/+
                         token->valActsize-=1;
                     if(f_addChar(actChar,token))
                         break;
                     else
                     {
-                        token->type=token_error; //TODO low mem printf
+                        token->type=token_error;
                         return;
                     }
                 }
                 else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
                 {
-                    printf("Error bad Number_state_double_e  po E musi ist cislo\n"); //TODO dopisat chybovu hlasku
-                    token->type=token_error;
+                    free_token(token);
+                    fprintf(stderr, "ERROR nepovoleny znak state_Double_exp\n");
                     return;
                 }
                 else
-                {  // TODO chyba ak pride operator ok je to cislo ale ak pride abcd alebo ostatne znaky -> error
+                {  // TODO chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
                     ungetc(actChar,filename);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
@@ -475,7 +526,7 @@ void get_token(T_token *token,FILE* filename)
                     return;
                 }
             case state_Double_exp_sign:
-		nty++;
+		        nty++;
                 if(isdigit(actChar) )
                 {
                     state=state_Double_exp;
@@ -489,7 +540,8 @@ void get_token(T_token *token,FILE* filename)
                 }
                 else // if( isalpha(actChar) || actChar == '$'|| actChar == '_' )
                 {
-                    printf("Error bad Number_state_double_sign ->za znamienkom musi ist cislo\n"); //TODO dopisat chybovu hlasku
+		            free_token(token);
+                    fprintf(stderr, "ERROR po znaku +/- musi ist cislo state_Double_exp_sign\n");
                     token->type=token_error;
                     return;
 
@@ -538,7 +590,10 @@ bool comment_in_block (FILE* filename)
                 continue;
         }
         else if(c_next==EOF) //TODO printf chybovy stav
+        {
+            fprintf(stderr, "ERROR neukonceny blokovy komentar\n");
             return false;
+        }
         else
             continue;
     }
@@ -576,8 +631,12 @@ bool check_String(FILE* sourceFile, T_token *actToken)
             continue;
         }
         else if(actChar == EOF || actChar == '\n') //nieje to string
-            return false; //TODO pritf error chybovy stav
-        else
+	    {
+            free_token(actToken);
+            fprintf(stderr,"ERROR: -> neukonceny string\n");
+            return false; //TODO pritf error chybovy stav -> warning
+	    }
+	    else
         {
             if(f_addChar(actChar,actToken))
                 ;
@@ -616,12 +675,12 @@ void check_escape(FILE* sourceFile, T_token* actToken)
         default:
             if( (nextChar) >='0' && (nextChar) < '9' )
             {
-		substring[0]=nextChar;
+		        substring[0]=nextChar;
                 convert_result=(nextChar-48)*8*8; // x*(8^2)
                 nextChar=fgetc(sourceFile);
                 if( (nextChar) >= '0' && (nextChar) < '9' )
                 {
-		    substring[1]=nextChar;
+		            substring[1]=nextChar;
                     convert_result+=(nextChar-48)*8; // x*(8^1)
                     nextChar=fgetc(sourceFile);
                     if( (nextChar) >= '0' && (nextChar) < '9' )
@@ -631,7 +690,7 @@ void check_escape(FILE* sourceFile, T_token* actToken)
                     }
                     else
                     {
-			f_addChar('\\',actToken);
+			            f_addChar('\\',actToken);
                         f_addChar(substring[0],actToken);
                         f_addChar(substring[1],actToken);
                         f_addChar(nextChar,actToken);
@@ -662,7 +721,8 @@ bool f_addChar (char symbol, T_token* token)
         token->value = realloc(token->value, newSize); //zvacsenie bloku pre string v tokene
         if(token->value == NULL)
         {
-            fprintf(stderr,"Low memory\n");
+            fprintf(stderr,"Low memory -> Reallock -> add_char\n");
+            free_token(token);
             return false;
         }
         token->valMaxsize += ALLOC_BLOCK;
@@ -684,7 +744,7 @@ bool f_Identifier(FILE* sourceFile, T_token *actToken)
             else
                 return false;
         }
-	else if( actChar == '.')
+	    else if( actChar == '.')
         {
 	    actToken->type=token_class_identifier;
 	    ungetc(actChar,sourceFile);
@@ -692,7 +752,7 @@ bool f_Identifier(FILE* sourceFile, T_token *actToken)
 	}
         else
         {
-	    actToken->type=token_identifier;
+	        actToken->type=token_identifier;
             ungetc(actChar,sourceFile);
             break; //TODOO error bad symbol (pritf actChar)-> return false ->free mem
         }
