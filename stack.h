@@ -7,10 +7,11 @@
 //#define size 20
 
 /* ADT zásobník */
-typedef struct {
-	int* data;                           
-	unsigned max;
-	int top;        /* index prvku na vrcholu zásobníku */
+typedef struct
+{
+    int* data;
+    unsigned max;
+    int top;        /* index prvku na vrcholu zásobníku */
 } IntStack;
 
 /* Hlavičky funkcí pro práci se zásobníkem. */
@@ -20,6 +21,6 @@ int stackFull (IntStack* s );
 void stackTop (IntStack* s, int* c );
 void stackPop (IntStack* s );
 void stackPush (IntStack* s, int c );
-void print_stack_data(IntStack *s);
+void print_stack_data_i(IntStack *s);
 
 #endif

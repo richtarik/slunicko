@@ -1,4 +1,5 @@
 #include "stack.h"
+#include "print_stack.h"
 
 
 void print_stack_data(IntStack *s)

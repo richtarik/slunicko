@@ -19,14 +19,14 @@ int stackEmpty (IntStack* s ) {
 /*  ----------
 ** Vrací nenulovou hodnotu, pokud je zásobník prázdný, jinak vrací hodnotu 0.
 */
-return (s->top == -1) ? 1 : 0;
+    return (s->top == -1) ? 1 : 0;
 }
 
 int stackFull (IntStack* s ) {
 /*  ---------
 ** Vrací nenulovou hodnotu, je-li zásobník plný, jinak vrací hodnotu 0.
 */
-return (s->top == s->max-1) ? 1 : 0;
+    return (s->top == s->max-1) ? 1 : 0;
 }
 
 void stackTop (IntStack* s, int* c ) {
@@ -48,7 +48,7 @@ void stackTop (IntStack* s, int* c ) {
 
 void stackPop (IntStack* s ) {
 /*   --------
-** Odstraní prvek z vrcholu zásobníku. 
+** Odstraní prvek z vrcholu zásobníku.
 */
     if(stackEmpty(s))
     {
@@ -85,7 +85,7 @@ void stackPush (IntStack* s, int value ) {
     return;
 }
 
-void print_stack_data(IntStack *s)
+void print_stack_data_i(IntStack *s)
 {
     int i = 0;
 
@@ -96,3 +96,4 @@ void print_stack_data(IntStack *s)
     }
     printf("\n");
 }
+
