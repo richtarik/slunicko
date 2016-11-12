@@ -3,18 +3,38 @@
 /*
  * Inicializace String
  */
-int strInit(String *s)
+void strInit(String *s)
 {
-	if((s->str = (char*) malloc(STR_LEN_INC)) == NULL)
+	if(s == NULL)
 	{
-		return 1;
+		return;
 	}
+	
+	s->str = (char*) memory_manager_malloc(STR_LENGTH);
 	
 	s->str[0] = '\0';
 	s->length = 0;
-	s->allocated = STR_LEN_INC;
+	s->allocated = STR_LENGTH;
+}
+
+/*
+ * Přidá znak do řetězce
+ */
+void strAddChar(String *s, char c)
+{
+	if(s == NULL)
+	{
+		return;
+	}
 	
-	return 0;
+	if(s->length + 1 >= s->allocated)
+	{
+		s->str = (char*) memory_manager_realloc(s->str, (size_t)(s->allocated * 2));
+		s->allocated *= 2;
+	}
+	
+	s->str[s->length] = c;
+	s->str[++s->length] = '\0';
 }
 
 /*
@@ -22,8 +42,11 @@ int strInit(String *s)
  */
 void strFree(String *s)
 {
-	free(s->str);
-	free(s);
+	if(s != NULL)
+	{
+		memory_manager_free_one(s->str);
+		memory_manager_free_one(s);
+	}
 }
 
 /*
@@ -33,13 +56,7 @@ int strReadInt()
 {
 	long int cislo;
 	int c, velikost = 1, delka = 0;
-	char* buffer = (char*) malloc(sizeof(char));
-	
-	if(buffer == NULL)
-	{
-		return 1;
-		// chyba
-	}
+	char* buffer = (char*) memory_manager_malloc(sizeof(char));
 	
 	while(1)
 	{
@@ -48,13 +65,7 @@ int strReadInt()
 		if(velikost == delka)
 		{
 			velikost *= 2;
-			if((buffer = (char*) realloc(buffer, sizeof(char) * velikost)) == NULL)
-			{
-				free(buffer);
-				buffer = NULL;
-				return 1;
-				// chyba
-			}
+			buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
 		}
 		
 		if(c == '\n' || c == EOF)
@@ -69,25 +80,93 @@ int strReadInt()
 		}
 		else
 		{
-			free(buffer);
-			buffer = NULL;
-			return 1;
-			// chyba
+			error_f(ERROR_INPUT);
 		}
 		
 		delka++;
 	}
 	
+	if(delka == 0)
+	{
+		error_f(ERROR_INPUT);
+	}
+	
 	sscanf(buffer, "%ld", &cislo);
 	
-	free(buffer);
-	buffer = NULL;
+	memory_manager_free_one(buffer);
 	
 	if(cislo >= INT_MAX)
 	{
-		return INT_MAX;
+		error_f(ERROR_INPUT);
 	}
+	
 	return (int)cislo;
+}
+
+/*
+ * Nacte double ze stdin
+ */
+double strReadDouble()
+{
+	int c, velikost = 1, delka = 0;
+	double cislo;
+    char* buffer = (char*) memory_manager_malloc(sizeof(char));
+    int pom = 0;
+    int dot_pom = 0;
+    while(1)
+    {
+        c = getchar();
+    
+        if(velikost == delka)
+        {
+            velikost *= 2;
+            buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
+        }
+        
+        if(c == '\n' || c == EOF){
+            buffer[delka] = '\0';       
+            break;
+        }
+        
+        if (isdigit(c))
+        {
+            buffer[delka] = c;
+            pom = 1;
+        }
+        else if(c == 46 && dot_pom == 0) // 46 - tečka
+        {
+            buffer[delka] = c;
+            dot_pom = 1;
+        }
+        else if(pom == 1 && (c == 69 || c == 101)){ // E - 69 , e - 101
+            buffer[delka] = c;
+            pom = 2;
+        }
+        else if (pom == 2 &&  ((buffer[delka - 1] == 69 || buffer[delka - 1] == 101) && (c == 43 || c == 45))){ // 43 - plus , 45 - mínus
+            buffer[delka] = c;
+        }
+        else
+        {
+            error_f(ERROR_INPUT);
+        }
+        delka++;
+    }
+    
+    if(delka == 0)
+	{
+		error_f(ERROR_INPUT);
+	}
+    
+    sscanf(buffer, "%lf", &cislo);
+    memory_manager_free_one(buffer);
+    buffer = NULL;
+    
+    if(cislo >= DBL_MAX)
+    {
+        error_f(ERROR_INPUT);
+    }
+
+    return (double)cislo;
 }
 
 /*
@@ -101,20 +180,16 @@ int strLength(String *s)
 /*
  * Prekopiruje druhy retezec do prvniho
  */
-int strCopy(String *s1, String *s2)
+void strCopy(String *s1, String *s2)
 {
    if (s2->length >= s1->allocated)
    {
-      if ((s1->str = (char*) realloc(s1->str, s2->length + 1)) == NULL)
-      {
-         return 1;
-      }
+      s1->str = (char*) memory_manager_realloc(s1->str, s2->length + 1);
       s1->allocated = s2->length + 1;
    }
    
    strcpy(s1->str, s2->str);
    s1->length = s2->length;
-   return 0;
 }
 
 /*
@@ -134,20 +209,16 @@ String *strSubstr(String *s, int i, int n)
 	
 	String *s_tmp;
 	
-	if((s_tmp = (String*) malloc(sizeof(String))) == NULL || strInit(s_tmp))
-	{
-		return NULL;
-	}
+	s_tmp = (String*) memory_manager_malloc(sizeof(String));
 	
-	s_tmp->length = n;
+	strInit(s_tmp);
 	
 	int j;
 	for(j = 0; j < n; j++)
 	{
-		s_tmp->str[j] = s->str[i];
+		strAddChar(s_tmp, s->str[i]);
 		i++;
 	}
-	s_tmp->str[j] = '\0';
 	
 	return s_tmp;
 }
@@ -156,7 +227,7 @@ String *strSubstr(String *s, int i, int n)
  * Porovna retezce
  */
 int strCompare(String *s1, String *s2)
-{
+{	
 	int num = strcmp(s1->str, s2->str);
 	
 	if(num > 0)
@@ -171,7 +242,7 @@ int strCompare(String *s1, String *s2)
 	return 0;
 }
 
-void strPrint(String *s)
+void strPrintStr(String *s)
 {
 	printf("%s", s->str);
 }
