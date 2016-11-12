@@ -17,7 +17,11 @@ void* memory_manager_malloc(size_t size)
 		error_f(ERROR_INTERN);
 	}
 	
-	memory_manager_new_block(ptr);
+	if(!memory_manager_new_block(ptr))
+	{
+		free(ptr);
+		error_f(ERROR_INTERN);
+	}
 	
 	return ptr;
 }
@@ -25,18 +29,20 @@ void* memory_manager_malloc(size_t size)
 /*
  * Vytvoří nový blok a uloží do něj ukazatel na alokovanou paměť
  */
-void memory_manager_new_block(void* ptr)
+bool memory_manager_new_block(void* ptr)
 {
 	memory_block_ptr new = (memory_block_ptr) malloc(sizeof(struct memory_block));
 	
 	if(new == NULL)
 	{
-		error_f(ERROR_INTERN);
+		return false;
 	}
 	
 	new->ptr = ptr;
 	new->prev = mm_last_block;
 	mm_last_block = new;
+	
+	return true;
 }
 
 /*
@@ -44,6 +50,11 @@ void memory_manager_new_block(void* ptr)
  */
 void* memory_manager_realloc(void* ptr, size_t size)
 {
+	if(mm_last_block == NULL || ptr == NULL)
+	{
+		return NULL;
+	}
+	
 	memory_block_ptr tmp = mm_last_block;
 	
 	while(tmp != NULL)
@@ -54,6 +65,11 @@ void* memory_manager_realloc(void* ptr, size_t size)
 		}
 		
 		tmp = tmp->prev;
+	}
+	
+	if(tmp == NULL)
+	{
+		return NULL;
 	}
 	
 	tmp->ptr = realloc(ptr, size);
@@ -86,6 +102,11 @@ void memory_manager_free_all()
  */
 void memory_manager_free_one(void* ptr)
 {
+	if(ptr == NULL)
+	{
+		return;
+	}
+	
 	memory_block_ptr tmp = mm_last_block;
 	memory_block_ptr tmp2;
 	
