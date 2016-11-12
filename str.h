@@ -2,12 +2,16 @@
 #define _STR_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 #include <ctype.h>
 #include <limits.h>
+#include <float.h>
 
-#define STR_LEN_INC 10 // velikost pocatecni alokace pro retezec v typu String
+#include "error.h"
+#include "memory_manager.h"
+
+#define STR_LENGTH 10 // velikost pocatecni alokace pro retezec v typu String
 
 /*
  * Struktura pro datový typ String
@@ -15,18 +19,19 @@
 typedef struct
 {
 	char* str; // znaky retezce se znakem \0 na konci
-	int length; // delka retezce bez znaku \0
+	int length; // delka retezce (\0 není započítán)
 	int allocated; // velikost alokovane pameti
 } String;
 
-int strInit(String *s);
+void strInit(String *s);
+void strAddChar(String *s, char c);
 void strFree(String *s);
 int strReadInt();
 double strReadDouble();
 String *strReadString();
-void strPrint(String *s);
+void strPrintStr(String *s);
 int strLength(String *s);
-int strCopy(String *s1, String *s2);
+void strCopy(String *s1, String *s2);
 String *strSubstr(String *s, int i, int n);
 int strCompare(String *s1, String *s2);
 
