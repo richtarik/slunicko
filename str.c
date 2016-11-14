@@ -228,20 +228,12 @@ String *strSubstr(String *s, int i, int n)
  */
 int strCompare(String *s1, String *s2)
 {	
-	int num = strcmp(s1->str, s2->str);
-	
-	if(num > 0)
-	{
-		return 1;
-	}
-	else if(num < 0)
-	{
-		return -1;
-	}
-	
-	return 0;
+	return strcmp(s1->str, s2->str);
 }
 
+/*
+ * Výpis řetězce
+ */
 void strPrintStr(String *s)
 {
 	printf("%s", s->str);
