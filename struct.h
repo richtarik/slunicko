@@ -10,18 +10,25 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /* todo Tokens for: ???
 ifj16
+
 readInt
 readDouble
 readString
+
 length
 substr
 compare
 find
 sort
+
 */
-#endif // TOKENS_H
+
+FILE* sourceFile;
 
 
 /**
@@ -60,7 +67,7 @@ typedef enum {
 
     //other symbols ?? todo
     token_sem,          // number  // ";" // Semicolon
-    token_col,          // number  // "," // Colon
+    token_com,          // number  // "," // Comma
     token_dot,          // number  // "." //
 
     token_pal,          // number  // "(" // Parenthesis left
@@ -111,8 +118,8 @@ typedef enum {
     token_number_int,
     token_number_double,
     token_error,
-    token_EOF
-
+    token_EOF,
+    token_String_type
 } token_type;
 
 
@@ -122,6 +129,8 @@ typedef struct T_Token {
     unsigned int valActsize;
     char *value;
 } T_token;
+
+T_token * token;
 
 //struktura triadresnyho kodu
 typedef struct {
@@ -143,8 +152,13 @@ typedef struct {
     struct item_list *Active;
 } T_instr_list;
 
-//struktura zasobniku integeru pro generator vnitrniho kodu
-typedef struct {
-	int *item;
-	int top;
-}int_stack;
+typedef enum
+{
+    in_if,
+    in_while,
+    in_assign,
+    in_function,
+    in_return,
+}expr_in;
+
+#endif // TOKENS_H
