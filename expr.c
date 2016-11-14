@@ -1,34 +1,37 @@
 #include "expr.h"
-//#include "struct.h"
-//#include "lex.h"
+#include "struct.h"
+#include "lex.h"
+//#include "print_stack.h"
 
 const char Precedence_table[P_table_size][P_table_size]={
 // todo unary- "-a" assign == $
 //          #                                  #      #    #
-//      "unary-"  "="   "+"   "-"   "*"   "/"   "%"   "++"  "--"  "=="  "!="  ">"   "<"   ">="  "<="  "||"  "&&"  "!"   "("   ")"   "ID"  "Fn"  "$"
-/*unry-*/ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' }, //unr-//
-/*  =  */ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' }, // =  //
-/*  +  */ { '#' , '#' , '>' , '>' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // +  //
-/*  -  */ { '#' , '#' , '>' , '>' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // -  //
-/*  *  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '<' , '<' , '>' }, // *  //
-/*  /  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '<' , '<' , '>' }, // /  //
-/*  %  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '<' , '<' , '>' }, // %  //
-/* ++  */ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' }, // ++ // --
-/* --  */ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' }, // -- // --
-/* ==  */ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' }, // == // --
-/* !=  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // != //
-/*  >  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // >  //
-/*  <  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // <  //
-/* >=  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // >= //
-/* <=  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // <= //
-/* ||  */ { '#' , '#' , '>' , '>' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '>' , '<' , '<' , '>' }, // || //
-/* &&  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '<' , '<' , '>' }, // && //
-/*  !  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '#' , '<' , '>' , '<' , '<' , '>' }, // !  //
-/*  (  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '=' , '<' , '<' , ' ' }, // (  //
-/*  )  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , 'F' , '>' , 'F' , 'F' , '>' }, // )  //
-/* ID  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , 'F' , '>' , 'F' , 'F' , '>' }, // ID //
-/* Fn  */ { '#' , '#' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , '=' , 'F' , 'F' , 'F' , 'F' }, // Fn //
-/*  $  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , 'F' , '<' , '<' , 'F' }, // $  //
+//      "unary-"  "="   "+"   "-"   "*"   "/"   "%"   "++"  "--"  "=="  "!="  ">"   "<"   ">="  "<="  "||"  "&&"  "!"   "("   ")"   ","   "ID"  "Fn"  "$"   "."
+/*unry-*/ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , 'F' , '#' , '#' , '#' , '#' }, //unr-//
+/*  =  */ { '#' , 'F' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '>' , '#' , '#' , '#' , '<' }, // =  //
+/*  +  */ { '#' , '#' , '>' , '>' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // +  //
+/*  -  */ { '#' , '#' , '>' , '>' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // -  //
+/*  *  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // *  //
+/*  /  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // /  //
+/*  %  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // %  //
+/* ++  */ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' , '#' , '<' }, // ++ // --
+/* --  */ { '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '#' , '>' , '#' , '#' , '#' , '#' , '<' }, // -- // --
+/* ==  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // == // --
+/* !=  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // != //
+/*  >  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // >  //
+/*  <  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // <  //
+/* >=  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // >= //
+/* <=  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // <= //
+/* ||  */ { '#' , '#' , '>' , '>' , '<' , '<' , '<' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // || //
+/* &&  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '<' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // && //
+/*  !  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '#' , '<' , '>' , '>' , '<' , '<' , '>' , '<' }, // !  //
+/*  (  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '=' , '=' , '<' , '<' , '>' , '<' }, // (  //
+/*  )  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , 'F' , '>' , '>' , 'F' , 'F' , '>' , '<' }, // )  //
+/*  ,  */ { '#' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '=' , '=' , '<' , '<' , 'F' , '<' }, // ,  //
+/* ID  */ { '#' , '#' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , 'F' , '>' , '>' , 'F' , 'F' , '>' , '>' }, // ID //
+/* Fn  */ { '#' , '#' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , 'F' , '=' , 'F' , '>' , 'F' , 'F' , 'F' , 'F' }, // Fn //
+/*  $  */ { '#' , '#' , '<' , '<' , '<' , '<' , '<' , '#' , '#' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , 'F' , 'F' , '<' , '<' , 'F' , '<' }, // $  //
+/*  .  */ { '#' , '>' , '>' , '>' , '>' , '>' , '>' , '#' , '#' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , 'F' , '>' , '>' , '<' , '<' , '>' , 'F' }, // .  //
 };
 
 /*
@@ -59,68 +62,78 @@ const char Precedence_table[P_table_size][P_table_size]={
 21.rule E->Fn
 
 */
-operators fn_token_to_operators(T_token * token)
+operators fn_token_to_operators(expr_in help, int *count_paranthesis)
 {
     switch(token->type)
     {
 
         case token_asg:
-            return operator_asg;          // number 0 // "=" // Assignment
+            return operator_asg;          // number 1 // "=" // Assignment
 
         case token_add:
-            return operator_add;          // number 1 // "+" // Addition
+            return operator_add;          // number 2 // "+" // Addition
 
         case token_sub:
-            return operator_sub;          // number 2 // "-" // Subtraction
+            return operator_sub;          // number 3 // "-" // Subtraction
 
         case token_mul:
-            return operator_mul;          // number 3 // "*" // Multiplication
+            return operator_mul;          // number 4 // "*" // Multiplication
 
         case token_div:
-            return operator_div;          // number 4 // "/" // Division
+            return operator_div;          // number 5 // "/" // Division
 
         case token_mod:
-            return operator_mod;          // number 5 // "%" // Modulo
+            return operator_mod;          // number 6 // "%" // Modulo
 
         case token_inc:
-            return operator_inc;          // number 6 // "++" // Increment
+            return operator_inc;          // number 7 // "++" // Increment
 
         case token_dec:
-            return operator_dec;          // number 7 // "--" // Decrement
+            return operator_dec;          // number 8 // "--" // Decrement
 
         case token_equ:
-            return operator_equ;          // number 8 // "==" // Equal
+            return operator_equ;          // number 9 // "==" // Equal
 
         case token_neq:
-            return operator_neq;          // number 9 // "!=" // Not equal
+            return operator_neq;          // number 10 // "!=" // Not equal
 
         case token_gre:
-            return operator_gre;          // number 10 // ">" // Greater
+            return operator_gre;          // number 11 // ">" // Greater
 
         case token_les:
-            return operator_les;          // number 11 // "<" // Less
+            return operator_les;          // number 12 // "<" // Less
 
         case token_goe:
-            return operator_goe;          // number 12 // ">=" // Greater or equal
+            return operator_goe;          // number 13 // ">=" // Greater or equal
 
         case token_loe:
-            return operator_loe;          // number 13 // "<=" // Less or equal
+            return operator_loe;          // number 14 // "<=" // Less or equal
 
         case token_or:
-            return operator_or;           // number 14 // "||" // Or
+            return operator_or;           // number 15 // "||" // Or
 
         case token_and:
-            return operator_and;          // number 15 // "&&" // And
+            return operator_and;          // number 16 // "&&" // And
 
         case token_not:
-            return operator_not;          // number 16 // "!" // Not
-
+            return operator_not;          // number 17 // "!" // Not
 
         case token_pal:
-            return operator_pal;          // number 17 // "(" // Parenthesis left
+            *count_paranthesis= *count_paranthesis +1;
+            return operator_pal;          // number 18 // "(" // Parenthesis left
 
         case token_par:
-            return operator_par;          // number 18 // ")" // Parenthesis right
+            *count_paranthesis= *count_paranthesis -1;
+            if( *count_paranthesis == 0 && help != in_assign)
+                return operator_dlr;          // number 19 // ")" // Parenthesis right
+            else
+                return operator_par;
+
+        case token_com:
+            return operator_com;          // number 20 // "," // Comma
+
+        case token_dot:
+            return operator_dot;          // number 25 // "."
 
         case token_identifier:
             get_token(token,sourceFile);  //TODO
@@ -140,11 +153,11 @@ operators fn_token_to_operators(T_token * token)
         case token_false:
         case token_number_int:
         case token_number_double:
-            return operator_ID;            // number 19 // ID
+            return operator_ID;            // number  // ID
 
-        case token_sem:
-        case token_col:
-            return operator_dlr;          // number 21 // "$" // Dollar
+        case token_zlz: // {
+        case token_sem: // ;
+            return operator_dlr;          // number  // "$" // Dollar
         default:
             return operator_NONTERM;
     }
@@ -163,35 +176,69 @@ precedence_symbol fn_char_to_numsymbol(char c)
             return symbol_equal;
         case'F':
             return symbol_fault;
-//      default:
-//          return
+        //default:
+            //return symbol_fault;
     }
 }
 
 #define stack_size 20
 
-int fn_expresion(FILE* sourceFile)
+int fn_expression(FILE* sourceFile, expr_in help)
 {
-
     char c;
     precedence_symbol symbol_from_table;
     operators My_operator;
     IntStack zasobnik;
-    T_token token;
     int topik;
-    get_token( &token, sourceFile );
+
+    int count_paranthesis;
+    if( help == in_assign)
+    {
+        count_paranthesis=0;
+    }
+    else
+        count_paranthesis=1;
+
+    get_token( token, sourceFile );
+    if( help == in_return && token->type == token_sem )
+    {
+
+        stackDelete_and_free(&zasobnik);
+    //print_stack_data(&zasobnik);
+    get_back_token(token);
+        return 1;
+    }
+
+    My_operator= fn_token_to_operators( help, &count_paranthesis );
 
     stackInit(&zasobnik,stack_size);
     stackPush(&zasobnik,operator_dlr);
 //DBGGGGGGG
-    print_stack_data(&zasobnik);
+    //print_stack_data(&zasobnik);
+//DBGGGGGGG
+    if ( (help == in_function) && (token->type == token_pal) )
+    {
+        stackPush(&zasobnik, symbol_less);
+        stackPush(&zasobnik, operator_fnc);
+        //DBGG
+        ////printf("Expresion_in_fnc");
+        //print_stack_data(&zasobnik);
+        //DBG
+
+    }
+
 
     do
     {
-        My_operator= fn_token_to_operators( &token );
+
         if(My_operator == operator_NONTERM)
+        {
+            stackDelete_and_free(&zasobnik);
+            //printf("delete and free 000\n");
+            //print_stack_data(&zasobnik);
             return 0; // TODO break free stack
 
+        }
         c= Precedence_table[ get_Top_operator_from_stack( &zasobnik ) ][ My_operator ];
         symbol_from_table= fn_char_to_numsymbol(c);
 
@@ -199,23 +246,19 @@ int fn_expresion(FILE* sourceFile)
         {
             case symbol_equal:
         // DBGG DELETE
-                printf("symbol_equ\n");
+                //printf("symbol_equ\n");
                 stackPush(&zasobnik,My_operator);
-                print_stack_data(&zasobnik);
-                stackPop(&zasobnik);
+                //print_stack_data(&zasobnik);
+                //stackPop(&zasobnik);
         // DBG DELETE
-
-                stackPop(&zasobnik);
-                stackPop(&zasobnik);
-                stackPop(&zasobnik);
-                stackPush(&zasobnik,operator_NONTERM);
-
-                get_token( &token, sourceFile );
+                get_token( token, sourceFile );
+                My_operator= fn_token_to_operators( help , &count_paranthesis );
                 break;
             case symbol_less:
                 add_less_operator_to_stack(&zasobnik);
                 stackPush(&zasobnik,My_operator);
-                get_token( &token, sourceFile );
+                get_token( token, sourceFile );
+                My_operator= fn_token_to_operators( help , &count_paranthesis );
                 break;
             case symbol_greater:
                 stackTop(&zasobnik,&topik);
@@ -223,115 +266,287 @@ int fn_expresion(FILE* sourceFile)
                 if(topik == operator_ID)
                 {
                     stackPop(&zasobnik);
-                    stackTop(&zasobnik,&topik);
-                    if( topik == symbol_less)
-                    {
-                        stackPop(&zasobnik);
-                        stackPush(&zasobnik,operator_NONTERM);
-
-                    }
+                    if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
+                        ;
                     else
                     {
-                        printf("ERROR -1\n");
-                        stackPush(&zasobnik,operator_dlr);
-                        break;
+                        //printf("ERROR -1\n");
+                        stackDelete_and_free(&zasobnik);
+                        //printf("delete and free\n");
+                        //print_stack_data(&zasobnik);
+                        return 0; // TODO break free stack
                     }
                 }
+                // RULE E-> fn( )
+                // RULE E-> fn( E )
+                // RULE E-> ( E )
+                // RULE E-> fn( E, E, ...)
                 else if( topik == operator_par )
                 {
                     stackPop(&zasobnik);
                     stackTop(&zasobnik,&topik);
+                    // E -> fn( )
+                    if( topik == operator_pal)
+                    {
+                        stackPop(&zasobnik);
+                        stackTop(&zasobnik,&topik);
+                        if( topik == operator_fnc )
+                        {
+                            stackPop(&zasobnik);
+                            stackTop(&zasobnik,&topik);
+                            if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
+                                ;
+                            else
+                            {
+                                stackDelete_and_free(&zasobnik);
+                                //printf("delete and free 001\n");
+                                //print_stack_data(&zasobnik);
+                                return 0; // TODO break free stack
+                            }
+                        }
+                        else
+                        {
+                            stackDelete_and_free(&zasobnik);
+                            //printf("delete and free 002\n");
+                            //print_stack_data(&zasobnik);
+                            return 0; // TODO break free stack
+                        }
+                    }
+                    // RULE E-> fn( E )
+                    // RULE E-> ( E )
+                    // RULE E-> fn( E, E, ...)
+                    else if( topik == operator_NONTERM)
+                    {
+                        stackPop(&zasobnik);
+                        stackTop(&zasobnik,&topik);
+                        // RULE E-> fn( E )
+                        // RULE E-> ( E )
+                        if( topik == operator_pal)
+                        {
+
+                            stackPop(&zasobnik);
+                            stackTop(&zasobnik,&topik);
+                            // RULE E-> fn( E )
+                            if( topik == operator_fnc )
+                            {
+                                //printf("funkcia s jednym parametrom \n");
+                                stackPop(&zasobnik);
+                                if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
+                                    ;
+                                else
+                                {
+                                    //printf("error 251987\n");;//TODOooooooooooo error
+                                    stackDelete_and_free(&zasobnik);
+                                    //printf("delete and free\n");
+                                    //print_stack_data(&zasobnik);
+                                    return 0; // TODO break free stack
+                                }
+                            }
+                            // RULE E-> ( E )
+                            else if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
+                                ;//printf("parameter v zatvorke \n");
+                            else
+                            {
+                                //printf("error 1987\n");;//TODOooooooooooo error
+                                stackDelete_and_free(&zasobnik);
+                                //printf("delete and free\n");
+                                //print_stack_data(&zasobnik);
+                                return 0; // TODO break free stack
+                            }
+                        }
+                        // RULE E-> fn( E, E, ...)
+                        else if( topik == operator_com)
+                        {
+                            //printf("funkcia s viacerimi parametrami \n");
+                            bool check_E_before= true;
+                            unsigned count_parameters= 1;
+
+                            stackPop(&zasobnik);
+                            stackTop(&zasobnik,&topik);
+                            //printf("pred cyklom pocet param: %d\n", count_parameters);
+                            //print_stack_data(&zasobnik);
+
+                            while ( topik != operator_pal )
+                            {
+                                if ( ( topik == operator_NONTERM ) && check_E_before )
+                                {
+                                    check_E_before= false;
+                                    count_parameters++;
+                                    stackPop(&zasobnik);
+                                }
+                                else if ( ( topik == operator_com ) && !(check_E_before))
+                                {
+                                    check_E_before= true;
+                                    stackPop(&zasobnik);
+                                }
+                                else
+                                {
+                                    //printf("ERROR parameters in func \n");
+                                    stackDelete_and_free(&zasobnik);
+                                    //printf("delete and free\n");
+                                    //print_stack_data(&zasobnik);
+                                    return 0; // TODO break free stack
+                                }
+                                stackTop(&zasobnik,&topik);
+                            }
+                            //printf("po cykle pocet param: %d\n", count_parameters);
+                            //print_stack_data(&zasobnik);
+                            if( topik == operator_pal)
+                            {
+                                stackPop(&zasobnik);
+                                stackTop(&zasobnik,&topik);
+                                if( topik == operator_fnc)
+                                {
+                                    stackPop(&zasobnik);
+
+                                    if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
+                                        ;
+                                    else
+                                    {
+                                        //printf("error 123\n");// Todoooo error
+                                        stackDelete_and_free(&zasobnik);
+                                        //printf("delete and free\n");
+                                        //print_stack_data(&zasobnik);
+                                        return 0; // TODO break free stack
+                                    }
+                                }
+                                else
+                                {
+
+                                    //printf("error 123123\n");;//TODOooooooooooo error
+                                    stackDelete_and_free(&zasobnik);
+                                    //printf("delete and free\n");
+                                    //print_stack_data(&zasobnik);
+                                    return 0; // TODO break free stack
+                                }
+                            }
+                            else
+                            {
+                                stackDelete_and_free(&zasobnik);
+                                //printf("delete and free lolik\n");
+                               //print_stack_data(&zasobnik);
+                                return 0; // TODO break free stack
+                            }
+                        }
+                        else
+                        {
+                            stackDelete_and_free(&zasobnik);
+                            //printf("delete and free omgg\n");
+                            //print_stack_data(&zasobnik);
+                            return 0; // TODO break free stack
+                        }
+                            ;
+                    }
+
+              //todoooooooooooo
                 }
                 else if( topik == operator_NONTERM)
                 {
-                    // check_rule(); -> REDUCE
                     stackPop(&zasobnik);
                     stackTop(&zasobnik,&topik);
+                    if( topik == operator_not)
+                    {
+                        //printf("not\n");
+                        stackPop(&zasobnik);
+                        if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
+                            ;
+                        else
+                        {
+                            //printf("error 123\n");// Todoooo error
+                            stackDelete_and_free(&zasobnik);
+                            //printf("delete and free\n");
+                            //print_stack_data(&zasobnik);
+                            return 0; // TODO break free stack
+                        }
+                        break;
+                    }
+
                     switch(topik)
                     {
                       case operator_add:
-                          printf("add\n");
+                          //printf("add\n");
                           break;
                       case operator_sub:
-                          printf("sub\n");
+                          //printf("sub\n");
                           break;
                       case operator_mul:
-                          printf("mul\n");
+                          //printf("mul\n");
                           break;
                       case operator_div:
-                          printf("div\n");
+                          //printf("div\n");
                           break;
                       case operator_mod:
-                          printf("mod\n");
+                          //printf("mod\n");
                           break;
 
                           // ++
                           // --
 
                       case operator_equ:
-                          printf("equ\n");
+                          //printf("equ\n");
                           break;
                       case operator_neq:
-                          printf("neq\n");
+                          //printf("neq\n");
                           break;
                       case operator_gre:
-                          printf("gre\n");
+                          //printf("gre\n");
                           break;
                       case operator_les:
-                          printf("les\n");
+                          //printf("les\n");
                           break;
                       case operator_goe:
-                          printf("goe\n");
+                          //printf("goe\n");
                           break;
                       case operator_loe:
-                          printf("loe\n");
+                          //printf("loe\n");
                           break;
 
                       case operator_or:
-                          printf("or\n");
+                          //printf("or\n");
                           break;
                       case operator_and:
-                          printf("goe\n");
+                          //printf("and\n");
                           break;
-                      case operator_not:
-                          printf("loe\n");
+                      case operator_dot:
+                          //printf("dot\n");
+                          break;
+                      //case operator_not:
+                      //printf("not\n");
+                      //    break;
+                      default:
+                          //printf("ERROR default other symbol then +-*/ \n");
+                          stackDelete_and_free(&zasobnik);
+                          //printf("delete and free\n");
+                          //print_stack_data(&zasobnik);
+                          return 0; // TODO break free stack
                           break;
                     }
                     stackPop(&zasobnik);
                     check_rule(&zasobnik,topik);
-
                 }
                 else
                 {
-                    //TODO ERROR free stack return err code
-                    printf("ERROR 0\n");
-                    stackPush(&zasobnik,operator_dlr);
-                    break;
+                    stackDelete_and_free(&zasobnik);
+                    //printf("delete and free ...\n");
+                    //print_stack_data(&zasobnik);
+                    return 0; // TODO break free stack
                 }
                 break;
 
-
-
-          case symbol_fault:
-                printf("end\n");
-                print_stack_data(&zasobnik);
+            case symbol_fault:
+                stackDelete_and_free(&zasobnik);
+                //printf("delete and free ==\n");
+                //print_stack_data(&zasobnik);
                 return 0; // TODO break free stack
-       }
-        /*Stack_Top(stack,&topik)
-        //20.rule E->i
-        if( get_Top_operator_from_stack( zasobnik ) == operator_dlr && topik == operator_NONTERM )
-        {                       //TODO je to less symbol ? ak to neni less ->koniec
-          Stack_push(&zasobnik,symbol_from_table);
-          Stack_push(&zasobnik,My_operator);
         }
-
-        check_rule(&zasobnik);
-        */
-
-        print_stack_data(&zasobnik);
-
-    }while( stackEmpty(&zasobnik) || topik!=operator_dlr );
-
+        stackTop(&zasobnik,&topik);
+        //DBGG
+       //print_stack_data(&zasobnik);
+        //
+    }while( My_operator != operator_dlr || !(topik == operator_NONTERM && (get_Top_operator_from_stack(&zasobnik) == operator_dlr) ) );
+    stackDelete_and_free(&zasobnik);
+    //print_stack_data(&zasobnik);
+    get_back_token(token);
   return 1;
 }
 
@@ -343,21 +558,15 @@ void check_rule(IntStack* stack,operators Rule_symbol)
     if(topik == operator_NONTERM)
     {
         stackPop(stack);
-        stackTop(stack,&topik);
-        if(topik == symbol_less)
-        {
-            stackPop(stack);
-            stackPush(stack,operator_NONTERM);
-        }
+        if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(stack) )
+            ;
         else
-            printf("ERROR 1- check rule\n");// TODO
+            ;//printf("ERROR 1- check rule\n");// TODO
     }
     else
     {
-        printf("ERROR 2- check rule\n");// TODO
+        ;//printf("ERROR 2- check rule\n");// TODO
     }
-    //stackPop(&zasobnik);
-
 
 }
 
@@ -383,15 +592,30 @@ void add_less_operator_to_stack(IntStack* stack)
 {
     int pom;
     stackTop(stack,&pom);
-    if ( pom != operator_NONTERM)
-    {
-        stackPush(stack,symbol_less);
-    }
-    else
+    if ( pom == operator_NONTERM)
     {
         stackPop(stack);
         stackPush(stack,symbol_less);
         stackPush(stack,operator_NONTERM);
-        return pom;
     }
+    else
+    {
+        stackPush(stack,symbol_less);
+    }
+
+}
+
+bool is_TOP_symbol_less_POP_and_PUSH_Nonterm(IntStack* stack)
+{
+    int topik;
+    stackTop(stack,&topik);
+    if( topik == symbol_less)
+    {
+        stackPop(stack);
+        stackPush(stack,operator_NONTERM);
+        return true;
+    }
+    else
+        return false;
+
 }

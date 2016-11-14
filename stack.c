@@ -89,11 +89,33 @@ void print_stack_data_i(IntStack *s)
 {
     int i = 0;
 
-    while(s->top - i >= 0)
+    if(!stackEmpty(s))
     {
-        printf("%d ", s->data[i]);
-        i++;
+        while(s->top - i >= 0)
+        {
+            printf("%d ", s->data[i]);
+            i++;
+        }
+        printf("\n");
     }
-    printf("\n");
+}
+
+void stackDelete_and_free(IntStack* s)
+{
+    if(stackEmpty(s))
+    {
+        //stackError(SERR_PUSH);
+        ;
+    }
+    else
+    {
+        while( !stackEmpty(s) )
+        {
+            stackPop(s);
+        }
+    }
+    free(s->data);
+    s->data=NULL;
+    return;
 }
 

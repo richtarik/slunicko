@@ -21,6 +21,7 @@
 #define base_token_size 20
 
 bool Init_token(T_token *token);
+bool realoc_to_base_token(T_token *token);
 void free_token(T_token *token);
 void get_back_token(T_token *token);
 void get_token(T_token *token,FILE* filename);

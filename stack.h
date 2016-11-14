@@ -22,5 +22,6 @@ void stackTop (IntStack* s, int* c );
 void stackPop (IntStack* s );
 void stackPush (IntStack* s, int c );
 void print_stack_data_i(IntStack *s);
+void stackDelete_and_free(IntStack* s);
 
 #endif

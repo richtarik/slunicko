@@ -1,7 +1,8 @@
 #include "struct.h"
 #include "stack.h"
+#include <stdbool.h>
 
-#define P_table_size 23
+#define P_table_size 25
 
 
 typedef enum
@@ -31,27 +32,33 @@ typedef enum
     operator_pal,          // number 1 // "(" // Parenthesis left
     operator_par,          // number 1 // ")" // Parenthesis right
 
-    operator_ID,           // number 20 //     // ID
+    operator_com,          // number 20 // "," // Comma
+
+    operator_ID,           // number 21 //     // ID
     operator_fnc,          // number 2 //     // function
     operator_dlr,          // number 2 // "$" // Dollar
-    operator_NONTERM       // number 23 //     //
+    operator_dot,           // number 25 // "."
+    operator_NONTERM      // number 24 //     //
 }operators;
 
 typedef enum{
-    symbol_equal =24 ,     // number 24 // "="
-    symbol_less,           // number 25 // "<"
+    symbol_equal =26 ,     // number 26 // "="
+    symbol_less,           // number 27 // "<"
     symbol_greater,        // number 2 // ">"
-    symbol_fault            // number 2 // "F"
+    symbol_fault           // number 2 // "F"
 } precedence_symbol;
 
-int fn_expresion(FILE *sourcefile);
-operators fn_token_to_operators(T_token * token);
+
+int fn_expression(FILE *sourcefile, expr_in help);
+operators fn_token_to_operators( expr_in help, int *count_paranthesis);
 precedence_symbol fn_char_to_numsymbol(char c);
 
+bool is_TOP_symbol_less_POP_and_PUSH_Nonterm(IntStack* stack);
 void add_less_operator_to_stack(IntStack* stack);
-int Count_of_numbers_after_symbolless(IntStack* stack);
+//int Count_of_numbers_after_symbolless(IntStack* stack);
 operators get_Top_operator_from_stack(IntStack* stack);
-int Reduce(IntStack* stack);
+void check_rule(IntStack* stack,operators Rule_symbol);
+//int Reduce(IntStack* stack);
 
 /*
 1.rule E->E=E ???????
