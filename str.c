@@ -182,24 +182,29 @@ int strLength(String *s)
  */
 void strCopy(String *s1, String *s2)
 {
-   if (s2->length >= s1->allocated)
-   {
-      s1->str = (char*) memory_manager_realloc(s1->str, s2->length + 1);
-      s1->allocated = s2->length + 1;
-   }
-   
-   strcpy(s1->str, s2->str);
-   s1->length = s2->length;
+	if(s1 == NULL || s2 == NULL)
+	{
+		return;
+	}
+	
+	if(s2->length >= s1->allocated)
+	{
+		s1->str = (char*) memory_manager_realloc(s1->str, s2->length + 1);
+		s1->allocated = s2->length + 1;
+	}
+	
+	strcpy(s1->str, s2->str);
+	s1->length = s2->length;
 }
 
 /*
  * Vrati podretezec retezce od i, n znaku
  */
 String *strSubstr(String *s, int i, int n)
-{
-	if(i > strLength(s))
+{	
+	if(s == NULL || i > strLength(s) || i < 0 || n < 0)
 	{
-		return NULL;
+		error_f(ERROR_OTHER);
 	}
 	
 	if(i + n > strLength(s))
@@ -228,6 +233,19 @@ String *strSubstr(String *s, int i, int n)
  */
 int strCompare(String *s1, String *s2)
 {	
+	if(s1 == NULL && s2 == NULL)
+	{
+		return 0;
+	}
+	else if(s1 == NULL)
+	{
+		return -1;
+	}
+	else if(s2 == NULL)
+	{
+		return 1;
+	}
+	
 	return strcmp(s1->str, s2->str);
 }
 
@@ -236,5 +254,8 @@ int strCompare(String *s1, String *s2)
  */
 void strPrintStr(String *s)
 {
-	printf("%s", s->str);
+	if(s != NULL)
+	{
+		printf("%s", s->str);
+	}
 }
