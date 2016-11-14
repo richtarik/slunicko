@@ -252,7 +252,8 @@ bool ht_insert_item_var(ht_item_var_ptr item, String *key, hash_table_ptr ht)
 {
 	int idx = hash_function(key->str, ht->size);
 	
-	ht_table_item_ptr tmp = ht_search(key, false, ht); // proměnná - false
+	ht_table_item_ptr tmp = NULL;
+	tmp = ht_search(key, false, ht); // proměnná - false
 		
 	if(tmp == NULL)
 	{
@@ -277,7 +278,8 @@ bool ht_insert_item_func(ht_item_func_ptr item, String *key, hash_table_ptr ht)
 {
 	int idx = hash_function(key->str, ht->size);
 	
-	ht_table_item_ptr tmp = ht_search(key, true, ht); // funkce - true
+	ht_table_item_ptr tmp = NULL;
+	tmp = ht_search(key, true, ht); // funkce - true
 		
 	if(tmp == NULL)
 	{
@@ -313,7 +315,9 @@ ht_table_item_ptr ht_search(String *key, bool func, hash_table_ptr ht)
 			
 		while(tmp != NULL)
 		{
-			if(tmp->key == key && ((tmp->var != NULL && !func) || (tmp->func != NULL && func)))
+			// funkce - func == true, proměnná - func == false
+			if(strcmp(tmp->key->str, key->str) == 0 && 
+			((tmp->var != NULL && !func) || (tmp->func != NULL && func)))
 			{
 				return tmp;
 			}
