@@ -316,7 +316,7 @@ ht_table_item_ptr ht_search(String *key, bool func, hash_table_ptr ht)
 		while(tmp != NULL)
 		{
 			// funkce - func == true, proměnná - func == false
-			if(strcmp(tmp->key->str, key->str) == 0 && 
+			if(strCompare(tmp->key, key) == 0 && 
 			((tmp->var != NULL && !func) || (tmp->func != NULL && func)))
 			{
 				return tmp;
