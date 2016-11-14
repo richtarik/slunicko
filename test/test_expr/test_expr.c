@@ -1,6 +1,6 @@
 
 #include "expr.h"
-
+#include "struct.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +16,13 @@ int main ()
         return -1;
     }
 
+    token= malloc(sizeof(T_token));
+    Init_token(token);
+    int result=fn_expression(sourceFile,in_assign);
 
-    int result=fn_expresion(sourceFile);
+    free_token(token);
+    free(token);
+    fclose(sourceFile);
 
     return result;
 }

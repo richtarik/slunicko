@@ -24,13 +24,13 @@ bool Init_token(T_token *token);
 bool realoc_to_base_token(T_token *token);
 void free_token(T_token *token);
 void get_back_token(T_token *token);
-void get_token(T_token *token,FILE* filename);
+void get_token(T_token *token,FILE* sourceFile);
 void check_escape(FILE* sourceFile, T_token *actToken);
 bool check_String(FILE* sourceFile, T_token *actToken);
 bool f_Identifier(FILE* sourceFile, T_token *actToken);
 bool f_addChar (char symbol, T_token *token);
-bool comment_in_block(FILE* filename);
-bool comment_in_line(FILE* filename);
+bool comment_in_block(FILE* sourceFile);
+bool comment_in_line(FILE* sourceFile);
 
 typedef enum
 {
