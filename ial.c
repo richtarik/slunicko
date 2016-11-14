@@ -9,6 +9,16 @@
  */ 
 int find(String *s, String *search)
 {
+	if(s == NULL || search == NULL)
+	{
+		return -1;
+	}
+	
+	if(strLength(search) == 0)
+	{
+		return 0;
+	}
+	
 	int* fail;
 	
 	fail = (int*) memory_manager_malloc(sizeof(int) * search->length);
@@ -82,6 +92,11 @@ String *sort(String *s)
 	int step, j;
 	char tmp;
 	String *s_tmp;
+	
+	if(s == NULL)
+	{
+		return NULL;
+	}
 	
 	s_tmp = (String*) memory_manager_malloc(sizeof(String));
 	
