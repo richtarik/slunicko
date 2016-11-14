@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "struct.h"
+
 void f_findKeyW(T_token *token);
 void f_find_key_w(T_token *token);
 

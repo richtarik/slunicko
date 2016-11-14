@@ -14,7 +14,7 @@ void f_findKeyW(T_token *token)
                       "if", "int", "return", "String", "static", "true", "void", "while"};
 
     token_type tokens[]={token_and, token_boolean, token_break, token_class, token_continue, token_do, token_double, token_else, token_false, token_for,
-                         token_if, token_int, token_return, token_String, token_static, token_true, token_void, token_while};
+                         token_if, token_int, token_return, token_String_type, token_static, token_true, token_void, token_while};
 
     token->type = token_identifier;
     for(int i=0; i <= 17; i++)
@@ -104,7 +104,7 @@ void f_find_key_w(T_token *token)
         case 'S':
             if (strcmp(token->value, "String") == 0)
             {
-                token->type=token_String;
+                token->type=token_String_type;
             }
             return;
         case 's':

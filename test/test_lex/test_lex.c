@@ -16,7 +16,7 @@ void f_print_type(T_token *tokenik);
 
 int main()
 {
-    FILE* suborik= fopen("test_ostatni.txt","r");
+    FILE* suborik= fopen("test_zadani.txt","r");
 
     T_token tokenik;
     if(suborik == NULL)
@@ -216,7 +216,7 @@ void f_print_type(T_token *tokenik)
 				case 39:
 				    printf("int \t\t\t type_num: %d\n",tokenik->type);
 				    break;
-				case 40:
+				case 49:
 				    printf("String \t\t\t type_num: %d\n",tokenik->type);
 				    break;
 				case 41:

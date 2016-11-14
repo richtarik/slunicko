@@ -235,14 +235,14 @@ identifier: run
 "(" 	Parenthes. left  type_num: 20
 ")" 	Parenthes. right type_num: 21
 "{" 			 type_num: 24
-String: String
+String 			 type_num: 49
 identifier: str1
 ";" 	Semicolon 	 type_num: 17
 identifier: str1
 "=" 	Assignment 	 type_num: 0
 String: Toto je nejaky text
 ";" 	Semicolon 	 type_num: 17
-String: String
+String 			 type_num: 49
 identifier: str2
 ";" 	Semicolon 	 type_num: 17
 identifier: str2
@@ -292,7 +292,7 @@ static 			 type_num: 42
 void 			 type_num: 37
 identifier: play
 "(" 	Parenthes. left  type_num: 20
-String: String
+String 			 type_num: 49
 identifier: str
 ")" 	Parenthes. right type_num: 21
 "{" 			 type_num: 24
