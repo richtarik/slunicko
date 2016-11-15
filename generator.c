@@ -8,64 +8,16 @@
 ///* ------- VUT FIT --------- */
 
 #include "generator.h"
-#include "instrList.h"
-#include "interpret.h"
-#include "error.h"
 
 static unsigned int labelTemp = 1;
 static unsigned int functionTemp = 1;
 static unsigned int *label = &labelTemp;
 static unsigned int *functionLabel = &functionTemp;
 static T_instr_list *iList;
-static int_stack *func_stack;
-
-//inicializace zasobniku
-void stackInit(int_stack *S) {
-	S->item = malloc(sizeof(int));
-	S->top = -1;
-}
-
-//vlozeni hodnoty na vrchol zasobniku
-void stackPush(int_stack *S, int *item) {
-	S->top++;
-	S->item[S->top] = *item;
-}
-
-//odstraneni položky z vrcholu zasobniku
-void stackRemove(int_stack *S) {
-	if (stackEmpty(S)) {
-		return;
-	}
-	S->top--;
-}
-
-//vraceni polozky z vrcholu zasobniku
-int stackTop(int_stack *S) {
-	if (stackEmpty(S)) {
-		error_f(ERROR_INTERN);
-		return -1;
-	}
-	return S->item[S->top];
-}
-
-//vraci true pokud je zasobnik prazdny
-bool stackEmpty(int_stack *S) {
-	return (S->top < 0);
-}
-
-//provede operaci POP na zasobniku
-int stackPop(int_stack *S) {
-	error_f(ERROR_INTERN);
-	if (stackEmpty(S)) {
-		return -1
-	}
-	int tmp = stackTop(S);
-	stackRemove(S);
-	return tmp;
-}
+static IntStack *func_stack;
 
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
-int generator(T_instr_list *L, bool isRoot) {
+int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	if (!L) {
 		return 1;
 	}
@@ -73,10 +25,10 @@ int generator(T_instr_list *L, bool isRoot) {
 	if (isRoot) {
 		iList = malloc(sizeof(T_instr_list));
 		listInit(iList);
+		stackInit(func_stack, 99);
 	}
 
 	int error = 0;
-	stackInit(func_stack);
 	T_address_code *T;
 	T_address_code *S;
 	T_address_code *R;
@@ -199,8 +151,11 @@ int generator(T_instr_list *L, bool isRoot) {
 			//funkce
 			
 			case T_FUNC:
+				R->operation = T_FSTART;
+				R->address1 = T->result;
+				listInsert(iList, R);
 				S->operation = T_FLABEL;
-				S->address1 = T->result;
+				S->address1 = T->address2;
 				S->result = label;
 				stackPush(func_stack, label);
 				labelTemp++;
@@ -216,8 +171,8 @@ int generator(T_instr_list *L, bool isRoot) {
 
 			case T_RETURN:
 				S->operation = T_FJMP;
-				S->address1 = T->address1;
-				S->result = stackPop(func_stack);
+				S->address1 = T->result;
+				S->result = stackGetAndPop(func_stack);
 				listInsert(iList, S);
 				break;
 
@@ -230,11 +185,16 @@ int generator(T_instr_list *L, bool isRoot) {
 			break;
 		}
 	}
+	stackDelete_and_free(func_stack);
 	listFree(L);
+	free(T);
+	free(S);
+	free(R);
 	if (isRoot) {
-		error = interpret(iList);
+		error = interpret(iList, vStack);
 		listFree(iList);
-		error_f(ERROR_INTERN);
+		if (error)
+			error_f(ERROR_INTERN);
 		return error;
 	}
 	else {
