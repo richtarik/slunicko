@@ -168,6 +168,43 @@ double strReadDouble()
 
     return (double)cislo;
 }
+/*
+ * Nacte string ze stdin
+ */
+String *strReadString()
+{
+	int c, velikost = 1, delka = 0;
+	
+   	String *s = memory_manager_malloc(sizeof(String));
+	char* buffer = (char*) memory_manager_malloc(sizeof(char));
+
+    	while(1)
+	{
+		c = getchar();
+		
+		if(velikost == delka)
+		{
+			velikost *= 2;
+			buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
+		}
+
+		if(c == '\n' || c == EOF)
+		{
+			buffer[delka] = '\0';
+			break;
+		}
+
+    		buffer[delka] = c;
+        	delka++;
+	}
+
+    	s->length = delka;
+   	s->str = buffer;
+	s->allocated = velikost;
+
+	return s;
+}
+
 
 /*
  * Nacte String ze stdin
