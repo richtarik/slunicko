@@ -8,60 +8,22 @@
 ///* ------- VUT FIT --------- */
 
 #include "generator.h"
-#include "instrList.h"
-#include "interpret.h"
-#include "error.h"
 
 static unsigned int labelTemp = 1;
 static unsigned int functionTemp = 1;
 static unsigned int *label = &labelTemp;
 static unsigned int *functionLabel = &functionTemp;
 static T_instr_list *iList;
-static int_stack *func_stack;
+static IntStack *func_stack;
 
-//inicializace zasobniku
-void stackInit(int_stack *S) {
-	S->item = malloc(sizeof(int));
-	S->top = -1;
+int stackGet(IntStack* s) {
+	return s->data[s->top];
 }
 
-//vlozeni hodnoty na vrchol zasobniku
-void stackPush(int_stack *S, int *item) {
-	S->top++;
-	S->item[S->top] = *item;
-}
-
-//odstraneni položky z vrcholu zasobniku
-void stackRemove(int_stack *S) {
-	if (stackEmpty(S)) {
-		return;
-	}
-	S->top--;
-}
-
-//vraceni polozky z vrcholu zasobniku
-int stackTop(int_stack *S) {
-	if (stackEmpty(S)) {
-		error_f(ERROR_INTERN);
-		return -1;
-	}
-	return S->item[S->top];
-}
-
-//vraci true pokud je zasobnik prazdny
-bool stackEmpty(int_stack *S) {
-	return (S->top < 0);
-}
-
-//provede operaci POP na zasobniku
-int stackPop(int_stack *S) {
-	error_f(ERROR_INTERN);
-	if (stackEmpty(S)) {
-		return -1
-	}
-	int tmp = stackTop(S);
-	stackRemove(S);
-	return tmp;
+int stackGetAndPop(IntStack* s) {
+	int c = stackGet(s);
+	stackPop(s);
+	return c;
 }
 
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
@@ -76,7 +38,7 @@ int generator(T_instr_list *L, bool isRoot) {
 	}
 
 	int error = 0;
-	stackInit(func_stack);
+	stackInit(func_stack, 99);
 	T_address_code *T;
 	T_address_code *S;
 	T_address_code *R;
@@ -217,7 +179,7 @@ int generator(T_instr_list *L, bool isRoot) {
 			case T_RETURN:
 				S->operation = T_FJMP;
 				S->address1 = T->address1;
-				S->result = stackPop(func_stack);
+				S->result = stackGetAndPop(func_stack);
 				listInsert(iList, S);
 				break;
 
@@ -230,6 +192,7 @@ int generator(T_instr_list *L, bool isRoot) {
 			break;
 		}
 	}
+	stackDelete_and_free(func_stack);
 	listFree(L);
 	if (isRoot) {
 		error = interpret(iList);
