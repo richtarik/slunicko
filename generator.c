@@ -16,16 +16,6 @@ static unsigned int *functionLabel = &functionTemp;
 static T_instr_list *iList;
 static IntStack *func_stack;
 
-int stackGet(IntStack* s) {
-	return s->data[s->top];
-}
-
-int stackGetAndPop(IntStack* s) {
-	int c = stackGet(s);
-	stackPop(s);
-	return c;
-}
-
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
 int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	if (!L) {
@@ -35,10 +25,10 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	if (isRoot) {
 		iList = malloc(sizeof(T_instr_list));
 		listInit(iList);
+		stackInit(func_stack, 99);
 	}
 
 	int error = 0;
-	stackInit(func_stack, 99);
 	T_address_code *T;
 	T_address_code *S;
 	T_address_code *R;
@@ -161,8 +151,11 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 			//funkce
 			
 			case T_FUNC:
+				R->operation = T_FSTART;
+				R->address1 = T->result;
+				listInsert(iList, R);
 				S->operation = T_FLABEL;
-				S->address1 = T->result;
+				S->address1 = T->address2;
 				S->result = label;
 				stackPush(func_stack, label);
 				labelTemp++;
@@ -178,7 +171,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 
 			case T_RETURN:
 				S->operation = T_FJMP;
-				S->address1 = T->address1;
+				S->address1 = T->result;
 				S->result = stackGetAndPop(func_stack);
 				listInsert(iList, S);
 				break;
@@ -194,10 +187,14 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	}
 	stackDelete_and_free(func_stack);
 	listFree(L);
+	free(T);
+	free(S);
+	free(R);
 	if (isRoot) {
 		error = interpret(iList, vStack);
 		listFree(iList);
-		error_f(ERROR_INTERN);
+		if (error)
+			error_f(ERROR_INTERN);
 		return error;
 	}
 	else {

@@ -8,6 +8,7 @@
 ///* ------- VUT FIT --------- */
 
 #include "struct.h"
+#include "stack.h"
 #include "ial.h"
 
 typedef struct {

@@ -100,6 +100,17 @@ void print_stack_data_i(IntStack *s)
     }
 }
 
+int stackGet(IntStack* s) {
+	return s->data[s->top];
+}
+
+int stackGetAndPop(IntStack* s) {
+	int c = stackGet(s);
+	stackPop(s);
+	return c;
+}
+
+
 void stackDelete_and_free(IntStack* s)
 {
     if(stackEmpty(s))
