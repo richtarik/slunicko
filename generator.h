@@ -13,4 +13,4 @@
 #include "error.h"
 #include "stack.h"
 
-int generator(T_instr_list *L, bool isRoot);
+int generator(T_instr_list *L, bool isRoot, VariableStack vStack);

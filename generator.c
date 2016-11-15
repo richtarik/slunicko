@@ -27,7 +27,7 @@ int stackGetAndPop(IntStack* s) {
 }
 
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
-int generator(T_instr_list *L, bool isRoot) {
+int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	if (!L) {
 		return 1;
 	}
@@ -195,7 +195,7 @@ int generator(T_instr_list *L, bool isRoot) {
 	stackDelete_and_free(func_stack);
 	listFree(L);
 	if (isRoot) {
-		error = interpret(iList);
+		error = interpret(iList, vStack);
 		listFree(iList);
 		error_f(ERROR_INTERN);
 		return error;

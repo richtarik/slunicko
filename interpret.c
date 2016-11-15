@@ -13,7 +13,7 @@
 void VStackInit(VariableStack* s, unsigned int size) {
 	s->top = -1;
 	s->max = size;
-	s->data = malloc(sizeof(ht_item_func_ptr)*size);
+	s->data = malloc(sizeof(ht_item_var_ptr)*size);
 
 	if (s->data == NULL)
 	{
@@ -59,11 +59,15 @@ void VStackPop(VariableStack* s) {
 	}
 }
 
-ht_item_func_ptr VStackGet(VariableStack* s, int offset) {
+ht_item_var_ptr VStackGet(VariableStack* s, int offset) {
 	return s->data[offset];
 }
 
-void VStackPush(VariableStack* s, ht_item_func_ptr data) {
+void VStackSet(VariableStack* s, int offset, ht_item_var_ptr data) {
+	s->data[offset] = data;
+}
+
+void VStackPush(VariableStack* s, ht_item_var_ptr data) {
 	if (stackFull(s))
 	{
 		//stackError(SERR_PUSH);
@@ -101,10 +105,14 @@ void VStackDelete_and_free(VariableStack* s)
 }
 
 //Provadi samotnou interpretaci predanych instrukci - pocetni operaca a instrukce skoku
-int interpret(T_instr_list *L) {
+int interpret(T_instr_list *L, VariableStack vStack) {
 	bool Flag = false;
+	int offset = 0;
 	T_address_code T = malloc(sizeof(T_address_code));
 	T_address_code S = malloc(sizeof(T_address_code));
+	ht_item_var_ptr A1 = malloc(sizeof(ht_item_var_ptr));
+	ht_item_var_ptr A2 = malloc(sizeof(ht_item_var_ptr));
+	ht_item_var_ptr A3 = malloc(sizeof(ht_item_var_ptr));
 	listFirst(L);
 
 	while (1) {
@@ -112,7 +120,95 @@ int interpret(T_instr_list *L) {
 		if (T == NULL) {
 			return -1;
 		}
-		switch (I->operation) {
+		switch (T->operation) {
+
+			//Aritmeticke operace
+			case T_ADD:
+				A1 = VStackGet(vStack, offset + T->address1);
+				A2 = VStackGet(vStack, offset + T->address2);
+				A3 = VStackGet(vStack, offset + T->result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value->value_int = A1->type->value_int + A2->type->value_int;
+					}
+					else if (A2->type == token_double) {
+						A3->value->value_double = A1->type->vaule_int + A2->type->value_double;
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value->value_double = A1->type->value_double + A2->type->value_int;
+					}
+					else if (A2->type == token_double) {
+						A3->value->valee_double = A1->type->value_double + A2->type->value_double;
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T->result, A3);
+				break;
+
+			case T_INC:
+				A1 = VStackGet(vStack, offset + T->address1);
+				if (A1->type == token_int) {
+					A1->value->value_int = A1->value->value_int + 1;
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T->address1, A1);
+				break;
+
+			case T_SUB:
+				A1 = VStackGet(vStack, offset + T->address1);
+				A2 = VStackGet(vStack, offset + T->address2);
+				A3 = VStackGet(vStack, offset + T->result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value->value_int = A1->type->value_int - A2->type->value_int;
+					}
+					else if (A2->type == token_double) {
+						A3->value->value_double = A1->type->vaule_int - A2->type->value_double;
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value->value_double = A1->type->value_double - A2->type->value_int;
+					}
+					else if (A2->type == token_double) {
+						A3->value->valee_double = A1->type->value_double - A2->type->value_double;
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T->result, A3);
+				break;
+
+			case T_DEC:
+				A1 = VStackGet(vStack, offset + T->address1);
+				if (A1->type == token_int) {
+					A1->value->value_int = A1->value->value_int - 1;
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T->address1, A1);
+				break;
+
 			/*Nejdøív musí bıt všechny aritmetickı a podobnı další všechny operace, èeká se na strukturu z parseru*/
 
 			case T_LABEL:
