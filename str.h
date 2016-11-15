@@ -34,5 +34,7 @@ int strLength(String *s);
 void strCopy(String *s1, String *s2);
 String *strSubstr(String *s, int i, int n);
 int strCompare(String *s1, String *s2);
+void strLoad(String *s, char *c);
+void strCat(String *s, char *c);
 
 #endif
