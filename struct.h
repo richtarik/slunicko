@@ -1,4 +1,4 @@
-///* File: token.h             */
+///* File: struct.h            */
 ///* Autor: Milos Molitoris    */
 ///* Login: xmolit00           */
 ///*                           */

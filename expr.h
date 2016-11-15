@@ -1,3 +1,12 @@
+///* File: expr.h              */
+///* Autor: Milos Molitoris    */
+///* Login: xmolit00           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 10.11.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "struct.h"
 #include "stack.h"
 #include <stdbool.h>
@@ -55,10 +64,8 @@ precedence_symbol fn_char_to_numsymbol(char c);
 
 bool is_TOP_symbol_less_POP_and_PUSH_Nonterm(IntStack* stack);
 void add_less_operator_to_stack(IntStack* stack);
-//int Count_of_numbers_after_symbolless(IntStack* stack);
 operators get_Top_operator_from_stack(IntStack* stack);
 void check_rule(IntStack* stack,operators Rule_symbol);
-//int Reduce(IntStack* stack);
 
 /*
 1.rule E->E=E ???????

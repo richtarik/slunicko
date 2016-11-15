@@ -1,3 +1,12 @@
+///* File: expr.c              */
+///* Autor: Milos Molitoris    */
+///* Login: xmolit00           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 29.09.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "stack.h"
 
 void stackInit (IntStack* s, unsigned size) {

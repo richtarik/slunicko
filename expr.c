@@ -1,3 +1,12 @@
+///* File: expr.c              */
+///* Autor: Milos Molitoris    */
+///* Login: xmolit00           */
+///*                           */
+///*       IFJ-Projekt         */
+///* Datum: 10.11.2016         */
+///* Prelozeno: gcc 4.9        */
+///* ------- VUT FIT --------- */
+
 #include "expr.h"
 #include "struct.h"
 #include "lex.h"
