@@ -170,6 +170,43 @@ double strReadDouble()
 }
 
 /*
+ * Nacte String ze stdin
+ */
+String *strReadString()
+{
+	int c, velikost = 1, delka = 0;
+	
+   	String *s = memory_manager_malloc(sizeof(String));
+	char* buffer = (char*) memory_manager_malloc(sizeof(char));
+
+    while(1)
+	{
+		c = getchar();
+		
+		if(velikost == delka)
+		{
+			velikost *= 2;
+			buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
+		}
+
+		if(c == '\n' || c == EOF)
+		{
+			buffer[delka] = '\0';
+			break;
+		}
+
+    	buffer[delka] = c;
+        delka++;
+	}
+
+    s->length = delka;
+   	s->str = buffer;
+	s->allocated = velikost;
+
+	return s;
+}
+
+/*
  * Vrati delku retezce (bez '\0')
  */
 int strLength(String *s)
@@ -257,5 +294,34 @@ void strPrintStr(String *s)
 	if(s != NULL)
 	{
 		printf("%s", s->str);
+	}
+}
+
+/*
+ * Vloží řetězec do String
+ */
+void strLoad(String *s, char *c)
+{
+	s->str[0] = '\0';
+	s->length = 0;
+	
+	int i = 0;
+	while(c[i] != '\0')
+	{
+		strAddChar(s, c[i]);
+		i++;
+	}
+}
+
+/*
+ * Připojí řetězec k String
+ */
+void strCat(String *s, char *c)
+{
+	int i = 0;
+	while(c[i] != '\0')
+	{
+		strAddChar(s, c[i]);
+		i++;
 	}
 }
