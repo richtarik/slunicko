@@ -39,6 +39,8 @@ void error_f(int error_num)
 				break;
 	}
 	
+	fclose(sourceFile);
+	
 	memory_manager_free_all(); // uvolneni pameti
 	
 	exit(error_num); // ukonceni s navratovou hodnotou chyby
