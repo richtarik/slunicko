@@ -59,10 +59,14 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 				listInsert(iList, T);
 				break;
 
-			//Logicke a porovnavaci operace
+			//Logicke operace
 			
 			case T_AND:
 			case T_OR:
+			case T_NOT:
+				break;
+
+			//Porovnavaci operace
 			case T_EQUAL:
 			case T_LEQUAL:
 			case T_MEQUAL:
