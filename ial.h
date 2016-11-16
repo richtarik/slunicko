@@ -35,15 +35,12 @@ typedef struct ht_params {
 
 typedef struct ht_item_func {
 	token_type type; // "struct.h", return type
-	int defined;
 	ht_params_ptr param; // parametry funkce
-	struct hash_table *ht; // tabulka symbolu pro proměnné dané funkce
-	int offset; //offset na blok instrukcii
+	T_item_list *listItemPtr; //ukazatel na prvu instrukciu
 } *ht_item_func_ptr;
 
 typedef struct ht_item_var {
 	token_type type; // "struct.h"
-	int defined;
 	int offset; //offset od zaciatku ramca funkcie
 	bool inicialized;
 } *ht_item_var_ptr;
@@ -64,8 +61,8 @@ unsigned int hash_function(const char *str, unsigned htab_size);
 hash_table_ptr ht_init(unsigned size);
 void ht_free(hash_table_ptr ht);
 void ht_item_func_clear(ht_item_func_ptr item);
-ht_item_var_ptr ht_create_item_var(token_type type, int defined, int offset, bool inicialized);
-ht_item_func_ptr ht_create_item_func(token_type type, int offset, int defined, ht_params_ptr param, struct hash_table *ht);
+ht_item_var_ptr ht_create_item_var(token_type type, int offset, bool inicialized);
+ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, ht_params_ptr param);
 bool ht_insert_item_var(ht_item_var_ptr item, char *key, hash_table_ptr ht);
 bool ht_insert_item_func(ht_item_func_ptr item, char *key, hash_table_ptr ht);
 ht_table_item_ptr ht_search(char *key, bool func, hash_table_ptr ht);
