@@ -166,7 +166,7 @@ union T_value {
 //Struktura pro ulozeni typu a hodnoty promenne
 typedef struct {
 	value_type type;
-	value_struct value;
+	union T_value value;
 } T_variable;
 
 //struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou

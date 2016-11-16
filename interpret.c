@@ -14,7 +14,7 @@
 void VStackInit(VariableStack* s, unsigned int size) {
 	s->top = -1;
 	s->max = size;
-	s->data = malloc(sizeof(ht_item_var_ptr)*size);
+	s->data = malloc(sizeof(T_variable)*size);
 
 	if (s->data == NULL)
 	{
@@ -60,15 +60,15 @@ void VStackPop(VariableStack* s) {
 	}
 }
 
-ht_item_var_ptr VStackGet(VariableStack* s, int offset) {
+T_variable VStackGet(VariableStack* s, int offset) {
 	return s->data[offset];
 }
 
-void VStackSet(VariableStack* s, int offset, ht_item_var_ptr data) {
+void VStackSet(VariableStack* s, int offset, T_variable data) {
 	s->data[offset] = data;
 }
 
-void VStackPush(VariableStack* s, ht_item_var_ptr data) {
+void VStackPush(VariableStack* s, T_variable data) {
 	if (stackFull(s))
 	{
 		//stackError(SERR_PUSH);
@@ -113,9 +113,9 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 	stackInit(offset_stack, 99);
 	T_address_code T = malloc(sizeof(T_address_code));
 	T_address_code S = malloc(sizeof(T_address_code));
-	ht_item_var_ptr A1 = malloc(sizeof(ht_item_var_ptr));
-	ht_item_var_ptr A2 = malloc(sizeof(ht_item_var_ptr));
-	ht_item_var_ptr A3 = malloc(sizeof(ht_item_var_ptr));
+	T_variable A1 = malloc(sizeof(T_variable));
+	T_variable A2 = malloc(sizeof(T_variable));
+	T_variable A3 = malloc(sizeof(T_variable));
 	listFirst(L);
 
 	while (1) {
@@ -130,31 +130,34 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int + A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int + A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.vaule_int + A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.vaule_int + A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double + A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double + A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.valee_double = A1->value.value_double + A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.valee_double = A1.value.value_double + A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
+				}
+				else if (A1.type == STRING && A2.type == STRING) {
+					strLoad(A3)
 				}
 				else {
 					return -1;
@@ -164,9 +167,9 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 			case T_INC:
 				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1->type == token_int) {
-					A1->value.value_int = A1->value.value_int + 1;
-					ZeroFlag = !(A3->value.value_int == 0)
+				if (A1.type == INT) {
+					A1.value.value_int = A1.value.value_int + 1;
+					ZeroFlag = !(A3.value.value_int == 0)
 				}
 				else {
 					return -1;
@@ -178,27 +181,27 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int - A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0)
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int - A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0)
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.vaule_int - A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.vaule_int - A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double - A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double - A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.valee_double = A1->value.value_double - A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.valee_double = A1.value.value_double - A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
@@ -212,9 +215,9 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 			case T_DEC:
 				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1->type == token_int) {
-					A1->value.value_int = A1->value.value_int - 1;
-					ZeroFlag = !(A3->value.value_int == 0)
+				if (A1.type == INT) {
+					A1.value.value_int = A1.value.value_int - 1;
+					ZeroFlag = !(A3.value.value_int == 0)
 				}
 				else {
 					return -1;
@@ -226,27 +229,27 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int * A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0)
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int * A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0)
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.vaule_int * A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.vaule_int * A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double * A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double * A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.valee_double = A1->value.value_double * A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.valee_double = A1.value.value_double * A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
@@ -262,27 +265,27 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int / A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0)
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int / A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0)
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.vaule_int / A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.vaule_int / A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double / A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double / A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.valee_double = A1->value.value_double / A2->value.value_double;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.valee_double = A1.value.value_double / A2.value.value_double;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
 					else {
 						return -1;
@@ -299,52 +302,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int && A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int && A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int && A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int && A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int && A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double && A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double && A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double && A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int && A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool && A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double && A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool && A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double && A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool && A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double && A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool && A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool && A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool && A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -360,52 +363,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int || A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int || A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int || A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int || A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int || A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double || A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double || A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double || A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int || A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool || A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double || A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool || A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double || A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool || A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double || A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool || A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool || A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool || A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -420,17 +423,17 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 			case T_NOT:
 				A1 = VStackGet(vStack, frame + T.address1);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					A3->value.value_int = !(A1->value.value_int);
-					ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					A3.value.value_int = !(A1.value.value_int);
+					ZeroFlag = !(A3.value.value_int == 0);
 				}
-				else if (A1->type == token_double) {
-					A3->value.value_double = !(A1->value.value_double);
-					ZeroFlag = !(A3->value.value_double == 0);
+				else if (A1.type == DOUBLE) {
+					A3.value.value_double = !(A1.value.value_double);
+					ZeroFlag = !(A3.value.value_double == 0);
 				}
-				else if (A1->type == token_boolean) {
-					A3->value.value_bool = !(A1->value.value_bool);
-					ZeroFlag = !(A3->value.value_bool == 0);
+				else if (A1.type == BOOLEAN) {
+					A3.value.value_bool = !(A1.value.value_bool);
+					ZeroFlag = !(A3.value.value_bool == 0);
 				}
 				else {
 					return -1;
@@ -443,52 +446,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int == A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int == A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int == A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int == A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int == A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double == A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double == A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double == A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int == A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool == A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double == A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool == A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double == A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool == A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double == A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool == A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool == A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool == A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -504,52 +507,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int <= A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int <= A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int <= A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int <= A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int <= A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double <= A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double <= A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double <= A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int <= A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool <= A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double <= A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool <= A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double <= A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool <= A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double <= A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool <= A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool <= A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool <= A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -565,52 +568,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int >= A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int >= A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int >= A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int >= A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int >= A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double >= A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double >= A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double >= A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int >= A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool >= A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double >= A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool >= A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double >= A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool >= A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double >= A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool >= A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool >= A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool >= A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -626,52 +629,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int != A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int != A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int != A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int != A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int != A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double != A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double != A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double != A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int != A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool != A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double != A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool != A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double != A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool != A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double != A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool != A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool != A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool != A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -687,52 +690,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int > A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int > A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int > A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int > A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int > A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double > A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double > A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double > A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int > A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool > A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double > A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool > A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double > A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool > A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double > A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool > A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool > A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool > A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -748,52 +751,52 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				A1 = VStackGet(vStack, frame + T.address1);
 				A2 = VStackGet(vStack, frame + T.address2);
 				A3 = VStackGet(vStack, frame + T.result);
-				if (A1->type == token_int) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_int < A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				if (A1.type == INT) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_int < A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_int < A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_int < A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_int = A1->value.value_int < A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else {
-						return -1;
-					}
-				}
-				else if (A1->type == token_double) {
-					if (A2->type == token_int) {
-						A3->value.value_double = A1->value.value_double < A2->value.value_int;
-						ZeroFlag = !(A3->value.value_double == 0);
-					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_double < A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
-					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_double = A1->value.value_double < A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_double == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_int = A1.value.value_int < A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1->type == token_boolean) {
-					if (A2->type == token_int) {
-						A3->value.value_int = A1->value.value_bool < A2->value.value_int;
-						ZeroFlag = !(A3->value.value_int == 0);
+				else if (A1.type == DOUBLE) {
+					if (A2.type == INT) {
+						A3.value.value_double = A1.value.value_double < A2.value.value_int;
+						ZeroFlag = !(A3.value.value_double == 0);
 					}
-					else if (A2->type == token_double) {
-						A3->value.value_double = A1->value.value_bool < A2->value.value_double;
-						ZeroFlag = !(A3->value.value_int == 0);
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_double < A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
 					}
-					else if (A2->type == token_boolean) {
-						A3->value.value_bool = A1->value.value_bool < A2->value.value_bool;
-						ZeroFlag = !(A3->value.value_bool == 0);
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_double = A1.value.value_double < A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1.type == BOOLEAN) {
+					if (A2.type == INT) {
+						A3.value.value_int = A1.value.value_bool < A2.value.value_int;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == DOUBLE) {
+						A3.value.value_double = A1.value.value_bool < A2.value.value_double;
+						ZeroFlag = !(A3.value.value_int == 0);
+					}
+					else if (A2.type == BOOLEAN) {
+						A3.value.value_bool = A1.value.value_bool < A2.value.value_bool;
+						ZeroFlag = !(A3.value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -808,18 +811,18 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 			//Vstup a výstup
 			case T_IN:
 				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1->type == token_int) {
-					scanf("%d", &(A1->value.value_int));
+				if (A1.type == INT) {
+					scanf("%d", &(A1.value.value_int));
 				}
-				else if (A1->type == token_double) {
-					scanf("%f", &(A1->value.value_double));
+				else if (A1.type == DOUBLE) {
+					scanf("%f", &(A1.value.value_double));
 				}
-				else if (A1->type == token_boolean) {
-					scanf("%b", &(A1->value.value_bool));
+				else if (A1.type == BOOLEAN) {
+					scanf("%b", &(A1.value.value_bool));
 				}
-				else if (A1->type == token_String) {
+				else if (A1.type == STRING) {
 					while (int c = getchar()) {
-						strAddChar(A1->value.value_String, c);
+						strAddChar(A1.value.value_String, c);
 					}
 				}
 				else {
@@ -830,22 +833,22 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 			case T_OUT:
 				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1->type == token_int) {
-					printf("%d", A1->value.value_int);
+				if (A1.type == INT) {
+					printf("%d", A1.value.value_int);
 				}
-				else if (A1->type == token_double) {
-					printf("%f", A1->value.value_double);
+				else if (A1.type == DOUBLE) {
+					printf("%f", A1.value.value_double);
 				}
-				else if (A1->type == token_boolean) {
-					if (A1->value.value_bool) {
+				else if (A1.type == BOOLEAN) {
+					if (A1.value.value_bool) {
 						printf("true");
 					}
 					else {
 						printf("false");
 					}
 				}
-				else if (A1->type == token_String) {
-					strPrintStr(A1->value.value_String);
+				else if (A1.type == STRING) {
+					strPrintStr(A1.value.value_String);
 				}
 				else {
 					return -1;
