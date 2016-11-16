@@ -151,6 +151,11 @@ unsigned int hash_function(const char *str, unsigned htab_size)
  */
 hash_table_ptr ht_init(unsigned size)
 {
+	if (size == 0)
+	{
+		size = 10;
+	}
+	
     hash_table_ptr ht;
 
     ht = (hash_table_ptr) memory_manager_malloc(sizeof(struct hash_table));
@@ -208,8 +213,6 @@ void ht_free(hash_table_ptr ht)
  */
 void ht_item_func_clear(ht_item_func_ptr item)
 {
-	ht_free(item->ht); // vyčištění tabulky symbolů dané funkce
-
 	ht_params_ptr tmp = item->param;
 
 	while(tmp != NULL)
@@ -219,6 +222,15 @@ void ht_item_func_clear(ht_item_func_ptr item)
 		memory_manager_free_one(tmp);
 		tmp = item->param;
 	}
+	
+	T_item_list *tmp2 = item->listItemPtr;
+
+	while(tmp2 != NULL)
+	{
+		item->listItemPtr = tmp2->next_item;
+		memory_manager_free_one(tmp2);
+		tmp2 = item->listItemPtr;
+	}
 
 	memory_manager_free_one(item);
 }
@@ -226,12 +238,11 @@ void ht_item_func_clear(ht_item_func_ptr item)
 /*
  * Funkce pro vytvoření itemu proměnné
  */
-ht_item_var_ptr ht_create_item_var(token_type type, int defined, int offset, bool inicialized)
+ht_item_var_ptr ht_create_item_var(token_type type, int offset, bool inicialized)
 {
 	ht_item_var_ptr new = (ht_item_var_ptr) memory_manager_malloc(sizeof(struct ht_item_var));
 
 	new->type = type;
-	new->defined = defined;
     new->offset = offset;
     new->inicialized = inicialized;
     
@@ -241,15 +252,13 @@ ht_item_var_ptr ht_create_item_var(token_type type, int defined, int offset, boo
 /*
  * Funkce pro vytvoření itemu funkce
  */
-ht_item_func_ptr ht_create_item_func(token_type type, int offset, int defined, ht_params_ptr param, struct hash_table *ht)
+ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, ht_params_ptr param)
 {
 	ht_item_func_ptr new = (ht_item_func_ptr) memory_manager_malloc(sizeof(struct ht_item_func));
 
 	new->type = type;
-	new->defined = defined;
 	new->param = param;
-	new->ht = ht;
-    new->offset = offset;
+    new->listItemPtr = listItemPtr;
     
 	return new;
 }
