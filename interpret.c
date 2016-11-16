@@ -116,6 +116,8 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 	T_variable A1 = malloc(sizeof(T_variable));
 	T_variable A2 = malloc(sizeof(T_variable));
 	T_variable A3 = malloc(sizeof(T_variable));
+	String stroing;
+	stroing.
 	listFirst(L);
 
 	while (1) {
@@ -157,7 +159,11 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 					}
 				}
 				else if (A1.type == STRING && A2.type == STRING) {
-					strLoad(A3)
+					String* tmp;
+					tmp = A1.value.value_String;
+					strLoad(A3.value.value_String, tmp->str);
+					tmp = A2.value.value_String;
+					strCat(A3.value.value_String, tmp->str);
 				}
 				else {
 					return -1;
@@ -808,27 +814,29 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				VStackSet(vStack, frame + T.result, A3);
 				break;
 
-			//Vstup a výstup
-			case T_IN:
-				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1.type == INT) {
-					scanf("%d", &(A1.value.value_int));
-				}
-				else if (A1.type == DOUBLE) {
-					scanf("%f", &(A1.value.value_double));
-				}
-				else if (A1.type == BOOLEAN) {
-					scanf("%b", &(A1.value.value_bool));
-				}
-				else if (A1.type == STRING) {
-					while (int c = getchar()) {
-						strAddChar(A1.value.value_String, c);
-					}
-				}
-				else {
-					return -1;
-				}
-				VStackSet(vStack, frame + T.addresss1, A1);
+			//Vestaveny funkce
+			case T_IIN:
+				int i = strReadInt();
+				A1 = VStackGet(vStack, frame + T.result);
+				A1.type = INT;
+				A1.value.value_int = i;
+				VStackSet(vStack, frame + T.result, A1);
+				break;
+
+			case T_DIN:
+				double d = strReadDouble();
+				A1 = VStackGet(vStack, frame + T.result);
+				A1.type = DOUBLE;
+				A1.value.value_double = d;
+				VStackSet(vStack, frame + T.result, A1);
+				break;
+
+			case T_SIN:
+				String* s = strReadString();
+				A1 = VStackGet(vStack, frame + T.result);
+				A1.type = STRING;
+				A1.value.value_String = s;
+				VStackSet(vStack, frame + T.result, A1);
 				break;
 
 			case T_OUT:
@@ -837,15 +845,7 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 					printf("%d", A1.value.value_int);
 				}
 				else if (A1.type == DOUBLE) {
-					printf("%f", A1.value.value_double);
-				}
-				else if (A1.type == BOOLEAN) {
-					if (A1.value.value_bool) {
-						printf("true");
-					}
-					else {
-						printf("false");
-					}
+					printf("%g", A1.value.value_double);
 				}
 				else if (A1.type == STRING) {
 					strPrintStr(A1.value.value_String);
@@ -855,7 +855,50 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				}
 				break;
 
-			/*Nejdøív musí být všechny aritmetický a podobný další všechny operace, èeká se na strukturu z parseru*/
+			case T_LENGTH:
+				A1 = VStackGet(vStack, frame + T.address1);
+				int i = strLength(A1.value.value_String);
+				//ulozit i
+				break;
+
+			case T_SUBSTR:
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.address3);
+				String s = strSubstr(A1.value.value_String, A2.value.value_int, A3.value.value_int);
+				//ulozit s
+				break;
+
+			case T_COMPARE:
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				int i = strCompare(A1.value.value_String, A2.value.value_String);
+				//ulozit i
+				break;
+
+			case T_FIND:
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				//find
+				break;
+
+			case T_SORT:
+				A1 = VStackGet(vStack, frame + T.address1);
+				//sort
+				break;
+
+			//Zasobnikove funkce
+			case T_PUSH:
+				VStackPush(vStack, T.address1);
+				break;
+
+			case T_POP:
+				VStackPop(vStack);
+				break;
+
+			case T_MOV:
+				//az budou zasobniky
+				break;
 
 			//Skokove instrukce pro if a cykly
 			case T_LABEL:
