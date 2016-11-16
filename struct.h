@@ -119,7 +119,16 @@ typedef enum {
     token_number_double,
     token_error,
     token_EOF,
-    token_String_type
+    token_String_type,
+
+	//enumy pouze pro generator-interpret
+	token_label,
+	token_jmpzd,
+	token_jmpd,
+	token_fstart,
+	token_fjmp,
+	token_flabel
+
 } token_type;
 
 
