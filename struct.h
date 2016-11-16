@@ -131,7 +131,6 @@ typedef enum {
 
 } token_type;
 
-
 typedef struct T_Token {
     token_type type;
     unsigned int valMaxsize;
@@ -140,6 +139,41 @@ typedef struct T_Token {
 } T_token;
 
 T_token * token;
+
+//Zasobnik pro ukladani promennych
+typedef struct {
+	T_variable* data;
+	unsigned int max;
+	int top;
+} VariableStack;
+
+//Enum typu promennych pro interpret
+typedef enum {
+	INT,
+	DOUBLE,
+	STRING,
+	BOOLEAN
+} value_type;
+
+//Svaz promennych pro hodnoty ruznych datovych typu
+union T_value {
+	int value_int;
+	double value_double;
+	String *value_String;
+	bool value_bool
+} value_struct;
+
+//Struktura pro ulozeni typu a hodnoty promenne
+typedef struct {
+	value_type type;
+	value_struct value;
+} T_variable;
+
+//struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou
+typedef struct {
+	int offset;
+	bool global;
+} T_address;
 
 //struktura triadresnyho kodu
 typedef struct {
