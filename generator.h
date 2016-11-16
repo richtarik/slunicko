@@ -31,6 +31,9 @@
 #define T_NEQUAL token_neq
 #define T_MORE token_gre
 #define T_LESS token_les
+//Predefinovai operaci pro vstup a vystup
+#define T_IN 100
+#define T_OUT 101
 //Predefinovani cyklu, funkci, ...
 #define T_IF token_if
 #define T_WHILE token_while

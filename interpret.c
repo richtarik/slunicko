@@ -805,6 +805,53 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				VStackSet(vStack, offset + T.result, A3);
 				break;
 
+			//Vstup a výstup
+			case T_IN:
+				A1 = VStackGet(vStack, offset + T.address1);
+				if (A1->type == token_int) {
+					scanf("%d", &(A1->value.value_int));
+				}
+				else if (A1->type == token_double) {
+					scanf("%f", &(A1->value.value_double));
+				}
+				else if (A1->type == token_boolean) {
+					scanf("%b", &(A1->value.value_bool));
+				}
+				else if (A1->type == token_String) {
+					while (int c = getchar()) {
+						strAddChar(A1->value.value_String, c);
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.addresss1, A1);
+				break;
+
+			case T_OUT:
+				A1 = VStackGet(vStack, offset + T.address1);
+				if (A1->type == token_int) {
+					printf("%d", A1->value.value_int);
+				}
+				else if (A1->type == token_double) {
+					printf("%f", A1->value.value_double);
+				}
+				else if (A1->type == token_boolean) {
+					if (A1->value.value_bool) {
+						printf("true");
+					}
+					else {
+						printf("false");
+					}
+				}
+				else if (A1->type == token_String) {
+					strPrintStr(A1->value.value_String);
+				}
+				else {
+					return -1;
+				}
+				break;
+
 			/*Nejdøív musí být všechny aritmetický a podobný další všechny operace, èeká se na strukturu z parseru*/
 
 			//Skokove instrukce pro if a cykly
