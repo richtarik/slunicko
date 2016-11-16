@@ -438,6 +438,373 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				VStackSet(vStack, offset + T.result, A3);
 				break;
 
+			//Porovnavaci operace
+			case T_EQUAL:
+				A1 = VStackGet(vStack, offset + T.address1);
+				A2 = VStackGet(vStack, offset + T.address2);
+				A3 = VStackGet(vStack, offset + T.result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_int == A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_int == A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_int = A1->value.value_int == A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value.value_double = A1->value.value_double == A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_double == A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_double = A1->value.value_double == A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_boolean) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_bool == A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_bool == A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_bool = A1->value.value_bool == A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.result, A3);
+				break;
+
+			case T_LEQUAL:
+				A1 = VStackGet(vStack, offset + T.address1);
+				A2 = VStackGet(vStack, offset + T.address2);
+				A3 = VStackGet(vStack, offset + T.result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_int <= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_int <= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_int = A1->value.value_int <= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value.value_double = A1->value.value_double <= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_double <= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_double = A1->value.value_double <= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_boolean) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_bool <= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_bool <= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_bool = A1->value.value_bool <= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.result, A3);
+				break;
+
+			case T_MEQUAL:
+				A1 = VStackGet(vStack, offset + T.address1);
+				A2 = VStackGet(vStack, offset + T.address2);
+				A3 = VStackGet(vStack, offset + T.result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_int >= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_int >= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_int = A1->value.value_int >= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value.value_double = A1->value.value_double >= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_double >= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_double = A1->value.value_double >= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_boolean) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_bool >= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_bool >= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_bool = A1->value.value_bool >= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.result, A3);
+				break;
+
+			case T_NEQUAL:
+				A1 = VStackGet(vStack, offset + T.address1);
+				A2 = VStackGet(vStack, offset + T.address2);
+				A3 = VStackGet(vStack, offset + T.result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_int != A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_int != A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_int = A1->value.value_int != A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value.value_double = A1->value.value_double != A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_double != A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_double = A1->value.value_double != A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_boolean) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_bool != A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_bool != A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_bool = A1->value.value_bool != A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.result, A3);
+				break;
+
+			case T_MORE:
+				A1 = VStackGet(vStack, offset + T.address1);
+				A2 = VStackGet(vStack, offset + T.address2);
+				A3 = VStackGet(vStack, offset + T.result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_int > A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_int > A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_int = A1->value.value_int > A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value.value_double = A1->value.value_double > A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_double > A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_double = A1->value.value_double > A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_boolean) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_bool > A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_bool > A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_bool = A1->value.value_bool > A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.result, A3);
+				break;
+
+			case T_LESS:
+				A1 = VStackGet(vStack, offset + T.address1);
+				A2 = VStackGet(vStack, offset + T.address2);
+				A3 = VStackGet(vStack, offset + T.result);
+				if (A1->type == token_int) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_int < A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_int < A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_int = A1->value.value_int < A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_double) {
+					if (A2->type == token_int) {
+						A3->value.value_double = A1->value.value_double < A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_double < A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_double = A1->value.value_double < A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else if (A1->type == token_boolean) {
+					if (A2->type == token_int) {
+						A3->value.value_int = A1->value.value_bool < A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_double) {
+						A3->value.value_double = A1->value.value_bool < A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
+					}
+					else if (A2->type == token_boolean) {
+						A3->value.value_bool = A1->value.value_bool < A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
+					}
+					else {
+						return -1;
+					}
+				}
+				else {
+					return -1;
+				}
+				VStackSet(vStack, offset + T.result, A3);
+				break;
+
 			/*Nejdøív musí být všechny aritmetický a podobný další všechny operace, èeká se na strukturu z parseru*/
 
 			//Skokove instrukce pro if a cykly
