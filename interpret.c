@@ -108,7 +108,7 @@ void VStackDelete_and_free(VariableStack* s)
 //Provadi samotnou interpretaci predanych instrukci - pocetni operaca a instrukce skoku
 int interpret(T_instr_list *L, VariableStack vStack) {
 	bool ZeroFlag = false;
-	int offset = 0;
+	int frame = 0;
 	IntStack* offset_stack;
 	stackInit(offset_stack, 99);
 	T_address_code T = malloc(sizeof(T_address_code));
@@ -127,9 +127,9 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 			//Instrukce pro aritmeticko operace
 			case T_ADD:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int + A2->value.value_int;
@@ -159,11 +159,11 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_INC:
-				A1 = VStackGet(vStack, offset + T.address1);
+				A1 = VStackGet(vStack, frame + T.address1);
 				if (A1->type == token_int) {
 					A1->value.value_int = A1->value.value_int + 1;
 					ZeroFlag = !(A3->value.value_int == 0)
@@ -171,13 +171,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.address1, A1);
+				VStackSet(vStack, frame + T.address1, A1);
 				break;
 
 			case T_SUB:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int - A2->value.value_int;
@@ -207,11 +207,11 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_DEC:
-				A1 = VStackGet(vStack, offset + T.address1);
+				A1 = VStackGet(vStack, frame + T.address1);
 				if (A1->type == token_int) {
 					A1->value.value_int = A1->value.value_int - 1;
 					ZeroFlag = !(A3->value.value_int == 0)
@@ -219,13 +219,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.address1, A1);
+				VStackSet(vStack, frame + T.address1, A1);
 				break;
 
 			case T_MUL:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int * A2->value.value_int;
@@ -255,13 +255,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_DIV:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int / A2->value.value_int;
@@ -291,14 +291,14 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			//Logicke operace
 			case T_AND:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int && A2->value.value_int;
@@ -353,13 +353,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_OR:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int || A2->value.value_int;
@@ -414,12 +414,12 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_NOT:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					A3->value.value_int = !(A1->value.value_int);
 					ZeroFlag = !(A3->value.value_int == 0);
@@ -435,14 +435,14 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			//Porovnavaci operace
 			case T_EQUAL:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int == A2->value.value_int;
@@ -497,13 +497,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_LEQUAL:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int <= A2->value.value_int;
@@ -558,13 +558,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_MEQUAL:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int >= A2->value.value_int;
@@ -619,13 +619,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_NEQUAL:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int != A2->value.value_int;
@@ -680,13 +680,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_MORE:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int > A2->value.value_int;
@@ -741,13 +741,13 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			case T_LESS:
-				A1 = VStackGet(vStack, offset + T.address1);
-				A2 = VStackGet(vStack, offset + T.address2);
-				A3 = VStackGet(vStack, offset + T.result);
+				A1 = VStackGet(vStack, frame + T.address1);
+				A2 = VStackGet(vStack, frame + T.address2);
+				A3 = VStackGet(vStack, frame + T.result);
 				if (A1->type == token_int) {
 					if (A2->type == token_int) {
 						A3->value.value_int = A1->value.value_int < A2->value.value_int;
@@ -802,12 +802,12 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.result, A3);
+				VStackSet(vStack, frame + T.result, A3);
 				break;
 
 			//Vstup a výstup
 			case T_IN:
-				A1 = VStackGet(vStack, offset + T.address1);
+				A1 = VStackGet(vStack, frame + T.address1);
 				if (A1->type == token_int) {
 					scanf("%d", &(A1->value.value_int));
 				}
@@ -825,11 +825,11 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, offset + T.addresss1, A1);
+				VStackSet(vStack, frame + T.addresss1, A1);
 				break;
 
 			case T_OUT:
-				A1 = VStackGet(vStack, offset + T.address1);
+				A1 = VStackGet(vStack, frame + T.address1);
 				if (A1->type == token_int) {
 					printf("%d", A1->value.value_int);
 				}
@@ -879,7 +879,7 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 			//Instrukce pro funkcnost uzivatelskych funkci
 			case T_FSTART:
-				offset = T->address1;
+				frame = T->address1;
 				stackPush(offset_stack, T->address1);
 				break;
 
@@ -887,25 +887,25 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				while (1) {
 					listNext(L);
 					S = listGetItem(L);
-					if (S->operation == T_LABEL && S->result == T->result) {
+					if (S->operation == T_FLABEL && S->result == T->result) {
 						break;
 					}
 					if (!(L->Active->next_item)) {
 						return 1;
 					}
 				}
-				A1 = VStackGet(vStack, offset + T->result);
+				A1 = VStackGet(vStack, frame + T->result);
 				break;
 
 			case T_FLABEL:
 				stackPop(offset_stack);
 				if (stackEmpty(offset_stack)) {
-					offset = 0;
+					frame = 0;
 				}
 				else {
-					offset = stackGet(offset_stack);
+					frame = stackGet(offset_stack);
 				}
-				VStackSet(vStack, offset + T->address1, A1);
+				VStackSet(vStack, frame + T->address1, A1);
 				break;
 
 			case default:
