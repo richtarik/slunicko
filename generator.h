@@ -11,6 +11,7 @@
 #include "instrList.h"
 #include "interpret.h"
 #include "error.h"
+#include "memory_manager.h"
 #include "stack.h"
 
 //Predefinovani aritmetickych operac
