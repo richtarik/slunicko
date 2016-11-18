@@ -10,6 +10,8 @@
 #include "struct.h"
 #include "stack.h"
 #include "ial.h"
+#include "error.h"
+#include "memory_manager.h"
 
 void VStackInit(VariableStack* s, unsigned int size);
 int VStackEmpty(VariableStack* s);
