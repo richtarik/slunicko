@@ -17,11 +17,11 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 	int frame = 0;
 	IntStack* offset_stack;
 	stackInit(offset_stack, 99);
-	T_address_code T = malloc(sizeof(T_address_code));
-	T_address_code S = malloc(sizeof(T_address_code));
-	T_variable A1 = malloc(sizeof(T_variable));
-	T_variable A2 = malloc(sizeof(T_variable));
-	T_variable A3 = malloc(sizeof(T_variable));
+	T_address_code T = memory_manager_malloc(sizeof(T_address_code));
+	T_address_code S = memory_manager_malloc(sizeof(T_address_code));
+	T_variable A1 = memory_manager_malloc(sizeof(T_variable));
+	T_variable A2 = memory_manager_malloc(sizeof(T_variable));
+	T_variable A3 = memory_manager_malloc(sizeof(T_variable));
 	String stroing;
 	stroing.
 	listFirst(L);
@@ -865,11 +865,11 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 		}
 		if (L->Active->next_item == NULL) {
-			free(T);
-			free(S);
-			free(A1);
-			free(A2);
-			free(A3);
+			memory_manager_free_one(T);
+			memory_manager_free_one(S);
+			memory_manager_free_one(A1);
+			memory_manager_free_one(A2);
+			memory_manager_free_one(A3);
 			return 0;
 		}
 		listNext(L);
