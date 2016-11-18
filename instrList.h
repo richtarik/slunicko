@@ -8,6 +8,7 @@
 ///* ------- VUT FIT --------- */
 
 #include "struct.h"
+#include "memory_manager.h"
 
 void listInit(T_instr_list *L);
 void listInsert(T_instr_list *L, T_address_code *I);
