@@ -13,7 +13,7 @@
 
 void gen_code(int operation, void *address1, void *address2, void *result)
 {
-    T_address_code *ins = malloc(sizeof(T_address_code));
+    T_address_code *ins = memory_manager_malloc(sizeof(T_address_code));
     ins->operation = operation;
     ins->address1 = address1;
     ins->address2 = address2;
@@ -36,7 +36,7 @@ void listInit (T_instr_list *L) {
 //vlozeni prvku do seznamu
 void listInsert (T_instr_list *L, T_address_code *I) {
 	T_item_list *newItem;
-	newItem = malloc(sizeof(T_item_list));
+	newItem = memory_manager_malloc(sizeof(T_item_list));
 
 	newItem->Instruction.operation = I->operation;
 	newItem->Instruction.address1 = I->address1;
@@ -87,6 +87,6 @@ void listFree(T_instr_list *L) {
 	while (L->First != NULL) {
 		tmp = L->First;
 		L->First = L->First->next_item;
-		free(tmp);
+		memory_manager_free_one(tmp);
 	}
 }
