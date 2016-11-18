@@ -6,7 +6,7 @@
 ///* Datum: 05.10.2016         */
 ///* Prelozeno: gcc 4.9        */
 ///* ------- VUT FIT --------- */
-
+#include "struct.h"
 #include "keywords.h"
 void f_findKeyW(T_token *token)
 {

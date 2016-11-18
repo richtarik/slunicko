@@ -21,16 +21,17 @@
 #define ALLOC_BLOCK 20
 #define base_token_size 20
 
-void Init_token(T_token *token);
+bool Init_token(T_token *token);
+bool realoc_to_base_token(T_token *token);
 void free_token(T_token *token);
 void get_back_token(T_token *token);
 void get_token(T_token *token,FILE* sourceFile);
 void check_escape(FILE* sourceFile, T_token *actToken);
-void check_String(FILE* sourceFile, T_token *actToken);
-void f_Identifier(FILE* sourceFile, T_token *actToken);
-void f_addChar (char symbol, T_token *token);
-void comment_in_block(FILE* sourceFile);
-void comment_in_line(FILE* sourceFile);
+bool check_String(FILE* sourceFile, T_token *actToken);
+bool f_Identifier(FILE* sourceFile, T_token *actToken);
+bool f_addChar (char symbol, T_token *token);
+bool comment_in_block(FILE* sourceFile);
+bool comment_in_line(FILE* sourceFile);
 
 typedef enum
 {

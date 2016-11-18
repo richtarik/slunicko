@@ -15,17 +15,14 @@
 
 /* todo Tokens for: ???
 ifj16
-
 readInt
 readDouble
 readString
-
 length
 substr
 compare
 find
 sort
-
 */
 
 FILE* sourceFile;
@@ -119,17 +116,9 @@ typedef enum {
     token_number_double,
     token_error,
     token_EOF,
-    token_String_type,
-
-	//enumy pouze pro generator-interpret
-	token_label,
-	token_jmpzd,
-	token_jmpd,
-	token_fstart,
-	token_fjmp,
-	token_flabel
-
+    token_String_type
 } token_type;
+
 
 typedef struct T_Token {
     token_type type;
@@ -139,41 +128,6 @@ typedef struct T_Token {
 } T_token;
 
 T_token * token;
-
-//Zasobnik pro ukladani promennych
-typedef struct {
-	T_variable* data;
-	unsigned int max;
-	int top;
-} VariableStack;
-
-//Enum typu promennych pro interpret
-typedef enum {
-	INT,
-	DOUBLE,
-	STRING,
-	BOOLEAN
-} value_type;
-
-//Svaz promennych pro hodnoty ruznych datovych typu
-union T_value {
-	int value_int;
-	double value_double;
-	String *value_String;
-	bool value_bool
-} value_struct;
-
-//Struktura pro ulozeni typu a hodnoty promenne
-typedef struct {
-	value_type type;
-	union T_value value;
-} T_variable;
-
-//struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou
-typedef struct {
-	int offset;
-	bool global;
-} T_address;
 
 //struktura triadresnyho kodu
 typedef struct {

@@ -6,13 +6,7 @@ void stackInit (IntStack* s, unsigned size) {
 */
     s->top = -1;
     s->max = size;
-    s->data = malloc(sizeof(int)*size);
-
-    if(s->data == NULL)
-    {
-        fprintf(stderr,"Error init allock stack \n"); // TODO
-        return;
-    }
+    s->data = memory_manager_malloc(sizeof(int)*size);
 }
 
 int stackEmpty (IntStack* s ) {
@@ -26,7 +20,9 @@ int stackFull (IntStack* s ) {
 /*  ---------
 ** Vrací nenulovou hodnotu, je-li zásobník plný, jinak vrací hodnotu 0.
 */
-    return (s->top == s->max-1) ? 1 : 0;
+
+	// max je unsigned!!
+    return (s->top == (int)s->max-1) ? 1 : 0;
 }
 
 void stackTop (IntStack* s, int* c ) {
@@ -35,8 +31,7 @@ void stackTop (IntStack* s, int* c ) {
 */
     if(stackEmpty(s))
     {
-         fprintf(stderr,"Error empty stack - call stackTop\n"); // TODO
-        return;
+		error_f(ERROR_INTERN);
     }
     else
     {
@@ -52,8 +47,7 @@ void stackPop (IntStack* s ) {
 */
     if(stackEmpty(s))
     {
-        fprintf(stderr,"Error empty stack - call stackpop\n"); // TODO
-        return;
+		error_f(ERROR_INTERN);
     }
     else
     {
@@ -70,19 +64,13 @@ void stackPush (IntStack* s, int value ) {
 */
     if(stackFull(s))
     {
-        //stackError(SERR_PUSH);
-        s->data= (int*)realloc(s->data, sizeof(int)*(s->max + s->max) );
-        if( s == NULL)
-        {
-            fprintf(stderr,"Error realloc stack \n"); // TODO
-            return;
-        }
+        s->data= (int*)memory_manager_realloc(s->data, sizeof(int)*(s->max + s->max) );
+        
         s->max+=s->max;
     }
 
     s->top+=1;
     s->data[s->top]=value;
-    return;
 }
 
 void print_stack_data_i(IntStack *s)
@@ -100,34 +88,20 @@ void print_stack_data_i(IntStack *s)
     }
 }
 
-int stackGet(IntStack* s) {
-	return s->data[s->top];
-}
-
-int stackGetAndPop(IntStack* s) {
-	int c = stackGet(s);
-	stackPop(s);
-	return c;
-}
-
-
 void stackDelete_and_free(IntStack* s)
 {
     if(stackEmpty(s))
     {
-        //stackError(SERR_PUSH);
-        ;
+		return;
     }
-    else
+   
+	while( !stackEmpty(s) )
     {
-        while( !stackEmpty(s) )
-        {
-            stackPop(s);
-        }
+		stackPop(s);
     }
-    free(s->data);
+    
+    memory_manager_free_one(s->data);
     s->data=NULL;
-    return;
 }
 
 void VStackInit(VariableStack* s, unsigned int size) {
