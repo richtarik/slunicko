@@ -14,23 +14,23 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h> // isdigit,isspace,...
-
 #include "struct.h"
-
+#include "keywords.h"
+#include "error.h"
+#include "memory_manager.h"
 #define ALLOC_BLOCK 20
 #define base_token_size 20
 
-bool Init_token(T_token *token);
-bool realoc_to_base_token(T_token *token);
+void Init_token(T_token *token);
 void free_token(T_token *token);
 void get_back_token(T_token *token);
 void get_token(T_token *token,FILE* sourceFile);
 void check_escape(FILE* sourceFile, T_token *actToken);
-bool check_String(FILE* sourceFile, T_token *actToken);
-bool f_Identifier(FILE* sourceFile, T_token *actToken);
-bool f_addChar (char symbol, T_token *token);
-bool comment_in_block(FILE* sourceFile);
-bool comment_in_line(FILE* sourceFile);
+void check_String(FILE* sourceFile, T_token *actToken);
+void f_Identifier(FILE* sourceFile, T_token *actToken);
+void f_addChar (char symbol, T_token *token);
+void comment_in_block(FILE* sourceFile);
+void comment_in_line(FILE* sourceFile);
 
 typedef enum
 {
