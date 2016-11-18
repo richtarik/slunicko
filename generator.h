@@ -47,4 +47,4 @@
 #define T_FJMP token_fjmp
 #define T_FLABEL token_flabel
 
-int generator(T_instr_list *L, bool isRoot, VariableStack vStack);
+int generator(T_instr_list *L, bool isRoot);

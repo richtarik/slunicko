@@ -22,8 +22,7 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 	T_variable A1 = malloc(sizeof(T_variable));
 	T_variable A2 = malloc(sizeof(T_variable));
 	T_variable A3 = malloc(sizeof(T_variable));
-	String stroing;
-	stroing.
+	T_address tmp = malloc(sizeof(T_address));
 	listFirst(L);
 
 	while (1) {
@@ -35,9 +34,27 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 
 			//Instrukce pro aritmeticko operace
 			case T_ADD:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
+				tmp = T.address1;
+				if (tmp.isGlobal) {
+					A1 = VStackGet(sVariableGlobal, tmp.offset);
+				}
+				else {
+					A1 = VStackGet(sVariableLocal, fram + tmp.offset;
+				}
+				tmp = T.address2;
+				if (tmp.isGlobal) {
+					A2 = VStackGet(sVariableGlobal, tmp.offset);
+				}
+				else {
+					A2 = VStackGet(sVariableLocal, fram + tmp.offset);
+				}
+				tmp = T.result;
+				if (tmp.isGlobal) {
+					A3 = VStackGet(sVariableGlobal, tmp.offset);
+				}
+				else {
+					A3 = VStackGet(sVariableLocal, fram + tmp.offset);
+				}
 				if (A1.type == INT) {
 					if (A2.type == INT) {
 						A3.value.value_int = A1.value.value_int + A2.value.value_int;
@@ -74,11 +91,22 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (tmp.isGlobal) {
+					VStackSet(sVariableGlobal, tmp.offset, A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + tmp.offset, A3);
+				}
 				break;
 
 			case T_INC:
-				A1 = VStackGet(vStack, frame + T.address1);
+				tmp = T.address1;
+				if (tmp.isGlobal) {
+					A1 = VStackGet(sVariableGlobal, tmp.offset);
+				}
+				else {
+					A1 = VStackGet(sVariableLocal, fram + tmp.offset;
+				}
 				if (A1.type == INT) {
 					A1.value.value_int = A1.value.value_int + 1;
 					ZeroFlag = !(A3.value.value_int == 0)
@@ -86,7 +114,12 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.address1, A1);
+				if (tmp.isGlobal) {
+					VStackSet(sVariableGlobal, tmp.offset, A1);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + tmp.offset, A1);
+				}
 				break;
 
 			case T_SUB:
@@ -847,17 +880,17 @@ int interpret(T_instr_list *L, VariableStack vStack) {
 					}
 				}
 				A1 = VStackGet(vStack, frame + T->result);
-				break;
-
-			case T_FLABEL:
 				stackPop(offset_stack);
+				VStackSet(vStack, frame, A1);
 				if (stackEmpty(offset_stack)) {
 					frame = 0;
 				}
 				else {
 					frame = stackGet(offset_stack);
 				}
-				VStackSet(vStack, frame + T->address1, A1);
+				break;
+
+			case T_FLABEL:
 				break;
 
 			case default:

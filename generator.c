@@ -17,7 +17,7 @@ static T_instr_list *iList;
 static IntStack *func_stack;
 
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
-int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
+int generator(T_instr_list *L, bool isRoot) {
 	if (!L) {
 		return 1;
 	}
@@ -159,7 +159,6 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 				R->address1 = T->result;
 				listInsert(iList, R);
 				S->operation = T_FLABEL;
-				S->address1 = T->address2;
 				S->result = label;
 				stackPush(func_stack, label);
 				labelTemp++;
