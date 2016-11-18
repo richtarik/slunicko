@@ -32,10 +32,8 @@ void stackDelete_and_free(IntStack* s);
 void VStackInit(VariableStack* s, unsigned int size);
 int VStackEmpty(VariableStack* s);
 int VStackFull(VariableStack* s);
-void VStackTop(VariableStack* s, int* c);
+void VStackTop(VariableStack* s, T_variable* c);
 void VStackPop(VariableStack* s);
-T_variable VStackGet(VariableStack* s, int offset);
-void VStackSet(VariableStack* s, int offset, T_variable data);
-void VStackPush(VariableStack* s, T_variable data);
+T_variable* VStackGet(VariableStack* s, int offset);
 void VStackDelete_and_free(VariableStack* s);
 

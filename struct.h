@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-//#include "ial.h"
+
+#include "str.h"
 
 /* todo Tokens for: ???
 ifj16
@@ -148,7 +149,7 @@ typedef enum {
 union T_value {
 	int value_int;
 	double value_double;
-	//String *value_String;
+	String *value_String;
 	bool value_bool;
 } value_struct;
 
@@ -159,11 +160,14 @@ typedef struct {
 } T_variable;
 
 //Zasobnik pro ukladani promennych
-typedef struct {
+typedef struct VariableStack{
 	T_variable* data;
 	unsigned int max;
 	int top;
 } VariableStack;
+
+    VariableStack * sVariableGlobal;
+
 
 //struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou
 typedef struct {

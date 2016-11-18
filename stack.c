@@ -33,11 +33,8 @@ void stackTop (IntStack* s, int* c ) {
     {
 		error_f(ERROR_INTERN);
     }
-    else
-    {
-        *c=s->data[s->top];
-        return;
-    }
+
+    *c=s->data[s->top];
 }
 
 
@@ -49,12 +46,8 @@ void stackPop (IntStack* s ) {
     {
 		error_f(ERROR_INTERN);
     }
-    else
-    {
-        //s->arr[s->top]=0; // todo
-        s->top-=1;
-        return;
-    }
+
+    s->top--;
 }
 
 
@@ -65,11 +58,11 @@ void stackPush (IntStack* s, int value ) {
     if(stackFull(s))
     {
         s->data= (int*)memory_manager_realloc(s->data, sizeof(int)*(s->max + s->max) );
-        
+
         s->max+=s->max;
     }
 
-    s->top+=1;
+    s->top++;
     s->data[s->top]=value;
 }
 
@@ -90,16 +83,7 @@ void print_stack_data_i(IntStack *s)
 
 void stackDelete_and_free(IntStack* s)
 {
-    if(stackEmpty(s))
-    {
-		return;
-    }
-   
-	while( !stackEmpty(s) )
-    {
-		stackPop(s);
-    }
-    
+    s->top = -1;
     memory_manager_free_one(s->data);
     s->data=NULL;
 }
@@ -107,13 +91,7 @@ void stackDelete_and_free(IntStack* s)
 void VStackInit(VariableStack* s, unsigned int size) {
 	s->top = -1;
 	s->max = size;
-	s->data = malloc(sizeof(T_variable)*size);
-
-	if (s->data == NULL)
-	{
-		fprintf(stderr, "Error init allock stack \n"); // TODO
-		return;
-	}
+	s->data = (T_variable*) memory_manager_malloc(sizeof(T_variable)*size);
 }
 
 int VStackEmpty(VariableStack* s) {
@@ -121,79 +99,78 @@ int VStackEmpty(VariableStack* s) {
 }
 
 int VStackFull(VariableStack* s) {
-	return (s->top == s->max - 1) ? 1 : 0;
+	return (s->top == (int)s->max - 1) ? 1 : 0;
 }
 
-void VStackTop(VariableStack* s, int* c) {
-	
-		if (stackEmpty(s))
+void VStackTop(VariableStack* s, T_variable* c) {
+
+		if (VStackEmpty(s))
 		{
-			fprintf(stderr, "Error empty stack - call stackTop\n"); // TODO
-			return;
+      // pokus o TOP nad prazdnim stackom neukoncuje program len warrning chybova hlaska na stderr ze niekto je ... a vola Top nad prazdnym stackom
+      // TODO
+		// ZLE error_f(ERROR_INTERN);
 		}
-		else
-		{
-			*c = s->data[s->top];
-			return;
-		}
+
+		*c = s->data[s->top];
 }
 
 
 void VStackPop(VariableStack* s) {
-	if (stackEmpty(s))
+
+	if (VStackEmpty(s))
 	{
-		fprintf(stderr, "Error empty stack - call stackpop\n"); // TODO
-		return;
+      // pokus o POP nad prazdnim stackom neukoncuje program len warrning chybova hlaska na stderr ze niekto je ... a popuje prazdny stack
+      // TODO
+		// ZLE error_f(ERROR_INTERN);
 	}
-	else
+
+	s->top--;
+}
+
+T_variable* VStackGet(VariableStack* s, int offset) {
+
+    if(offset > s->top)
+    {
+        return NULL;
+    }
+    return (&(s->data[offset]));
+}
+
+/*
+ZLEEE !!
+void VStackSet(VariableStack* s, int offset, value_type type, union T_value value) {
+
+	if(offset > s->max)
 	{
-		//s->arr[s->top]=0; // todo
-		s->top -= 1;
-		return;
+		s->data = (T_variable*) memory_manager_realloc(s->data, sizeof(T_variable)*(offset));
+		s->max = offset;
 	}
-}
 
-T_variable VStackGet(VariableStack* s, int offset) {
-	return s->data[offset];
-}
-
-void VStackSet(VariableStack* s, int offset, T_variable data) {
-	s->data[offset] = data;
-}
-
-void VStackPush(VariableStack* s, T_variable data) {
-	if (stackFull(s))
+	if(offset > s->top)
 	{
-		//stackError(SERR_PUSH);
-		s->data = (int*)realloc(s->data, sizeof(int)*(s->max + s->max));
-		if (s == NULL)
-		{
-			fprintf(stderr, "Error realloc stack \n"); // TODO
-			return;
-		}
+		s->top = offset;
+	}
+
+	s->data[offset].type = type;
+	s->data[offset].value = value;
+}*/
+
+void VStackPush(VariableStack* s, value_type type, union T_value value) {
+
+	if (VStackFull(s))
+	{
 		s->max += s->max;
+		s->data = (T_variable*) memory_manager_realloc(s->data, sizeof(T_variable)*(s->max));
 	}
 
-	s->top += 1;
-	s->data[s->top] = data;
-	return;
+	s->top++;
+	s->data[s->top].type = type;
+	s->data[s->top].value = value;
 }
 
 void VStackDelete_and_free(VariableStack* s)
 {
-	if (stackEmpty(s))
-	{
-		//stackError(SERR_PUSH);
-		;
-	}
-	else
-	{
-		while (!stackEmpty(s))
-		{
-			stackPop(s);
-		}
-	}
-	free(s->data);
+	s->top = -1;
+	memory_manager_free_one(s->data);
 	s->data = NULL;
-	return;
 }

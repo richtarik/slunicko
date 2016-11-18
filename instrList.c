@@ -22,15 +22,11 @@ void gen_code(int operation, void *address1, void *address2, void *result)
     listInsert(L_ins, ins);
 }
 
-void gen_expr_code()
-{
-
-}
-
 //inicializace seznamu
-void listInit (T_instr_list *L) {
-	L->First = NULL;
-	L->Active = NULL;
+void listInit (T_instr_list *L)
+{
+    L->First = NULL;
+    L->Active = NULL;
 }
 
 //vlozeni prvku do seznamu
@@ -51,6 +47,7 @@ void listInsert (T_instr_list *L, T_address_code *I) {
 	{
 		L->Active->next_item = newItem;
 		L->Active = L->Active->next_item;
+		L->Active->next_item=NULL;
 	}
 }
 
