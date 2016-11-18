@@ -151,6 +151,11 @@ unsigned int hash_function(const char *str, unsigned htab_size)
  */
 hash_table_ptr ht_init(unsigned size)
 {
+	if (size == 0)
+	{
+		size = 10;
+	}
+
     hash_table_ptr ht;
 
     ht = (hash_table_ptr) memory_manager_malloc(sizeof(struct hash_table));
@@ -208,8 +213,6 @@ void ht_free(hash_table_ptr ht)
  */
 void ht_item_func_clear(ht_item_func_ptr item)
 {
-	ht_free(item->ht); // vyčištění tabulky symbolů dané funkce
-
 	ht_params_ptr tmp = item->param;
 
 	while(tmp != NULL)
@@ -218,6 +221,15 @@ void ht_item_func_clear(ht_item_func_ptr item)
 		memory_manager_free_one(tmp->name);
 		memory_manager_free_one(tmp);
 		tmp = item->param;
+	}
+
+	T_item_list *tmp2 = item->listItemPtr;
+
+	while(tmp2 != NULL)
+	{
+		item->listItemPtr = tmp2->next_item;
+		memory_manager_free_one(tmp2);
+		tmp2 = item->listItemPtr;
 	}
 
 	memory_manager_free_one(item);
@@ -240,13 +252,12 @@ ht_item_var_ptr ht_create_item_var(token_type type, int offset, bool inicialized
 /*
  * Funkce pro vytvoření itemu funkce
  */
-ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, ht_params_ptr param, struct hash_table *ht)
+ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, ht_params_ptr param)
 {
 	ht_item_func_ptr new = (ht_item_func_ptr) memory_manager_malloc(sizeof(struct ht_item_func));
 
 	new->type = type;
 	new->param = param;
-	new->ht = ht;
     new->listItemPtr = listItemPtr;
 
 	return new;
@@ -329,69 +340,4 @@ ht_table_item_ptr ht_search(char *key, bool func, hash_table_ptr ht)
 	}
 
 	return NULL;
-}
-
-void print_table(hash_table_ptr ht)
-{
-    int item_count=0;
-    if(ht != NULL)
-    {
-        for( unsigned i = 0; i < ht->size ; i++ )
-        {
-            //ht_table_item_ptr pom_table= ht->table_item[i];
-            while(ht->table_item[i] != NULL)
-            {
-
-                printf("Table_indx: %d \t Item:%d \t Key: %s\n",i,item_count,ht->table_item[i]->key);
-                if(ht->table_item[i]->func == NULL)
-                {
-                    int initt=ht->table_item[i]->var->inicialized;
-                    int typ=ht->table_item[i]->var->type;
-                    f_print_type(typ);
-                }
-                else if(ht->table_item[i]->var == NULL)
-                {
-                    ht->table_item[i]->func->param->name;
-                    int typ=ht->table_item[i]->func->type;
-                    printf("FUNCTION: \t param: ");
-                    //ht_params_ptr pom_fnc_param= ht->table_item[i]->func->param;
-                    while( ht->table_item[i]->func->param != NULL)
-                    {
-                        printf(" %s,",ht->table_item[i]->func->param->name);
-                        ht->table_item[i]->func->param= ht->table_item[i]->func->param->next;
-                    }
-                    printf(" token_type: ");
-                    f_print_type(typ);
-                }
-                item_count++;
-                ht->table_item[i]= ht->table_item[i]->next;
-            }
-            item_count=0;
-        }
-    }
-}
-
-void f_print_type(int TOKENIKTYPE)
-{
-    switch(TOKENIKTYPE)
-    {
-        case 37:
-            printf("void\t type_num: %d\n",TOKENIKTYPE);
-            break;
-        case 38:
-            printf("double\t type_num: %d\n",TOKENIKTYPE);
-            break;
-        case 39:
-            printf("int\t type_num: %d\n",TOKENIKTYPE);
-            break;
-        case 40:
-            printf("String\t type_num: %d\n",TOKENIKTYPE);
-            break;
-        case 41:
-            printf("boolean\t type_num: %d\n",TOKENIKTYPE);
-            break;
-        default:
-            printf("Something Wrong type_num: %d\n",TOKENIKTYPE);
-            break;
-    }
 }
