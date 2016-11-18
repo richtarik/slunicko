@@ -23,7 +23,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	}
 
 	if (isRoot) {
-		iList = malloc(sizeof(T_instr_list));
+		iList = memory_manager_malloc(sizeof(T_instr_list));
 		listInit(iList);
 		stackInit(func_stack, 99);
 	}
@@ -32,9 +32,9 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	T_address_code *T;
 	T_address_code *S;
 	T_address_code *R;
-	T = malloc(sizeof(T_address_code));
-	S = malloc(sizeof(T_address_code));
-	R = malloc(sizeof(T_address_code));
+	T = memory_manager_malloc(sizeof(T_address_code));
+	S = memory_manager_malloc(sizeof(T_address_code));
+	R = memory_manager_malloc(sizeof(T_address_code));
 
 	listFirst(L);
 	if (L->First == NULL || L->Active == NULL) {
@@ -191,9 +191,9 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	}
 	stackDelete_and_free(func_stack);
 	listFree(L);
-	free(T);
-	free(S);
-	free(R);
+	memory_manager_free_one(T);
+	memory_manager_free_one(S);
+	memory_manager_free_one(R);
 	if (isRoot) {
 		error = interpret(iList, vStack);
 		listFree(iList);
