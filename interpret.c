@@ -12,7 +12,7 @@
 #include "generator.h"
 
 //Provadi samotnou interpretaci predanych instrukci - pocetni operaca a instrukce skoku
-int interpret(T_instr_list *L, VariableStack vStack) {
+int interpret(T_instr_list *L) {
 	bool ZeroFlag = false;
 	int frame = 0;
 	IntStack* offset_stack;
