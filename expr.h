@@ -1,5 +1,6 @@
 #include "struct.h"
 #include "stack.h"
+#include "ial.h"
 #include <stdbool.h>
 
 #define P_table_size 25
@@ -49,7 +50,8 @@ typedef enum{
 } precedence_symbol;
 
 
-int fn_expression(FILE *sourcefile, expr_in help);
+int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce);
+
 operators fn_token_to_operators( expr_in help, int *count_paranthesis);
 precedence_symbol fn_char_to_numsymbol(char c);
 
@@ -67,24 +69,19 @@ void check_rule(IntStack* stack,operators Rule_symbol);
 4.rule E->E*E
 5.rule E->E/E
 6.rule E->E%E
-
 7.rule E->E++ ######
 8.rule E->E-- ########
 9.rule E->-E  ..................
-
 10.rule E->E==E
 11.rule E->E!=E
 12.rule E->E>E
 13.rule E->E<E
 14.rule E->E>=E
 15.rule E->E<=E
-
 16.rule E->E||E
 17.rule E->E&&E
 18.rule E->!E
-
 19.rule E->(E)
 20.rule E->i
 21.rule E->Fn
-
 */

@@ -1,4 +1,4 @@
-///* File: token.h             */
+///* File: struct.h             */
 ///* Autor: Milos Molitoris    */
 ///* Login: xmolit00           */
 ///*                           */
@@ -15,17 +15,14 @@
 
 /* todo Tokens for: ???
 ifj16
-
 readInt
 readDouble
 readString
-
 length
 substr
 compare
 find
 sort
-
 */
 
 FILE* sourceFile;
@@ -61,65 +58,60 @@ typedef enum {
     token_and,          // number 15 // "&&" // And
     token_not,          // number 16 // "!" // Not
 
-    //Bitwise operators
+    //Other Symbols
+    token_sem,          // number 17 // ";" // Semicolon
+    token_com,          // number 18 // "," // Comma
+    token_dot,          // number 19 // "." //
 
-    //...TODO
+    token_pal,          // number 20 // "(" // Parenthesis left
+    token_par,          // number 21 // ")" // Parenthesis right
 
-    //other symbols ?? todo
-    token_sem,          // number  // ";" // Semicolon
-    token_com,          // number  // "," // Comma
-    token_dot,          // number  // "." //
+    token_brl,          // number 22 // "[" // Bracket left
+    token_brr,          // number 23 // "]" // Bracket right
 
-    token_pal,          // number  // "(" // Parenthesis left
-    token_par,          // number  // ")" // Parenthesis right
-
-    token_brl,          // number  // "[" // Bracket left
-    token_brr,          // number  // "]" // Bracket right
-
-    token_zlz,          // number  // "{" //
+    token_zlz,          // number 24 // "{" //
     token_zrz,          // number 25 // "}" //
 
     // KEYWORDS
     /*boolean, break, class, continue, do, double, else, false, for,
       if, int, return, String, static, true, void, while */
 
-    token_break,        // number  //
-    token_continue,     // number  //
-    token_while,        // number  //
-    token_for,          // number  //
+    token_break,        // number 26 //
+    token_continue,     // number 27 //
+    token_while,        // number 28 //
+    token_for,          // number 29 //
     token_do,           // number 30 //
 
     //token_switch,
     //token_case,
 
-    token_if,           // number  //
-    token_else,         // number  //
+    token_if,           // number 31 //
+    token_else,         // number 32 //
 
-    //token_function,
-    token_return,       // number  //
+    token_return,       // number 33 //
 
-    token_true,         // number  //
-    token_false,        // number  //
+    token_true,         // number 34 //
+    token_false,        // number 35 //
     //token_null,
 
-    token_class,
-    token_void,
+    token_class,        // number 36 //
+    token_void,         // number 37 //
 
-    token_double,
-    token_int,
-    token_String,
+    token_double,       // number 38 //
+    token_int,          // number 39 //
+    token_String,       // number 40 //
 
-    token_boolean,
-    token_static,
+    token_boolean,      // number 41 //
+    token_static,       // number 42 //
   //token_char,
 
-    token_class_identifier,
-    token_identifier,
-    token_number_int,
-    token_number_double,
-    token_error,
-    token_EOF,
-    token_String_type,
+    token_class_identifier,// number 43 //
+    token_identifier,      // number 44 //
+    token_number_int,      // number 45 //
+    token_number_double,   // number 46 //
+    token_error,           // number 47 //
+    token_EOF,             // number 48 //
+    token_String_type,     // number 49 //
 
 	//enumy pouze pro generator-interpret
 	token_label,

@@ -9,9 +9,9 @@ void strInit(String *s)
 	{
 		return;
 	}
-	
+
 	s->str = (char*) memory_manager_malloc(STR_LENGTH);
-	
+
 	s->str[0] = '\0';
 	s->length = 0;
 	s->allocated = STR_LENGTH;
@@ -26,13 +26,13 @@ void strAddChar(String *s, char c)
 	{
 		return;
 	}
-	
+
 	if(s->length + 1 >= s->allocated)
 	{
 		s->str = (char*) memory_manager_realloc(s->str, (size_t)(s->allocated * 2));
 		s->allocated *= 2;
 	}
-	
+
 	s->str[s->length] = c;
 	s->str[++s->length] = '\0';
 }
@@ -57,23 +57,23 @@ int strReadInt()
 	long int cislo;
 	int c, velikost = 1, delka = 0;
 	char* buffer = (char*) memory_manager_malloc(sizeof(char));
-	
+
 	while(1)
 	{
 		c = getchar();
-		
+
 		if(velikost == delka)
 		{
 			velikost *= 2;
 			buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
 		}
-		
+
 		if(c == '\n' || c == EOF)
 		{
 			buffer[delka] = '\0';
 			break;
 		}
-		
+
 		if(isdigit(c))
 		{
 			buffer[delka] = c;
@@ -82,24 +82,24 @@ int strReadInt()
 		{
 			error_f(ERROR_INPUT);
 		}
-		
+
 		delka++;
 	}
-	
+
 	if(delka == 0)
 	{
 		error_f(ERROR_INPUT);
 	}
-	
+
 	sscanf(buffer, "%ld", &cislo);
-	
+
 	memory_manager_free_one(buffer);
-	
+
 	if(cislo >= INT_MAX)
 	{
 		error_f(ERROR_INPUT);
 	}
-	
+
 	return (int)cislo;
 }
 
@@ -116,18 +116,18 @@ double strReadDouble()
     while(1)
     {
         c = getchar();
-    
+
         if(velikost == delka)
         {
             velikost *= 2;
             buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
         }
-        
+
         if(c == '\n' || c == EOF){
-            buffer[delka] = '\0';       
+            buffer[delka] = '\0';
             break;
         }
-        
+
         if (isdigit(c))
         {
             buffer[delka] = c;
@@ -151,16 +151,16 @@ double strReadDouble()
         }
         delka++;
     }
-    
+
     if(delka == 0)
 	{
 		error_f(ERROR_INPUT);
 	}
-    
+
     sscanf(buffer, "%lf", &cislo);
     memory_manager_free_one(buffer);
     buffer = NULL;
-    
+
     if(cislo >= DBL_MAX)
     {
         error_f(ERROR_INPUT);
@@ -168,43 +168,6 @@ double strReadDouble()
 
     return (double)cislo;
 }
-/*
- * Nacte string ze stdin
- */
-String *strReadString()
-{
-	int c, velikost = 1, delka = 0;
-	
-   	String *s = memory_manager_malloc(sizeof(String));
-	char* buffer = (char*) memory_manager_malloc(sizeof(char));
-
-    	while(1)
-	{
-		c = getchar();
-		
-		if(velikost == delka)
-		{
-			velikost *= 2;
-			buffer = (char*) memory_manager_realloc(buffer, sizeof(char) * velikost);
-		}
-
-		if(c == '\n' || c == EOF)
-		{
-			buffer[delka] = '\0';
-			break;
-		}
-
-    		buffer[delka] = c;
-        	delka++;
-	}
-
-    	s->length = delka;
-   	s->str = buffer;
-	s->allocated = velikost;
-
-	return s;
-}
-
 
 /*
  * Nacte String ze stdin
@@ -212,14 +175,14 @@ String *strReadString()
 String *strReadString()
 {
 	int c, velikost = 1, delka = 0;
-	
+
    	String *s = memory_manager_malloc(sizeof(String));
 	char* buffer = (char*) memory_manager_malloc(sizeof(char));
 
     while(1)
 	{
 		c = getchar();
-		
+
 		if(velikost == delka)
 		{
 			velikost *= 2;
@@ -260,13 +223,13 @@ void strCopy(String *s1, String *s2)
 	{
 		return;
 	}
-	
+
 	if(s2->length >= s1->allocated)
 	{
 		s1->str = (char*) memory_manager_realloc(s1->str, s2->length + 1);
 		s1->allocated = s2->length + 1;
 	}
-	
+
 	strcpy(s1->str, s2->str);
 	s1->length = s2->length;
 }
@@ -275,30 +238,30 @@ void strCopy(String *s1, String *s2)
  * Vrati podretezec retezce od i, n znaku
  */
 String *strSubstr(String *s, int i, int n)
-{	
+{
 	if(s == NULL || i > strLength(s) || i < 0 || n < 0)
 	{
 		error_f(ERROR_OTHER);
 	}
-	
+
 	if(i + n > strLength(s))
 	{
 		n = strLength(s) - i;
 	}
-	
+
 	String *s_tmp;
-	
+
 	s_tmp = (String*) memory_manager_malloc(sizeof(String));
-	
+
 	strInit(s_tmp);
-	
+
 	int j;
 	for(j = 0; j < n; j++)
 	{
 		strAddChar(s_tmp, s->str[i]);
 		i++;
 	}
-	
+
 	return s_tmp;
 }
 
@@ -306,7 +269,7 @@ String *strSubstr(String *s, int i, int n)
  * Porovna retezce
  */
 int strCompare(String *s1, String *s2)
-{	
+{
 	if(s1 == NULL && s2 == NULL)
 	{
 		return 0;
@@ -319,7 +282,7 @@ int strCompare(String *s1, String *s2)
 	{
 		return 1;
 	}
-	
+
 	return strcmp(s1->str, s2->str);
 }
 
@@ -341,7 +304,7 @@ void strLoad(String *s, char *c)
 {
 	s->str[0] = '\0';
 	s->length = 0;
-	
+
 	int i = 0;
 	while(c[i] != '\0')
 	{
