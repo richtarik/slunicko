@@ -1,4 +1,4 @@
-///* File: struct.h            */
+///* File: token.h             */
 ///* Autor: Milos Molitoris    */
 ///* Login: xmolit00           */
 ///*                           */
@@ -15,17 +15,14 @@
 
 /* todo Tokens for: ???
 ifj16
-
 readInt
 readDouble
 readString
-
 length
 substr
 compare
 find
 sort
-
 */
 
 FILE* sourceFile;

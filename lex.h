@@ -14,9 +14,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h> // isdigit,isspace,...
-
 #include "struct.h"
-
+#include "keywords.h"
+#include "error.h"
+#include "memory_manager.h"
 #define ALLOC_BLOCK 20
 #define base_token_size 20
 

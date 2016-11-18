@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "memory_manager.h"
+#include "struct.h"
 
 /*
  * Návratové hodnoty jednotlivých typů chyb

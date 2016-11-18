@@ -1,0 +1,14 @@
+class main
+{
+	static int run(int a, int b)
+	{
+
+	}
+	static void fuck(int a, int b)
+	{
+		
+	}
+	static String x;
+	static int y = 5;
+	static int y = 5;
+}

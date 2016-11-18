@@ -1,16 +1,6 @@
-///* File: expr.c              */
-///* Autor: Milos Molitoris    */
-///* Login: xmolit00           */
-///*                           */
-///*       IFJ-Projekt         */
-///* Datum: 10.11.2016         */
-///* Prelozeno: gcc 4.9        */
-///* ------- VUT FIT --------- */
-
 #include "expr.h"
 #include "struct.h"
 #include "lex.h"
-//#include "print_stack.h"
 
 const char Precedence_table[P_table_size][P_table_size]={
 // todo unary- "-a" assign == $
@@ -185,14 +175,14 @@ precedence_symbol fn_char_to_numsymbol(char c)
             return symbol_equal;
         case'F':
             return symbol_fault;
-        //default:
-            //return symbol_fault;
+        default:
+            return symbol_fault;
     }
 }
 
 #define stack_size 20
 
-int fn_expression(FILE* sourceFile, expr_in help)
+int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
 {
     char c;
     precedence_symbol symbol_from_table;
@@ -211,10 +201,9 @@ int fn_expression(FILE* sourceFile, expr_in help)
     get_token( token, sourceFile );
     if( help == in_return && token->type == token_sem )
     {
-
         stackDelete_and_free(&zasobnik);
-    //print_stack_data(&zasobnik);
-    get_back_token(token);
+        //print_stack_data(&zasobnik);
+        get_back_token(token);
         return 1;
     }
 
@@ -230,7 +219,7 @@ int fn_expression(FILE* sourceFile, expr_in help)
         stackPush(&zasobnik, symbol_less);
         stackPush(&zasobnik, operator_fnc);
         //DBGG
-        ////printf("Expresion_in_fnc");
+        //printf("Expresion_in_fnc");
         //print_stack_data(&zasobnik);
         //DBG
 
@@ -243,8 +232,8 @@ int fn_expression(FILE* sourceFile, expr_in help)
         if(My_operator == operator_NONTERM)
         {
             stackDelete_and_free(&zasobnik);
-            //printf("delete and free 000\n");
-            //print_stack_data(&zasobnik);
+            printf("delete and free 000\n");
+           // //print_stack_data(&zasobnik);
             return 0; // TODO break free stack
 
         }
@@ -255,7 +244,7 @@ int fn_expression(FILE* sourceFile, expr_in help)
         {
             case symbol_equal:
         // DBGG DELETE
-                //printf("symbol_equ\n");
+             //   printf("symbol_equ\n");
                 stackPush(&zasobnik,My_operator);
                 //print_stack_data(&zasobnik);
                 //stackPop(&zasobnik);
@@ -279,9 +268,9 @@ int fn_expression(FILE* sourceFile, expr_in help)
                         ;
                     else
                     {
-                        //printf("ERROR -1\n");
+                        printf("ERROR -1\n");
                         stackDelete_and_free(&zasobnik);
-                        //printf("delete and free\n");
+                        printf("delete and free\n");
                         //print_stack_data(&zasobnik);
                         return 0; // TODO break free stack
                     }
@@ -308,7 +297,7 @@ int fn_expression(FILE* sourceFile, expr_in help)
                             else
                             {
                                 stackDelete_and_free(&zasobnik);
-                                //printf("delete and free 001\n");
+                                printf("delete and free 001\n");
                                 //print_stack_data(&zasobnik);
                                 return 0; // TODO break free stack
                             }
@@ -316,8 +305,8 @@ int fn_expression(FILE* sourceFile, expr_in help)
                         else
                         {
                             stackDelete_and_free(&zasobnik);
-                            //printf("delete and free 002\n");
-                            //print_stack_data(&zasobnik);
+                            printf("delete and free 002\n");
+            //                //print_stack_data(&zasobnik);
                             return 0; // TODO break free stack
                         }
                     }
@@ -338,42 +327,42 @@ int fn_expression(FILE* sourceFile, expr_in help)
                             // RULE E-> fn( E )
                             if( topik == operator_fnc )
                             {
-                                //printf("funkcia s jednym parametrom \n");
+                            //    printf("funkcia s jednym parametrom \n");
                                 stackPop(&zasobnik);
                                 if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
                                     ;
                                 else
                                 {
-                                    //printf("error 251987\n");;//TODOooooooooooo error
+                                    printf("error 251987\n");;//TODOooooooooooo error
                                     stackDelete_and_free(&zasobnik);
-                                    //printf("delete and free\n");
-                                    //print_stack_data(&zasobnik);
+                                    printf("delete and free\n");
+                          //          //print_stack_data(&zasobnik);
                                     return 0; // TODO break free stack
                                 }
                             }
                             // RULE E-> ( E )
                             else if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
-                                ;//printf("parameter v zatvorke \n");
+                                printf("parameter v zatvorke \n");
                             else
                             {
-                                //printf("error 1987\n");;//TODOooooooooooo error
+                                printf("error 1987\n");;//TODOooooooooooo error
                                 stackDelete_and_free(&zasobnik);
-                                //printf("delete and free\n");
-                                //print_stack_data(&zasobnik);
+                                printf("delete and free\n");
+                          //      //print_stack_data(&zasobnik);
                                 return 0; // TODO break free stack
                             }
                         }
                         // RULE E-> fn( E, E, ...)
                         else if( topik == operator_com)
                         {
-                            //printf("funkcia s viacerimi parametrami \n");
+                         //   printf("funkcia s viacerimi parametrami \n");
                             bool check_E_before= true;
                             unsigned count_parameters= 1;
 
                             stackPop(&zasobnik);
                             stackTop(&zasobnik,&topik);
-                            //printf("pred cyklom pocet param: %d\n", count_parameters);
-                            //print_stack_data(&zasobnik);
+                          //  printf("pred cyklom pocet param: %d\n", count_parameters);
+                  //          //print_stack_data(&zasobnik);
 
                             while ( topik != operator_pal )
                             {
@@ -390,16 +379,16 @@ int fn_expression(FILE* sourceFile, expr_in help)
                                 }
                                 else
                                 {
-                                    //printf("ERROR parameters in func \n");
+                                    printf("ERROR parameters in func \n");
                                     stackDelete_and_free(&zasobnik);
-                                    //printf("delete and free\n");
-                                    //print_stack_data(&zasobnik);
+                                    printf("delete and free\n");
+            //                        //print_stack_data(&zasobnik);
                                     return 0; // TODO break free stack
                                 }
                                 stackTop(&zasobnik,&topik);
                             }
-                            //printf("po cykle pocet param: %d\n", count_parameters);
-                            //print_stack_data(&zasobnik);
+                          //  printf("po cykle pocet param: %d\n", count_parameters);
+          //                  //print_stack_data(&zasobnik);
                             if( topik == operator_pal)
                             {
                                 stackPop(&zasobnik);
@@ -412,9 +401,9 @@ int fn_expression(FILE* sourceFile, expr_in help)
                                         ;
                                     else
                                     {
-                                        //printf("error 123\n");// Todoooo error
+                                        printf("error 123\n");// Todoooo error
                                         stackDelete_and_free(&zasobnik);
-                                        //printf("delete and free\n");
+                                        printf("delete and free\n");
                                         //print_stack_data(&zasobnik);
                                         return 0; // TODO break free stack
                                     }
@@ -422,9 +411,9 @@ int fn_expression(FILE* sourceFile, expr_in help)
                                 else
                                 {
 
-                                    //printf("error 123123\n");;//TODOooooooooooo error
+                                    printf("error 123123\n");;//TODOooooooooooo error
                                     stackDelete_and_free(&zasobnik);
-                                    //printf("delete and free\n");
+                                    printf("delete and free\n");
                                     //print_stack_data(&zasobnik);
                                     return 0; // TODO break free stack
                                 }
@@ -432,15 +421,15 @@ int fn_expression(FILE* sourceFile, expr_in help)
                             else
                             {
                                 stackDelete_and_free(&zasobnik);
-                                //printf("delete and free lolik\n");
-                               //print_stack_data(&zasobnik);
+                                printf("delete and free lolik\n");
+                                //print_stack_data(&zasobnik);
                                 return 0; // TODO break free stack
                             }
                         }
                         else
                         {
                             stackDelete_and_free(&zasobnik);
-                            //printf("delete and free omgg\n");
+                            printf("delete and free omgg\n");
                             //print_stack_data(&zasobnik);
                             return 0; // TODO break free stack
                         }
@@ -455,15 +444,15 @@ int fn_expression(FILE* sourceFile, expr_in help)
                     stackTop(&zasobnik,&topik);
                     if( topik == operator_not)
                     {
-                        //printf("not\n");
+                        printf("not\n");
                         stackPop(&zasobnik);
                         if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(&zasobnik) )
                             ;
                         else
                         {
-                            //printf("error 123\n");// Todoooo error
+                            printf("error 123\n");// Todoooo error
                             stackDelete_and_free(&zasobnik);
-                            //printf("delete and free\n");
+                            printf("delete and free\n");
                             //print_stack_data(&zasobnik);
                             return 0; // TODO break free stack
                         }
@@ -473,59 +462,59 @@ int fn_expression(FILE* sourceFile, expr_in help)
                     switch(topik)
                     {
                       case operator_add:
-                          //printf("add\n");
+                         // printf("add\n");
                           break;
                       case operator_sub:
-                          //printf("sub\n");
+                         // printf("sub\n");
                           break;
                       case operator_mul:
-                          //printf("mul\n");
+                         // printf("mul\n");
                           break;
                       case operator_div:
-                          //printf("div\n");
+                         // printf("div\n");
                           break;
                       case operator_mod:
-                          //printf("mod\n");
+                         // printf("mod\n");
                           break;
 
                           // ++
                           // --
 
                       case operator_equ:
-                          //printf("equ\n");
+                         // printf("equ\n");
                           break;
                       case operator_neq:
-                          //printf("neq\n");
+                         // printf("neq\n");
                           break;
                       case operator_gre:
-                          //printf("gre\n");
+                       //   printf("gre\n");
                           break;
                       case operator_les:
-                          //printf("les\n");
+                         // printf("les\n");
                           break;
                       case operator_goe:
-                          //printf("goe\n");
+                        //  printf("goe\n");
                           break;
                       case operator_loe:
-                          //printf("loe\n");
+                        //  printf("loe\n");
                           break;
 
                       case operator_or:
-                          //printf("or\n");
+                        //  printf("or\n");
                           break;
                       case operator_and:
-                          //printf("and\n");
+                        //  printf("and\n");
                           break;
                       case operator_dot:
-                          //printf("dot\n");
+                         // printf("dot\n");
                           break;
                       //case operator_not:
-                      //printf("not\n");
+                      //    printf("not\n");
                       //    break;
                       default:
-                          //printf("ERROR default other symbol then +-*/ \n");
+                          printf("ERROR default other symbol then +-*/ \n");
                           stackDelete_and_free(&zasobnik);
-                          //printf("delete and free\n");
+                          printf("delete and free\n");
                           //print_stack_data(&zasobnik);
                           return 0; // TODO break free stack
                           break;
@@ -536,7 +525,7 @@ int fn_expression(FILE* sourceFile, expr_in help)
                 else
                 {
                     stackDelete_and_free(&zasobnik);
-                    //printf("delete and free ...\n");
+                    printf("delete and free ...\n");
                     //print_stack_data(&zasobnik);
                     return 0; // TODO break free stack
                 }
@@ -544,8 +533,8 @@ int fn_expression(FILE* sourceFile, expr_in help)
 
             case symbol_fault:
                 stackDelete_and_free(&zasobnik);
-                //printf("delete and free ==\n");
-                //print_stack_data(&zasobnik);
+                printf("delete and free ==\n");
+     //           //print_stack_data(&zasobnik);
                 return 0; // TODO break free stack
         }
         stackTop(&zasobnik,&topik);
@@ -562,6 +551,9 @@ int fn_expression(FILE* sourceFile, expr_in help)
 
 void check_rule(IntStack* stack,operators Rule_symbol)
 {
+
+    Rule_symbol = Rule_symbol; // <= unused!!
+
     int topik;
     stackTop(stack,&topik);
     if(topik == operator_NONTERM)
@@ -570,11 +562,11 @@ void check_rule(IntStack* stack,operators Rule_symbol)
         if( is_TOP_symbol_less_POP_and_PUSH_Nonterm(stack) )
             ;
         else
-            ;//printf("ERROR 1- check rule\n");// TODO
+            printf("ERROR 1- check rule\n");// TODO
     }
     else
     {
-        ;//printf("ERROR 2- check rule\n");// TODO
+        printf("ERROR 2- check rule\n");// TODO
     }
 
 }

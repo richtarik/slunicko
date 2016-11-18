@@ -1,17 +1,11 @@
-///* File: stack.h             */
-///* Autor: Milos Molitoris    */
-///* Login: xmolit00           */
-///*                           */
-///*       IFJ-Projekt         */
-///* Datum: 10.11.2016         */
-///* Prelozeno: gcc 4.9        */
-///* ------- VUT FIT --------- */
-
 #ifndef _STACK_H_
 #define _STACK_H_
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "memory_manager.h"
+#include "error.h"
+#include "struct.h"
 
 //#define size 20
 
