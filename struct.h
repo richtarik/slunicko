@@ -12,6 +12,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+//#include "ial.h"
 
 /* todo Tokens for: ???
 ifj16
@@ -132,12 +134,7 @@ typedef struct T_Token {
 
 T_token * token;
 
-//Zasobnik pro ukladani promennych
-typedef struct {
-	T_variable* data;
-	unsigned int max;
-	int top;
-} VariableStack;
+
 
 //Enum typu promennych pro interpret
 typedef enum {
@@ -151,8 +148,8 @@ typedef enum {
 union T_value {
 	int value_int;
 	double value_double;
-	String *value_String;
-	bool value_bool
+	//String *value_String;
+	bool value_bool;
 } value_struct;
 
 //Struktura pro ulozeni typu a hodnoty promenne
@@ -160,6 +157,13 @@ typedef struct {
 	value_type type;
 	union T_value value;
 } T_variable;
+
+//Zasobnik pro ukladani promennych
+typedef struct {
+	T_variable* data;
+	unsigned int max;
+	int top;
+} VariableStack;
 
 //struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou
 typedef struct {
@@ -177,7 +181,7 @@ typedef struct {
 
 //definice seznamu instrukci
 typedef struct item_list {
-    T_address_code Instrukcion;
+    T_address_code Instruction;
     struct item_list *next_item;
 } T_item_list;
 
@@ -186,6 +190,8 @@ typedef struct {
     struct item_list *First;
     struct item_list *Active;
 } T_instr_list;
+
+T_instr_list* L_ins;
 
 typedef enum
 {
