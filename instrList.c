@@ -1,6 +1,7 @@
 ///* File: instrList.c         */
-///* Autor: Petr Mynarcik      */
-///* Login: xmynar05           */
+///* Autori: Petr Mynarcik,    */
+///*         Milos Molitoris   */
+///* Login: xmynar05, xmolit00 */
 ///*                           */
 ///*       IFJ-Projekt         */
 ///* Datum: 09.10.2016         */
@@ -9,6 +10,22 @@
 
 #include "instrList.h"
 #include "struct.h"
+
+void gen_code(int operation, void *address1, void *address2, void *result)
+{
+    T_address_code *ins = malloc(sizeof(T_address_code));
+    ins->operation = operation;
+    ins->address1 = address1;
+    ins->address2 = address2;
+    ins->result = result;
+
+    listInsert(L_ins, ins);
+}
+
+void gen_expr_code()
+{
+
+}
 
 //inicializace seznamu
 void listInit (T_instr_list *L) {
@@ -27,13 +44,13 @@ void listInsert (T_instr_list *L, T_address_code *I) {
 	newItem->Instruction.result = I->result;
 
 	if (L->First == NULL) {
-		newItem->nextItem = L->First;
+		newItem->next_item = L->First;
 		L->First = newItem;
 		L->Active = L->First;
-	} else 
+	} else
 	{
-		L->Active->nextItem = newItem;
-		L->Active = L->Active->nextItem;
+		L->Active->next_item = newItem;
+		L->Active = L->Active->next_item;
 	}
 }
 
@@ -47,12 +64,12 @@ void listFirst(T_instr_list *L)
 void listNext(T_instr_list *L)
 {
 	if (L->Active != NULL) {
-		L->Active = L->Active->nextItem;
+		L->Active = L->Active->next_item;
 	}
 }
 
 //Vrati aktivni prvek seznamu
-T_address_code *listGetItem(T_instr_list *L)
+T_address_code* listGetItem(T_instr_list *L)
 {
 	if (L->Active == NULL)
 	{
@@ -69,7 +86,7 @@ void listFree(T_instr_list *L) {
 	L->Active = NULL;
 	while (L->First != NULL) {
 		tmp = L->First;
-		L->First = L->First->nextItem;
+		L->First = L->First->next_item;
 		free(tmp);
 	}
 }
