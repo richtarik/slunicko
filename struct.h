@@ -182,7 +182,7 @@ typedef struct {
 //struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou
 typedef struct {
 	int offset;
-	bool global;
+	bool isGlobal;
 } T_address;
 
 //struktura triadresnyho kodu

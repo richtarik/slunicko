@@ -171,7 +171,6 @@ int generator(T_instr_list *L, bool isRoot) {
 				R->address1 = T->result;
 				listInsert(iList, R);
 				S->operation = T_FLABEL;
-				S->address1 = T->address2;
 				S->result = label;
 				stackPush(func_stack, label);
 				labelTemp++;
