@@ -111,7 +111,8 @@ void VStackTop(VariableStack* s, T_variable* c) {
 		// ZLE error_f(ERROR_INTERN);
 		}
 
-		*c = s->data[s->top];
+		(*c).type = ((s->data[s->top]).type);
+		(*c).value = ((s->data[s->top]).value);
 }
 
 
