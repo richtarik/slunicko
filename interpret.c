@@ -17,7 +17,7 @@ int interpret(T_instr_list *L) {
     double d;
     String* s;
 
-	/* VECI PRO PREKLAD
+/*	 VECI PRO PREKLAD
 	VariableStack* sVariableGlobal;
 	VariableStack* sVariableLocal;
 	VStackInit(sVariableGlobal, 99);
@@ -52,24 +52,24 @@ int interpret(T_instr_list *L) {
 			case T_ADD:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 
 				if (A1->type == INT) {
@@ -109,10 +109,10 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+                    VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 
 				break;
@@ -120,10 +120,10 @@ int interpret(T_instr_list *L) {
 			case T_INC:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 
 				if (A1->type == INT) {
@@ -134,10 +134,10 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A1);
+					VStackSet(sVariableGlobal, POM->offset, A1->type, A1->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A1);
+					VStackSet(sVariableLocal, frame + POM->offset, A1->type, A1->value);
 				}
 
 				break;
@@ -145,24 +145,24 @@ int interpret(T_instr_list *L) {
 			case T_SUB:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -194,20 +194,20 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_DEC:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					A1->value.value_int = A1->value.value_int - 1;
@@ -217,34 +217,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A1);
+					VStackSet(sVariableGlobal, POM->offset, A1->type, A1->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A1);
+					VStackSet(sVariableLocal, frame + POM->offset, A1->type, A1->value);
 				}
 				break;
 
 			case T_MUL:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -276,34 +276,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_DIV:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -335,10 +335,10 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
@@ -346,24 +346,24 @@ int interpret(T_instr_list *L) {
 			case T_AND:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -420,34 +420,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_OR:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -504,27 +504,27 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_NOT:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					A3->value.value_int = !(A1->value.value_int);
@@ -542,10 +542,10 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
@@ -553,24 +553,24 @@ int interpret(T_instr_list *L) {
 			case T_EQUAL:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -627,34 +627,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_LEQUAL:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -711,34 +711,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_MEQUAL:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -795,34 +795,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_NEQUAL:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -879,34 +879,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_MORE:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -963,34 +963,34 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
 			case T_LESS:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
@@ -1047,10 +1047,10 @@ int interpret(T_instr_list *L) {
 					return -1;
 				}
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A3);
+					VStackSet(sVariableGlobal, POM->offset, A3->type, A3->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
 				break;
 
@@ -1059,51 +1059,51 @@ int interpret(T_instr_list *L) {
 				i = strReadInt();
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				A1->type = INT;
 				A1->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, *A1);
+				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
 				break;
 
 			case T_DIN:
 				d = strReadDouble();
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				A1->type = DOUBLE;
 				A1->value.value_double = d;
-				VStackSet(sVariableGlobal, 0, *A1);
+				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
 				break;
 
 			case T_SIN:
 				s = strReadString();
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				A1->type = STRING;
 				A1->value.value_String = s;
-				VStackSet(sVariableGlobal, 0, *A1);
+				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
 				break;
 
 			case T_OUT:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				if (A1->type == INT) {
 					printf("%d", A1->value.value_int);
@@ -1122,96 +1122,96 @@ int interpret(T_instr_list *L) {
 			case T_LENGTH:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				i = strLength(A1->value.value_String);
 				A2->type = INT;
 				A2->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, *A2);
+				VStackSet(sVariableGlobal, 0, A2->type, A2->value);
 				break;
 
 			case T_SUBSTR:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->result;
 				if (POM->isGlobal) {
-					*A3 = VStackGet(sVariableGlobal, POM->offset);
+					A3 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+					A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				s = strSubstr(A1->value.value_String, A2->value.value_int, A3->value.value_int);
 				A1->type = STRING;
 				A1->value.value_String = s;
-				VStackSet(sVariableGlobal, 0, *A1);
+				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
 				break;
 
 			case T_COMPARE:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				i = strCompare(A1->value.value_String, A2->value.value_String);
 				A3->type = INT;
 				A3->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, *A3);
+				VStackSet(sVariableGlobal, 0, A3->type, A3->value);
 				break;
 
 			case T_FIND:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					*A2 = VStackGet(sVariableGlobal, POM->offset);
+					A2 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				i = fail(A1->value.value_String, A2->value.value_String);
 				A3->type = INT;
 				A3->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, *A3);
+				VStackSet(sVariableGlobal, 0, A3->type, A3->value);
 				break;
 
 			case T_SORT:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				s = sort(A1->value.value_String);
 				A2->type = STRING;
 				A2->value.value_String = s;
-				VStackSet(sVariableGlobal, 0, *A2);
+				VStackSet(sVariableGlobal, 0, A2->type, A2->value);
 				break;
 
 			//Zasobnikove funkce
@@ -1219,10 +1219,10 @@ int interpret(T_instr_list *L) {
 				POM = T->result;
 				A1 = T->address1;
 				if (POM->isGlobal) {
-					VStackPush(sVariableGlobal, *A1);
+					VStackPush(sVariableGlobal, A1->type, A1->value);
 				}
 				else {
-					VStackPush(sVariableLocal, *A1);
+					VStackPush(sVariableLocal, A1->type, A1->value);
 				}
 				break;
 
@@ -1239,17 +1239,17 @@ int interpret(T_instr_list *L) {
 			case T_MOV:
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				POM = T->address2;
 				if (POM->isGlobal) {
-					VStackSet(sVariableGlobal, POM->offset, *A1);
+					VStackSet(sVariableGlobal, POM->offset, A1->type, A1->value);
 				}
 				else {
-					VStackSet(sVariableLocal, frame + POM->offset, *A1);
+					VStackSet(sVariableLocal, frame + POM->offset, A1->type, A1->value);
 				}
 				break;
 
@@ -1296,13 +1296,13 @@ int interpret(T_instr_list *L) {
 				}
 				POM = T->address1;
 				if (POM->isGlobal) {
-					*A1 = VStackGet(sVariableGlobal, POM->offset);
+					A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
 				else {
-					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				stackPop(offset_stack);
-				VStackSet(sVariableLocal, frame, *A1);
+				VStackSet(sVariableLocal, frame, A1->type, A1->value);
 				if (stackEmpty(offset_stack)) {
 					frame = 0;
 				}

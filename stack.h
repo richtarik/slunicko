@@ -27,15 +27,14 @@ void stackPush (IntStack* s, int c );
 void print_stack_data_i(IntStack *s);
 void stackDelete_and_free(IntStack* s);
 
-#endif
-
 void VStackInit(VariableStack* s, unsigned int size);
 int VStackEmpty(VariableStack* s);
 int VStackFull(VariableStack* s);
-void VStackTop(VariableStack* s, int* c);
+void VStackTop(VariableStack* s, T_variable* c);
 void VStackPop(VariableStack* s);
-T_variable VStackGet(VariableStack* s, int offset);
-void VStackSet(VariableStack* s, int offset, T_variable data);
-void VStackPush(VariableStack* s, T_variable data);
+T_variable* VStackGet(VariableStack* s, int offset);
+void VStackPush(VariableStack* s, value_type type, union T_value value);
+void VStackSet(VariableStack* s, int offset, value_type type, union T_value value);
 void VStackDelete_and_free(VariableStack* s);
 
+#endif
