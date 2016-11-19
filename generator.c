@@ -188,7 +188,8 @@ int generator(T_instr_list *L, bool isRoot) {
 			case T_RETURN:
 				S->operation = T_FJMP;
 				S->address1 = T->result;
-				i = stackGetAndPop(func_stack);
+				stackTop(func_stack, &i);
+				stackPop(func_stack);
 				S->result = &i;
 				listInsert(iList, S);
 				break;

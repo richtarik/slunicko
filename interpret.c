@@ -15,7 +15,7 @@
 int interpret(T_instr_list *L) {
     int i;
     double d;
-    String* s;
+    str* s;
 
 /*	 VECI PRO PREKLAD
 	VariableStack* sVariableGlobal;
@@ -1194,7 +1194,7 @@ int interpret(T_instr_list *L) {
 				else {
 					A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
-				i = fail(A1->value.value_String, A2->value.value_String);
+				i = find(A1->value.value_String, A2->value.value_String);
 				A3->type = INT;
 				A3->value.value_int = i;
 				VStackSet(sVariableGlobal, 0, A3->type, A3->value);
