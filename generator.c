@@ -28,6 +28,7 @@ int generator(T_instr_list *L, bool isRoot) {
 		stackInit(func_stack, 99);
 	}
 
+    int i;
 	int error = 0;
 	T_address_code *T;
 	T_address_code *S;
@@ -87,7 +88,7 @@ int generator(T_instr_list *L, bool isRoot) {
 
 			//Vestavene funkce
 
-			case T_LENGHT:
+			case T_LENGTH:
 			case T_SUBSTR:
 			case T_COMPARE:
 			case T_FIND:
@@ -172,7 +173,7 @@ int generator(T_instr_list *L, bool isRoot) {
 				listInsert(iList, R);
 				S->operation = T_FLABEL;
 				S->result = label;
-				stackPush(func_stack, label);
+				stackPush(func_stack, *label);
 				labelTemp++;
 				error = generator(T->address1, false);
 				if (error) {
@@ -187,7 +188,8 @@ int generator(T_instr_list *L, bool isRoot) {
 			case T_RETURN:
 				S->operation = T_FJMP;
 				S->address1 = T->result;
-				S->result = stackGetAndPop(func_stack);
+				i = stackGetAndPop(func_stack);
+				S->result = &i;
 				listInsert(iList, S);
 				break;
 

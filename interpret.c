@@ -17,11 +17,11 @@ int interpret(T_instr_list *L) {
     double d;
     String* s;
 
-	/* VECI PRO PREKLAD*/
+	/* VECI PRO PREKLAD
 	VariableStack* sVariableGlobal;
 	VariableStack* sVariableLocal;
 	VStackInit(sVariableGlobal, 99);
-	VStackInit(sVariableLocal, 99);
+	VStackInit(sVariableLocal, 99);*/
 
 	bool ZeroFlag = false;
 	int frame = 0;
