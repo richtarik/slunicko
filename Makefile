@@ -1,14 +1,14 @@
-FLAGS= -std=c99 -O0 -Wall -Wextra -Werror -pedantic -Wuninitialized -Winit-self -Wmaybe-uninitialized
+NAME=interpret
+CC=gcc
+FLAGS=-std=c99 -Wall -Wextra -Werror -pedantic -Wunused -Wuninitialized -Winit-self -Wmaybe-uninitialized
+CFILES=error.c memory_manager.c str.c ial.c keywords.c lex.c stack.c expr.c instrList.c generator.c interpret.c parser.c
+OFILES=error.o memory_manager.o str.o ial.o keywords.o lex.o stack.o expr.o instrList.o generator.o interpret.o parser.o
 
 all:
-	gcc $(FLAGS) str.c -c
-	gcc $(FLAGS) ial.c -c
-	gcc $(FLAGS) error.c -c
-	gcc $(FLAGS) memory_manager.c -c
-	gcc $(FLAGS) parser.c -c
-	gcc $(FLAGS) lex.c -c
-	gcc $(FLAGS) expr.c -c
-	gcc $(FLAGS) keywords.c -c
-	gcc $(FLAGS) stack.c -c
-	gcc -o test str.o ial.o error.o memory_manager.o parser.o keywords.o lex.o expr.o stack.o
+	$(CC) $(FLAGS) $(CFILES) -c
+	$(CC) $(FLAGS) -o $(NAME) $(OFILES)
+	
+clean:
+	rm $(NAME) $(OFILES)
+
 	
