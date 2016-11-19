@@ -38,7 +38,7 @@
 #define T_SIN token_sin
 #define T_OUT token_out
 //Vestavene funkce
-#define T_LENGHT token_length
+#define T_LENGTH token_length
 #define T_SUBSTR token_substr
 #define T_COMPARE token_compare
 #define T_FIND token_find
@@ -56,7 +56,7 @@
 #define T_FJMP token_fjmp
 #define T_FLABEL token_flabel
 #define T_PUSH token_push
-#define T_PULL token_pull
+#define T_POP token_pull
 #define T_MOV token_mov
 
 int generator(T_instr_list *L, bool isRoot);

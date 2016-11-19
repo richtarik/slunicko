@@ -1,4 +1,4 @@
-///* File: interpret.c         */
+///* File: interpreT->c         */
 ///* Autor: Petr Mynarcik      */
 ///* Login: xmynar05           */
 ///*                           */
@@ -13,17 +13,32 @@
 
 //Provadi samotnou interpretaci predanych instrukci - pocetni operaca a instrukce skoku
 int interpret(T_instr_list *L) {
+    int i;
+    double d;
+    String* s;
+
+	/* VECI PRO PREKLAD
+	VariableStack* sVariableGlobal;
+	VariableStack* sVariableLocal;
+	VStackInit(sVariableGlobal, 99);
+	VStackInit(sVariableLocal, 99);*/
+
 	bool ZeroFlag = false;
 	int frame = 0;
 	IntStack* offset_stack;
 	stackInit(offset_stack, 99);
-	T_address_code T = memory_manager_malloc(sizeof(T_address_code));
-	T_address_code S = memory_manager_malloc(sizeof(T_address_code));
-	T_variable A1 = memory_manager_malloc(sizeof(T_variable));
-	T_variable A2 = memory_manager_malloc(sizeof(T_variable));
-	T_variable A3 = memory_manager_malloc(sizeof(T_variable));
-	String stroing;
-	stroing.
+	T_address_code *T;
+	T_address_code *S;
+	T = memory_manager_malloc(sizeof(T_address_code));
+	S = memory_manager_malloc(sizeof(T_address_code));
+	T_variable *A1;
+	T_variable *A2;
+	T_variable *A3;
+	A1 = memory_manager_malloc(sizeof(T_variable));
+	A2 = memory_manager_malloc(sizeof(T_variable));
+	A3 = memory_manager_malloc(sizeof(T_variable));
+	T_address *POM;
+	POM = memory_manager_malloc(sizeof(T_address));
 	listFirst(L);
 
 	while (1) {
@@ -31,89 +46,145 @@ int interpret(T_instr_list *L) {
 		if (T == NULL) {
 			return -1;
 		}
-		switch (T.operation) {
+		switch (T->operation) {
 
 			//Instrukce pro aritmeticko operace
 			case T_ADD:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int + A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int + A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.vaule_int + A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int + A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double + A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double + A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.valee_double = A1.value.value_double + A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double + A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == STRING && A2.type == STRING) {
+				else if (A1->type == STRING && A2->type == STRING) {
 					String* tmp;
-					tmp = A1.value.value_String;
-					strLoad(A3.value.value_String, tmp->str);
-					tmp = A2.value.value_String;
-					strCat(A3.value.value_String, tmp->str);
+					tmp = A1->value.value_String;
+					strLoad(A3->value.value_String, tmp->str);
+					tmp = A2->value.value_String;
+					strCat(A3->value.value_String, tmp->str);
 				}
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
+
 				break;
 
 			case T_INC:
-				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1.type == INT) {
-					A1.value.value_int = A1.value.value_int + 1;
-					ZeroFlag = !(A3.value.value_int == 0)
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+
+				if (A1->type == INT) {
+					A1->value.value_int = A1->value.value_int + 1;
+					ZeroFlag = !(A3->value.value_int == 0);
 				}
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.address1, A1);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A1);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A1);
+				}
+
 				break;
 
 			case T_SUB:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int - A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0)
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int - A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.vaule_int - A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int - A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double - A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double - A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.valee_double = A1.value.value_double - A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double - A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
@@ -122,46 +193,80 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_DEC:
-				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1.type == INT) {
-					A1.value.value_int = A1.value.value_int - 1;
-					ZeroFlag = !(A3.value.value_int == 0)
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					A1->value.value_int = A1->value.value_int - 1;
+					ZeroFlag = !(A3->value.value_int == 0);
 				}
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.address1, A1);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A1);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A1);
+				}
 				break;
 
 			case T_MUL:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int * A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0)
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int * A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.vaule_int * A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int * A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double * A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double * A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.valee_double = A1.value.value_double * A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double * A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
@@ -170,34 +275,57 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_DIV:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int / A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0)
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int / A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.vaule_int / A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int / A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double / A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double / A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.valee_double = A1.value.value_double / A2.value.value_double;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double / A2->value.value_double;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
@@ -206,60 +334,83 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			//Logicke operace
 			case T_AND:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int && A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int && A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int && A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int && A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int && A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int && A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double && A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double && A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double && A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double && A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double && A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double && A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool && A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool && A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool && A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool && A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool && A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool && A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -268,59 +419,82 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_OR:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int || A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int || A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int || A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int || A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int || A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int || A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double || A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double || A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double || A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double || A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double || A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double || A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool || A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool || A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool || A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool || A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool || A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool || A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -329,81 +503,121 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_NOT:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					A3.value.value_int = !(A1.value.value_int);
-					ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
-				else if (A1.type == DOUBLE) {
-					A3.value.value_double = !(A1.value.value_double);
-					ZeroFlag = !(A3.value.value_double == 0);
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
-				else if (A1.type == BOOLEAN) {
-					A3.value.value_bool = !(A1.value.value_bool);
-					ZeroFlag = !(A3.value.value_bool == 0);
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					A3->value.value_int = !(A1->value.value_int);
+					ZeroFlag = !(A3->value.value_int == 0);
+				}
+				else if (A1->type == DOUBLE) {
+					A3->value.value_double = !(A1->value.value_double);
+					ZeroFlag = !(A3->value.value_double == 0);
+				}
+				else if (A1->type == BOOLEAN) {
+					A3->value.value_bool = !(A1->value.value_bool);
+					ZeroFlag = !(A3->value.value_bool == 0);
 				}
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			//Porovnavaci operace
 			case T_EQUAL:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int == A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int == A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int == A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int == A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int == A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int == A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double == A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double == A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double == A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double == A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double == A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double == A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool == A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool == A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool == A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool == A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool == A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool == A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -412,59 +626,82 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_LEQUAL:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int <= A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int <= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int <= A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int <= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int <= A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int <= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double <= A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double <= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double <= A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double <= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double <= A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double <= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool <= A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool <= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool <= A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool <= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool <= A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool <= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -473,59 +710,82 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_MEQUAL:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int >= A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int >= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int >= A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int >= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int >= A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int >= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double >= A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double >= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double >= A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double >= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double >= A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double >= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool >= A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool >= A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool >= A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool >= A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool >= A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool >= A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -534,59 +794,82 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_NEQUAL:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int != A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int != A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int != A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int != A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int != A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int != A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double != A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double != A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double != A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double != A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double != A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double != A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool != A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool != A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool != A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool != A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool != A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool != A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -595,59 +878,82 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_MORE:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int > A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int > A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int > A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int > A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int > A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int > A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double > A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double > A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double > A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double > A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double > A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double > A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool > A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool > A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool > A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool > A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool > A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool > A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -656,59 +962,82 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			case T_LESS:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.result);
-				if (A1.type == INT) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_int < A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_int < A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_int < A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_int < A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_int = A1.value.value_int < A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_int = A1->value.value_int < A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == DOUBLE) {
-					if (A2.type == INT) {
-						A3.value.value_double = A1.value.value_double < A2.value.value_int;
-						ZeroFlag = !(A3.value.value_double == 0);
+				else if (A1->type == DOUBLE) {
+					if (A2->type == INT) {
+						A3->value.value_double = A1->value.value_double < A2->value.value_int;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_double < A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_double < A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_double = A1.value.value_double < A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_double == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_double = A1->value.value_double < A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else {
 						return -1;
 					}
 				}
-				else if (A1.type == BOOLEAN) {
-					if (A2.type == INT) {
-						A3.value.value_int = A1.value.value_bool < A2.value.value_int;
-						ZeroFlag = !(A3.value.value_int == 0);
+				else if (A1->type == BOOLEAN) {
+					if (A2->type == INT) {
+						A3->value.value_int = A1->value.value_bool < A2->value.value_int;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == DOUBLE) {
-						A3.value.value_double = A1.value.value_bool < A2.value.value_double;
-						ZeroFlag = !(A3.value.value_int == 0);
+					else if (A2->type == DOUBLE) {
+						A3->value.value_double = A1->value.value_bool < A2->value.value_double;
+						ZeroFlag = !(A3->value.value_int == 0);
 					}
-					else if (A2.type == BOOLEAN) {
-						A3.value.value_bool = A1.value.value_bool < A2.value.value_bool;
-						ZeroFlag = !(A3.value.value_bool == 0);
+					else if (A2->type == BOOLEAN) {
+						A3->value.value_bool = A1->value.value_bool < A2->value.value_bool;
+						ZeroFlag = !(A3->value.value_bool == 0);
 					}
 					else {
 						return -1;
@@ -717,44 +1046,73 @@ int interpret(T_instr_list *L) {
 				else {
 					return -1;
 				}
-				VStackSet(vStack, frame + T.result, A3);
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A3);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A3);
+				}
 				break;
 
 			//Vestaveny funkce
 			case T_IIN:
-				int i = strReadInt();
-				A1 = VStackGet(vStack, frame + T.result);
-				A1.type = INT;
-				A1.value.value_int = i;
-				VStackSet(vStack, frame + T.result, A1);
+				i = strReadInt();
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				A1->type = INT;
+				A1->value.value_int = i;
+				VStackSet(sVariableGlobal, 0, *A1);
 				break;
 
 			case T_DIN:
-				double d = strReadDouble();
-				A1 = VStackGet(vStack, frame + T.result);
-				A1.type = DOUBLE;
-				A1.value.value_double = d;
-				VStackSet(vStack, frame + T.result, A1);
+				d = strReadDouble();
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				A1->type = DOUBLE;
+				A1->value.value_double = d;
+				VStackSet(sVariableGlobal, 0, *A1);
 				break;
 
 			case T_SIN:
-				String* s = strReadString();
-				A1 = VStackGet(vStack, frame + T.result);
-				A1.type = STRING;
-				A1.value.value_String = s;
-				VStackSet(vStack, frame + T.result, A1);
+				s = strReadString();
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				A1->type = STRING;
+				A1->value.value_String = s;
+				VStackSet(sVariableGlobal, 0, *A1);
 				break;
 
 			case T_OUT:
-				A1 = VStackGet(vStack, frame + T.address1);
-				if (A1.type == INT) {
-					printf("%d", A1.value.value_int);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
 				}
-				else if (A1.type == DOUBLE) {
-					printf("%g", A1.value.value_double);
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
-				else if (A1.type == STRING) {
-					strPrintStr(A1.value.value_String);
+				if (A1->type == INT) {
+					printf("%d", A1->value.value_int);
+				}
+				else if (A1->type == DOUBLE) {
+					printf("%g", A1->value.value_double);
+				}
+				else if (A1->type == STRING) {
+					strPrintStr(A1->value.value_String);
 				}
 				else {
 					return -1;
@@ -762,44 +1120,101 @@ int interpret(T_instr_list *L) {
 				break;
 
 			case T_LENGTH:
-				A1 = VStackGet(vStack, frame + T.address1);
-				int i = strLength(A1.value.value_String);
-				//ulozit i
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				i = strLength(A1->value.value_String);
+				A2->type = INT;
+				A2->value.value_int = i;
+				VStackSet(sVariableGlobal, 0, *A2);
 				break;
 
 			case T_SUBSTR:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				A3 = VStackGet(vStack, frame + T.address3);
-				String s = strSubstr(A1.value.value_String, A2.value.value_int, A3.value.value_int);
-				//ulozit s
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->result;
+				if (POM->isGlobal) {
+					*A3 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				s = strSubstr(A1->value.value_String, A2->value.value_int, A3->value.value_int);
+				A2->type = STRING;
+				A2->value.value_String = s;
+				VStackSet(sVariableGlobal, 0, *A2);
 				break;
 
 			case T_COMPARE:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
-				int i = strCompare(A1.value.value_String, A2.value.value_String);
-				//ulozit i
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				i = strCompare(A1->value.value_String, A2->value.value_String);
+				A2->type = INT;
+				A2->value.value_int = i;
+				VStackSet(sVariableGlobal, 0, *A2);
 				break;
 
 			case T_FIND:
-				A1 = VStackGet(vStack, frame + T.address1);
-				A2 = VStackGet(vStack, frame + T.address2);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					*A2 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
 				//find
 				break;
 
 			case T_SORT:
-				A1 = VStackGet(vStack, frame + T.address1);
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
 				//sort
 				break;
 
 			//Zasobnikove funkce
 			case T_PUSH:
-				VStackPush(vStack, T.address1);
+				//VStackPush(vStack, T->address1);
 				break;
 
 			case T_POP:
-				VStackPop(vStack);
+				//VStackPop(vStack);
 				break;
 
 			case T_MOV:
@@ -831,8 +1246,9 @@ int interpret(T_instr_list *L) {
 
 			//Instrukce pro funkcnost uzivatelskych funkci
 			case T_FSTART:
-				frame = T->address1;
-				stackPush(offset_stack, T->address1);
+			    POM = T->address1;
+				frame = POM->offset;
+				stackPush(offset_stack, frame);
 				break;
 
 			case T_FJMP:
@@ -846,21 +1262,27 @@ int interpret(T_instr_list *L) {
 						return 1;
 					}
 				}
-				A1 = VStackGet(vStack, frame + T->result);
-				break;
-
-			case T_FLABEL:
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
 				stackPop(offset_stack);
+				VStackSet(sVariableLocal, frame, *A1);
 				if (stackEmpty(offset_stack)) {
 					frame = 0;
 				}
 				else {
 					frame = stackGet(offset_stack);
 				}
-				VStackSet(vStack, frame + T->address1, A1);
 				break;
 
-			case default:
+			case T_FLABEL:
+				break;
+
+			default:
 				return -1;
 
 		}
