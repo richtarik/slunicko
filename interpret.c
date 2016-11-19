@@ -1,4 +1,4 @@
-///* File: interpreT->c         */
+///* File: interpret.c         */
 ///* Autor: Petr Mynarcik      */
 ///* Login: xmynar05           */
 ///*                           */
@@ -17,11 +17,11 @@ int interpret(T_instr_list *L) {
     double d;
     String* s;
 
-	/* VECI PRO PREKLAD
+	/* VECI PRO PREKLAD*/
 	VariableStack* sVariableGlobal;
 	VariableStack* sVariableLocal;
 	VStackInit(sVariableGlobal, 99);
-	VStackInit(sVariableLocal, 99);*/
+	VStackInit(sVariableLocal, 99);
 
 	bool ZeroFlag = false;
 	int frame = 0;
@@ -1153,9 +1153,9 @@ int interpret(T_instr_list *L) {
 					*A3 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				s = strSubstr(A1->value.value_String, A2->value.value_int, A3->value.value_int);
-				A2->type = STRING;
-				A2->value.value_String = s;
-				VStackSet(sVariableGlobal, 0, *A2);
+				A1->type = STRING;
+				A1->value.value_String = s;
+				VStackSet(sVariableGlobal, 0, *A1);
 				break;
 
 			case T_COMPARE:
@@ -1174,9 +1174,9 @@ int interpret(T_instr_list *L) {
 					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				i = strCompare(A1->value.value_String, A2->value.value_String);
-				A2->type = INT;
-				A2->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, *A2);
+				A3->type = INT;
+				A3->value.value_int = i;
+				VStackSet(sVariableGlobal, 0, *A3);
 				break;
 
 			case T_FIND:
@@ -1194,7 +1194,10 @@ int interpret(T_instr_list *L) {
 				else {
 					*A2 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
-				//find
+				i = fail(A1->value.value_String, A2->value.value_String);
+				A3->type = INT;
+				A3->value.value_int = i;
+				VStackSet(sVariableGlobal, 0, *A3);
 				break;
 
 			case T_SORT:
@@ -1205,16 +1208,32 @@ int interpret(T_instr_list *L) {
 				else {
 					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
-				//sort
+				s = sort(A1->value.value_String);
+				A2->type = STRING;
+				A2->value.value_String = s;
+				VStackSet(sVariableGlobal, 0, *A2);
 				break;
 
 			//Zasobnikove funkce
 			case T_PUSH:
-				//VStackPush(vStack, T->address1);
+				POM = T->result;
+				A1 = T->address1;
+				if (POM->isGlobal) {
+					VStackPush(sVariableGlobal, *A1);
+				}
+				else {
+					VStackPush(sVariableLocal, *A1);
+				}
 				break;
 
 			case T_POP:
-				//VStackPop(vStack);
+				POM = T->result;
+				if (POM->isGlobal) {
+					VStackPop(sVariableGlobal);
+				}
+				else {
+					VStackPop(sVariableLocal);
+				}
 				break;
 
 			case T_MOV:
