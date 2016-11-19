@@ -1237,7 +1237,20 @@ int interpret(T_instr_list *L) {
 				break;
 
 			case T_MOV:
-				//az budou zasobniky
+				POM = T->address1;
+				if (POM->isGlobal) {
+					*A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					*A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				POM = T->address2;
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, *A1);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, *A1);
+				}
 				break;
 
 			//Skokove instrukce pro if a cykly
