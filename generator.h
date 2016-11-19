@@ -33,12 +33,20 @@
 #define T_MORE token_gre
 #define T_LESS token_les
 //Predefinovai operaci pro vstup a vystup
-#define T_IN 100
-#define T_OUT 101
+#define T_IIN token_iin
+#define T_DIN token_din
+#define T_SIN token_sin
+#define T_OUT token_out
+//Vestavene funkce
+#define T_LENGHT token_length
+#define T_SUBSTR token_substr
+#define T_COMPARE token_compare
+#define T_FIND token_find
+#define T_SORT token_sort
 //Predefinovani cyklu, funkci, ...
 #define T_IF token_if
 #define T_WHILE token_while
-#define T_FUNC 99
+#define T_FUNC token_func
 #define T_RETURN token_return
 //Definovani skoku
 #define T_LABEL token_label
@@ -47,5 +55,8 @@
 #define T_FSTART token_fstart
 #define T_FJMP token_fjmp
 #define T_FLABEL token_flabel
+#define T_PUSH token_push
+#define T_PULL token_pull
+#define T_MOV token_mov
 
 int generator(T_instr_list *L, bool isRoot);

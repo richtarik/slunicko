@@ -17,7 +17,7 @@ static T_instr_list *iList;
 static IntStack *func_stack;
 
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
-int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
+int generator(T_instr_list *L, bool isRoot) {
 	if (!L) {
 		return 1;
 	}
@@ -60,7 +60,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 				break;
 
 			//Logicke operace
-			
+
 			case T_AND:
 			case T_OR:
 			case T_NOT:
@@ -77,20 +77,20 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 				break;
 
 			//Vstup a vystup
-			
+
 			case T_IN:
 			case T_OUT:
 				listInsert(iList, T);
 				break;
 
 			//Zalkadni "cykly"
-			
+
 			case T_IF:
 				error = generator(T->address1, false);
 				if (error) {
 					listFree(L);
 					listFree(iList);
-					return error:
+					return error;
 				}
 				S->operation = T_JMPZD;
 				S->result = label;
@@ -100,7 +100,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 				if (error) {
 					listFree(L);
 					listFree(iList);
-					return error:
+					return error;
 				}
 				if (T->result) {
 					R->operation = T_JMPD;
@@ -116,7 +116,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 						listFree(L);
 						listFree(iList);
 						error_f(ERROR_INTERN);
-						return error:
+						return error;
 					}
 					R->operation = T_LABEL;
 					listInsert(iList, R);
@@ -133,7 +133,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 					listFree(L);
 					listFree(iList);
 					error_f(ERROR_INTERN);
-					return error:
+					return error;
 				}
 				R->operation = T_JMPZD;
 				R->result = label;
@@ -144,16 +144,16 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 					listFree(L);
 					listFree(iList);
 					error_f(ERROR_INTERN);
-					return error:
+					return error;
 				}
-				S->operation = T_JMPU;
+				S->operation = T_JMPD;
 				listInsert(iList, S);
 				R->operation = T_LABEL;
 				listInsert(iList, R);
 				break;
 
 			//funkce
-			
+
 			case T_FUNC:
 				R->operation = T_FSTART;
 				R->address1 = T->result;
@@ -168,7 +168,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 					listFree(L);
 					listFree(iList);
 					error_f(ERROR_INTERN);
-					return error:
+					return error;
 				}
 				listInsert(iList, S);
 				break;
@@ -180,12 +180,12 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 				listInsert(iList, S);
 				break;
 
-			case default:
+			default:
 				listFree(L);
 				return 1;
 		}
 
-		if (L->Active->nextItem == NULL) {
+		if (L->Active->next_item == NULL) {
 			break;
 		}
 	}
@@ -195,7 +195,7 @@ int generator(T_instr_list *L, bool isRoot, VariableStack vStack) {
 	memory_manager_free_one(S);
 	memory_manager_free_one(R);
 	if (isRoot) {
-		error = interpret(iList, vStack);
+		error = interpret(iList);
 		listFree(iList);
 		if (error)
 			error_f(ERROR_INTERN);

@@ -121,7 +121,21 @@ typedef enum {
 	token_jmpd,
 	token_fstart,
 	token_fjmp,
-	token_flabel
+	token_flabel,
+	token_push,
+	token_pull,
+	token_mov,
+	token_func,
+	//vestavene funkce
+	token_iin,
+	token_din,
+	token_sin,
+	token_out,
+	token_length,
+	token_substr,
+	token_compare,
+	token_find,
+	token_sort
 
 } token_type;
 
