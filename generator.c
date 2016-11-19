@@ -78,8 +78,20 @@ int generator(T_instr_list *L, bool isRoot) {
 
 			//Vstup a vystup
 
-			case T_IN:
+			case T_IIN:
+			case T_DIN:
+			case T_SIN:
 			case T_OUT:
+				listInsert(iList, T);
+				break;
+
+			//Vestavene funkce
+
+			case T_LENGHT:
+			case T_SUBSTR:
+			case T_COMPARE:
+			case T_FIND:
+			case T_SORT:
 				listInsert(iList, T);
 				break;
 
