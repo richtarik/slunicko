@@ -2,6 +2,7 @@
 #define _MEMORY_MANAGER_H
 
 #include <stdio.h>
+#include <malloc.h>
 #include <stdlib.h>
 #include <stdbool.h>
 

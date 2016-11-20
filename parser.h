@@ -16,4 +16,6 @@ int nontermElse();
 int nontermRozlisenieIdentifikatora();
 int nontermFunctionsArguments();
 
+bool strToVal(String *retazec, value_type valType, union T_value * valStruct);
+
 #endif

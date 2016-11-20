@@ -130,10 +130,7 @@ void VStackPop(VariableStack* s) {
 
 T_variable* VStackGet(VariableStack* s, int offset) {
 
-    if(offset > s->top)
-    {
-        return NULL;
-    }
+
     return (&(s->data[offset]));
 }
 

@@ -7,16 +7,15 @@
 #include <ctype.h>
 #include <limits.h>
 #include <float.h>
-
 #include "error.h"
 #include "memory_manager.h"
-
+#include "struct.h"
 #define STR_LENGTH 10 // velikost pocatecni alokace pro retezec v typu String
 
 /*
  * Struktura pro datový typ String
  */
-typedef struct
+ typedef struct
 {
 	char* str; // znaky retezce se znakem \0 na konci
 	int length; // delka retezce (\0 není započítán)

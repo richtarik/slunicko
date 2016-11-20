@@ -25,7 +25,8 @@ int generator(T_instr_list *L, bool isRoot) {
 	if (isRoot) {
 		iList = memory_manager_malloc(sizeof(T_instr_list));
 		listInit(iList);
-		stackInit(func_stack, 99);
+		func_stack = memory_manager_malloc(sizeof(IntStack));
+		stackInit(func_stack, 50);
 	}
 
     int i;
@@ -44,6 +45,7 @@ int generator(T_instr_list *L, bool isRoot) {
 	}
 	while (1) {
 		T = listGetItem(L);
+
 		if (T == NULL) {
 			error_f(ERROR_INTERN);
 			return -1;
@@ -76,6 +78,13 @@ int generator(T_instr_list *L, bool isRoot) {
 			case T_LESS:
 				listInsert(iList, T);
 				break;
+
+            //Zasobnikove instrukce
+            case T_PUSH:
+            case T_POP:
+            case T_MOV:
+                listInsert(iList, T);
+                break;
 
 			//Vstup a vystup
 
@@ -198,10 +207,10 @@ int generator(T_instr_list *L, bool isRoot) {
 				listFree(L);
 				return 1;
 		}
-
 		if (L->Active->next_item == NULL) {
 			break;
 		}
+		listNext(L);
 	}
 	stackDelete_and_free(func_stack);
 	listFree(L);
@@ -210,7 +219,6 @@ int generator(T_instr_list *L, bool isRoot) {
 	memory_manager_free_one(R);
 	if (isRoot) {
 		error = interpret(iList);
-		listFree(iList);
 		if (error)
 			error_f(ERROR_INTERN);
 		return error;

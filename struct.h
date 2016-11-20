@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "str.h"
+
 //#include "ial.h"
 
 /* todo Tokens for: ???
@@ -159,11 +159,12 @@ typedef enum {
 	BOOLEAN
 } value_type;
 
+typedef struct String str;
 //Svaz promennych pro hodnoty ruznych datovych typu
 union T_value {
 	int value_int;
 	double value_double;
-	String* value_String;
+	str* value_String;
 	bool value_bool;
 } value_struct;
 
@@ -217,4 +218,6 @@ typedef enum
     in_return,
 }expr_in;
 
+VariableStack * sVariableGlobal;
+VariableStack * sVariableLocal;
 #endif // TOKENS_H

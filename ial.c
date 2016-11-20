@@ -36,8 +36,8 @@ void kmpGraf(String *s, int *fail)
 	int j;
 
 	fail[0] = -1;
-
-	for(int i = 1; i < s->length; i++)
+int i;
+	for(i = 1; i < s->length; i++)
 	{
 		j = fail[i - 1];
 
@@ -80,7 +80,7 @@ int kmp(String *s, String *search, int *fail)
 	{
 		return i - search->length;
 	}
-	
+
 	return -1;
 }
 
@@ -109,7 +109,8 @@ String *sort(String *s)
 
 	while(step > 0)
 	{
-		for(int i = step; i < s_tmp->length; i++)
+int i;
+		for(i = step; i < s_tmp->length; i++)
 		{
 			j = i - step;
 			while(j > -1 && s_tmp->str[j] > s_tmp->str[j + step])
@@ -155,7 +156,7 @@ hash_table_ptr ht_init(unsigned size)
 	{
 		size = 10;
 	}
-	
+
     hash_table_ptr ht;
 
     ht = (hash_table_ptr) memory_manager_malloc(sizeof(struct hash_table));
@@ -165,7 +166,8 @@ hash_table_ptr ht_init(unsigned size)
     ht->table_item = (ht_table_item_ptr*) memory_manager_malloc(size * sizeof(ht_table_item_ptr));
 
 	// inicializace položek
-    for(unsigned i = 0; i < size; i++ )
+unsigned i;
+    for(i = 0; i < size; i++ )
     {
 		ht->table_item[i] = NULL;
     }
@@ -180,7 +182,8 @@ void ht_free(hash_table_ptr ht)
 {
 	if(ht != NULL)
 	{
-		for(unsigned i = 0; i < ht->size; i++)
+unsigned i;
+		for(i = 0; i < ht->size; i++)
 		{
 			while(ht->table_item[i] != NULL)
 			{
@@ -222,7 +225,7 @@ void ht_item_func_clear(ht_item_func_ptr item)
 		memory_manager_free_one(tmp);
 		tmp = item->param;
 	}
-	
+
 	T_item_list *tmp2 = item->listItemPtr;
 
 	while(tmp2 != NULL)
@@ -245,7 +248,7 @@ ht_item_var_ptr ht_create_item_var(token_type type, int offset, bool inicialized
 	new->type = type;
     new->offset = offset;
     new->inicialized = inicialized;
-    
+
 	return new;
 }
 
@@ -259,7 +262,7 @@ ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, 
 	new->type = type;
 	new->param = param;
     new->listItemPtr = listItemPtr;
-    
+
 	return new;
 }
 

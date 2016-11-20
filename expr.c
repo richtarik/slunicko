@@ -182,7 +182,7 @@ precedence_symbol fn_char_to_numsymbol(char c)
 
 #define stack_size 20
 
-int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
+int fn_expression(FILE* sourceFile, expr_in help)
 {
     char c;
     precedence_symbol symbol_from_table;
@@ -404,7 +404,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                                         printf("error 123\n");// Todoooo error
                                         stackDelete_and_free(&zasobnik);
                                         printf("delete and free\n");
-                                        //print_stack_data(&zasobnik);
+           //                             //print_stack_data(&zasobnik);
                                         return 0; // TODO break free stack
                                     }
                                 }
@@ -414,7 +414,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                                     printf("error 123123\n");;//TODOooooooooooo error
                                     stackDelete_and_free(&zasobnik);
                                     printf("delete and free\n");
-                                    //print_stack_data(&zasobnik);
+          //                          //print_stack_data(&zasobnik);
                                     return 0; // TODO break free stack
                                 }
                             }
@@ -422,7 +422,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                             {
                                 stackDelete_and_free(&zasobnik);
                                 printf("delete and free lolik\n");
-                                //print_stack_data(&zasobnik);
+      //                          //print_stack_data(&zasobnik);
                                 return 0; // TODO break free stack
                             }
                         }
@@ -430,7 +430,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                         {
                             stackDelete_and_free(&zasobnik);
                             printf("delete and free omgg\n");
-                            //print_stack_data(&zasobnik);
+     //                       //print_stack_data(&zasobnik);
                             return 0; // TODO break free stack
                         }
                             ;
@@ -453,7 +453,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                             printf("error 123\n");// Todoooo error
                             stackDelete_and_free(&zasobnik);
                             printf("delete and free\n");
-                            //print_stack_data(&zasobnik);
+        //                    //print_stack_data(&zasobnik);
                             return 0; // TODO break free stack
                         }
                         break;
@@ -515,7 +515,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                           printf("ERROR default other symbol then +-*/ \n");
                           stackDelete_and_free(&zasobnik);
                           printf("delete and free\n");
-                          //print_stack_data(&zasobnik);
+      //                    //print_stack_data(&zasobnik);
                           return 0; // TODO break free stack
                           break;
                     }
@@ -526,7 +526,7 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
                 {
                     stackDelete_and_free(&zasobnik);
                     printf("delete and free ...\n");
-                    //print_stack_data(&zasobnik);
+    //                //print_stack_data(&zasobnik);
                     return 0; // TODO break free stack
                 }
                 break;
@@ -550,10 +550,10 @@ int fn_expression(expr_in help,ht_item_var_ptr result, ht_item_func_ptr fnce)
 
 
 void check_rule(IntStack* stack,operators Rule_symbol)
-{
-
-    Rule_symbol = Rule_symbol; // <= unused!!
-
+{	
+	
+	Rule_symbol = Rule_symbol; // <= unused!!
+	
     int topik;
     stackTop(stack,&topik);
     if(topik == operator_NONTERM)

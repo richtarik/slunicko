@@ -17,11 +17,11 @@ int interpret(T_instr_list *L) {
     double d;
     String* s;
 
-/*	 VECI PRO PREKLAD*/
+/*	 VECI PRO PREKLAD
 	VariableStack* sVariableGlobal;
 	VariableStack* sVariableLocal;
 	VStackInit(sVariableGlobal, 99);
-	VStackInit(sVariableLocal, 99);
+	VStackInit(sVariableLocal, 99);*/
 
 	bool ZeroFlag = false;
 	int frame = 0;
@@ -1058,12 +1058,6 @@ int interpret(T_instr_list *L) {
 			case T_IIN:
 				i = strReadInt();
 				POM = T->address1;
-				if (POM->isGlobal) {
-					A1 = VStackGet(sVariableGlobal, POM->offset);
-				}
-				else {
-					A1 = VStackGet(sVariableLocal, frame + POM->offset);
-				}
 				A1->type = INT;
 				A1->value.value_int = i;
 				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
@@ -1071,13 +1065,6 @@ int interpret(T_instr_list *L) {
 
 			case T_DIN:
 				d = strReadDouble();
-				POM = T->address1;
-				if (POM->isGlobal) {
-					A1 = VStackGet(sVariableGlobal, POM->offset);
-				}
-				else {
-					A1 = VStackGet(sVariableLocal, frame + POM->offset);
-				}
 				A1->type = DOUBLE;
 				A1->value.value_double = d;
 				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
@@ -1086,12 +1073,6 @@ int interpret(T_instr_list *L) {
 			case T_SIN:
 				s = strReadString();
 				POM = T->address1;
-				if (POM->isGlobal) {
-					A1 = VStackGet(sVariableGlobal, POM->offset);
-				}
-				else {
-					A1 = VStackGet(sVariableLocal, frame + POM->offset);
-				}
 				A1->type = STRING;
 				A1->value.value_String = s;
 				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
@@ -1123,6 +1104,9 @@ int interpret(T_instr_list *L) {
 				POM = T->address1;
 				if (POM->isGlobal) {
 					A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+                    A1 = VStackGet(sVariableLocal, frame + POM->offset);
 				}
 				i = strLength(A1->value.value_String);
 				A2->type = INT;
@@ -1319,7 +1303,7 @@ int interpret(T_instr_list *L) {
 
 		}
 		if (L->Active->next_item == NULL) {
-			memory_manager_free_one(T);
+            memory_manager_free_one(T);
 			memory_manager_free_one(S);
 			memory_manager_free_one(A1);
 			memory_manager_free_one(A2);
