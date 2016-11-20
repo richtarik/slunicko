@@ -15,13 +15,13 @@
 int interpret(T_instr_list *L) {
     int i;
     double d;
-    str* s;
+    String* s;
 
-/*	 VECI PRO PREKLAD
+/*	 VECI PRO PREKLAD*/
 	VariableStack* sVariableGlobal;
 	VariableStack* sVariableLocal;
 	VStackInit(sVariableGlobal, 99);
-	VStackInit(sVariableLocal, 99);*/
+	VStackInit(sVariableLocal, 99);
 
 	bool ZeroFlag = false;
 	int frame = 0;
@@ -1307,7 +1307,7 @@ int interpret(T_instr_list *L) {
 					frame = 0;
 				}
 				else {
-					frame = stackGet(offset_stack);
+					stackTop(offset_stack, &frame);
 				}
 				break;
 
