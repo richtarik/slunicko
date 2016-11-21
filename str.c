@@ -239,7 +239,7 @@ void strCopy(String *s1, String *s2)
  */
 String *strSubstr(String *s, int i, int n)
 {
-	if(s == NULL || i > strLength(s) || i < 0 || n < 0)
+	if(s == NULL || i >= strLength(s) || i < 0 || n < 0)
 	{
 		error_f(ERROR_OTHER);
 	}
