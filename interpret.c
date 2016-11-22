@@ -17,12 +17,6 @@ int interpret(T_instr_list *L) {
     double d;
     String* s;
 
-/*	 VECI PRO PREKLAD
-	VariableStack* sVariableGlobal;
-	VariableStack* sVariableLocal;
-	VStackInit(sVariableGlobal, 99);
-	VStackInit(sVariableLocal, 99);*/
-
 	bool ZeroFlag = false;
 	int frame = 0;
 	IntStack* offset_stack;
@@ -1278,24 +1272,16 @@ int interpret(T_instr_list *L) {
 						return 1;
 					}
 				}
-				POM = T->address1;
-				if (POM->isGlobal) {
-					A1 = VStackGet(sVariableGlobal, POM->offset);
-				}
-				else {
-					A1 = VStackGet(sVariableLocal, frame + POM->offset);
-				}
+				continue;
+
+			case T_FLABEL:
 				stackPop(offset_stack);
-				VStackSet(sVariableLocal, frame, A1->type, A1->value);
 				if (stackEmpty(offset_stack)) {
 					frame = 0;
 				}
 				else {
 					stackTop(offset_stack, &frame);
 				}
-				break;
-
-			case T_FLABEL:
 				break;
 
 			default:

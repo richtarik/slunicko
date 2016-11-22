@@ -191,21 +191,20 @@ int generator(T_instr_list *L, bool isRoot) {
 					error_f(ERROR_INTERN);
 					return error;
 				}
+				stackPop(func_stack);
 				listInsert(iList, S);
 				break;
 
 			case T_RETURN:
 				S->operation = T_FJMP;
-				S->address1 = T->result;
 				stackTop(func_stack, &i);
-				stackPop(func_stack);
 				S->result = &i;
 				listInsert(iList, S);
 				break;
 
 			default:
 				listFree(L);
-				return 1;
+				return -1;
 		}
 		if (L->Active->next_item == NULL) {
 			break;
