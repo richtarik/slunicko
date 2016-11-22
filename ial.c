@@ -226,14 +226,8 @@ void ht_item_func_clear(ht_item_func_ptr item)
 		tmp = item->param;
 	}
 
-	T_item_list *tmp2 = item->listItemPtr;
-
-	while(tmp2 != NULL)
-	{
-		item->listItemPtr = tmp2->next_item;
-		memory_manager_free_one(tmp2);
-		tmp2 = item->listItemPtr;
-	}
+	// zrušení T_instr_list
+	listFree(item->instructionList);
 
 	memory_manager_free_one(item);
 }
@@ -255,13 +249,14 @@ ht_item_var_ptr ht_create_item_var(token_type type, int offset, bool inicialized
 /*
  * Funkce pro vytvoření itemu funkce
  */
-ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, ht_params_ptr param)
+ht_item_func_ptr ht_create_item_func(token_type type, T_instr_list *instructionList, ht_params_ptr param, int nParams)
 {
 	ht_item_func_ptr new = (ht_item_func_ptr) memory_manager_malloc(sizeof(struct ht_item_func));
 
 	new->type = type;
 	new->param = param;
-    new->listItemPtr = listItemPtr;
+    new->instructionList = instructionList;
+    new->nParams = nParams;
 
 	return new;
 }
