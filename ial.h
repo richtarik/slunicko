@@ -9,6 +9,7 @@
 #include "error.h"
 #include "memory_manager.h"
 #include "str.h"
+#include "instrList.h"
 
 /*
  * Funkce pro vyhledavani podretezce v retezci
@@ -36,7 +37,8 @@ typedef struct ht_params {
 typedef struct ht_item_func {
 	token_type type; // "struct.h", return type
 	ht_params_ptr param; // parametry funkce
-	T_item_list *listItemPtr; //ukazatel na prvu instrukciu
+	T_instr_list *instructionList;
+	int nParams;
 } *ht_item_func_ptr;
 
 typedef struct ht_item_var {
@@ -62,7 +64,7 @@ hash_table_ptr ht_init(unsigned size);
 void ht_free(hash_table_ptr ht);
 void ht_item_func_clear(ht_item_func_ptr item);
 ht_item_var_ptr ht_create_item_var(token_type type, int offset, bool inicialized);
-ht_item_func_ptr ht_create_item_func(token_type type, T_item_list *listItemPtr, ht_params_ptr param);
+ht_item_func_ptr ht_create_item_func(token_type type, T_instr_list *instructionList, ht_params_ptr param, int nParams);
 bool ht_insert_item_var(ht_item_var_ptr item, char *key, hash_table_ptr ht);
 bool ht_insert_item_func(ht_item_func_ptr item, char *key, hash_table_ptr ht);
 ht_table_item_ptr ht_search(char *key, bool func, hash_table_ptr ht);
