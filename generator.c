@@ -19,7 +19,7 @@ static IntStack *func_stack;
 //Provadi generaci a optimalizaci vnitrniho kodu pro interpretaci
 int generator(T_instr_list *L, bool isRoot) {
 	if (!L) {
-		return 1;
+		return -1;
 	}
 
 	if (isRoot) {
@@ -67,6 +67,7 @@ int generator(T_instr_list *L, bool isRoot) {
 			case T_AND:
 			case T_OR:
 			case T_NOT:
+			    listInsert(iList, T);
 				break;
 
 			//Porovnavaci operace

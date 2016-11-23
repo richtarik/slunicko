@@ -16,22 +16,22 @@ int interpret(T_instr_list *L) {
     int i;
     double d;
     String* s;
+	T_address_code *T;
+	T_address_code *S;
+	T_variable *A1;
+	T_variable *A2;
+	T_variable *A3;
+	T_address *POM;
 
 	bool ZeroFlag = false;
 	int frame = 0;
 	IntStack* offset_stack;
 	stackInit(offset_stack, 99);
-	T_address_code *T;
-	T_address_code *S;
 	T = memory_manager_malloc(sizeof(T_address_code));
 	S = memory_manager_malloc(sizeof(T_address_code));
-	T_variable *A1;
-	T_variable *A2;
-	T_variable *A3;
 	A1 = memory_manager_malloc(sizeof(T_variable));
 	A2 = memory_manager_malloc(sizeof(T_variable));
 	A3 = memory_manager_malloc(sizeof(T_variable));
-	T_address *POM;
 	POM = memory_manager_malloc(sizeof(T_address));
 	listFirst(L);
 
