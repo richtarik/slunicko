@@ -1254,6 +1254,20 @@ int interpret(T_instr_list *L) {
 				ZeroFlag = false;
 				break;
 
+			case T_JMPU:
+				listFirst(L);
+				while (1) {
+					S = listGetItem(L);
+					if (S->operation == T_LABEL && S->result == T->result) {
+						break;
+					}
+					if (!(L->Active->next_item)) {
+						return 1;
+					}
+				}
+				ZeroFlag = false;
+				break;
+
 			//Instrukce pro funkcnost uzivatelskych funkci
 			case T_FSTART:
 			    POM = T->address1;

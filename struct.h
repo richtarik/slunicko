@@ -120,6 +120,7 @@ typedef enum {
 	token_label,
 	token_jmpzd,
 	token_jmpd,
+	token_jmpu,
 	token_fstart,
 	token_fjmp,
 	token_flabel,

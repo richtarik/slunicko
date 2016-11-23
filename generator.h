@@ -52,6 +52,7 @@
 #define T_LABEL token_label
 #define T_JMPZD token_jmpzd
 #define T_JMPD token_jmpd
+#define T_JMPU token_jmpu
 #define T_FSTART token_fstart
 #define T_FJMP token_fjmp
 #define T_FLABEL token_flabel

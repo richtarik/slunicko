@@ -168,7 +168,7 @@ int generator(T_instr_list *L, bool isRoot) {
 					error_f(ERROR_INTERN);
 					return error;
 				}
-				S->operation = T_JMPD;
+				S->operation = T_JMPU;
 				listInsert(iList, S);
 				R->operation = T_LABEL;
 				listInsert(iList, R);
