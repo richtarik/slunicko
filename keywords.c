@@ -17,8 +17,7 @@ void f_findKeyW(T_token *token)
                          token_if, token_int, token_return, token_String_type, token_static, token_true, token_void, token_while};
 
     token->type = token_identifier;
-    int i;
-    for(i=0; i <= 17; i++)
+    for(int i=0; i <= 17; i++)
     {
         if ( ( strcmp(keywords[i],token->value) )== 0)
         {

@@ -51,6 +51,7 @@ void listInsert (T_instr_list *L, T_address_code *I) {
 	{
 		L->Active->next_item = newItem;
 		L->Active = L->Active->next_item;
+		L->Active->next_item = NULL;
 	}
 }
 

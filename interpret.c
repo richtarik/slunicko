@@ -1270,8 +1270,7 @@ int interpret(T_instr_list *L) {
 
 			//Instrukce pro funkcnost uzivatelskych funkci
 			case T_FSTART:
-			    POM = T->address1;
-				frame = POM->offset;
+			    frame = sVariableLocal->top;
 				stackPush(offset_stack, frame);
 				break;
 

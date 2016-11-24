@@ -179,7 +179,6 @@ int generator(T_instr_list *L, bool isRoot) {
 
 			case T_FUNC:
 				R->operation = T_FSTART;
-				R->address1 = T->result;
 				listInsert(iList, R);
 				S->operation = T_FLABEL;
 				S->result = label;

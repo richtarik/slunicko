@@ -36,8 +36,7 @@ FILE* sourceFile;
   */
 typedef enum {
 
-    //Arithmetic operators
-    token_asg,          // number 0 // "=" // Assignment
+     token_asg,          // number 0 // "=" // Assignment
     token_add,          // number 1 // "+" // Addition
     token_sub,          // number 2 // "-" // Subtraction
     token_mul,          // number 3 // "*" // Multiplication
@@ -157,7 +156,9 @@ typedef enum {
 	INT,
 	DOUBLE,
 	STRING,
-	BOOLEAN
+	BOOLEAN,
+	ADRESS_L,
+	ADRESS_G
 } value_type;
 
 typedef struct String str;

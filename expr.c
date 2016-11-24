@@ -182,7 +182,7 @@ precedence_symbol fn_char_to_numsymbol(char c)
 
 #define stack_size 20
 
-int fn_expression(FILE* sourceFile, expr_in help)
+int fn_expression(expr_in help,value_type * result_type, ht_item_func_ptr fnce, T_instr_list  * instrList)
 {
     char c;
     precedence_symbol symbol_from_table;
@@ -550,10 +550,10 @@ int fn_expression(FILE* sourceFile, expr_in help)
 
 
 void check_rule(IntStack* stack,operators Rule_symbol)
-{	
-	
+{
+
 	Rule_symbol = Rule_symbol; // <= unused!!
-	
+
     int topik;
     stackTop(stack,&topik);
     if(topik == operator_NONTERM)

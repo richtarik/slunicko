@@ -1,14 +1,12 @@
-class main
+class Main
 {
-	static int run(int a, int b)
+	static int q;	
+	static String b;
+	static String x;
+	static boolean aa;
+		
+	static void run()
 	{
 
 	}
-	static void fuck(int a, int b)
-	{
-		
-	}
-	static String x;
-	static int y = 5;
-	static int y = 5;
 }

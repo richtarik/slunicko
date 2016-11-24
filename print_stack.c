@@ -21,38 +21,37 @@ char int_to_operator(int i)
   switch(i)
   {
     case 0 : return'-';    // / Unary minus
-    case  1: return'=';    // Assignment
-    case  2: return'+';    // Addition
-    case  3: return'-';    // Subtraction
-    case  4: return'*';   // Multiplication
-    case  5: return'/';    // Division
-    case  6: return'%';   // Modulo
+    //case  1: return'=';    // Assignment
+    case  1: return'+';    // Addition
+    case  2: return'-';    // Subtraction
+    case  3: return'*';   // Multiplication
+    case  4: return'/';    // Division
+    case  5: return'%';   // Modulo
 
-    case  7: return'I';    //  Increment
-    case  8: return'D';   //  Decrement
+    case  6: return'I';    //  Increment
+    case  7: return'D';   //  Decrement
 
-    case  9: return'E';    //  Equal
-    case 10: return'Q';   // // Not equal
-    case 11: return'>';   // / Greater
-    case 12 : return'<';    //  Less
-    case 13 : return'G';    // / Greater or equal
-    case 14 : return'L';    // / Less or equal
+    case  8: return'E';    //  Equal
+    case 9: return'Q';   // // Not equal
+    case 10: return'>';   // / Greater
+    case 11 : return'<';    //  Less
+    case 12 : return'G';    // / Greater or equal
+    case 13 : return'L';    // / Less or equal
 
-    case 15: return'|';   // // Or
-    case 16 : return'&';    // / And
-    case 17 : return'!';    //  Not
+    case 14: return'|';   // // Or
+    case 15 : return'&';    // / And
+    case 16 : return'!';    //  Not
 
-    case 18 : return'(';    //  Parenthesis left
-    case 19 : return')';    //  Parenthesis right
-    case 20: return',';      // / ID
+    case 17 : return'(';    //  Parenthesis left
+    case 18 : return')';    //  Parenthesis right
+    case 19: return',';      // / ID
 
-    case 21: return'i';      // / ID
-    case 22 : return'f';      //  function
-    case 23 : return'$';    //  Dollar
-    case 25: return'n';      // Nonterminal
-    case 24: return'.';      // Dot
-    case 26: return'=';
-    case 27: return'<';
+    case 20: return'i';      // / ID
+    case 21 : return'f';      //  function
+    case 22 : return'$';    //  Dollar
+    case 23: return'n';      // Nonterminal
+    case 30: return'=';
+    case 31: return'<';
   }
   return 'F';
 }
@@ -63,8 +62,7 @@ void print_table(hash_table_ptr ht)
     int item_count=0;
     if(ht != NULL)
     {
-unsigned i;
-        for( i = 0; i < ht->size ; i++ )
+        for( unsigned i = 0; i < ht->size ; i++ )
         {
             ht_table_item_ptr pom_table= ht->table_item[i];
             while(pom_table != NULL)
@@ -78,6 +76,7 @@ unsigned i;
                     int typ=ht->table_item[i]->var->type;
                     printf("VARIABLE: \t \tinit:%d \t token_type:",initt,typ);
                     f_print_type(typ);
+                    printf("\t offset: %d", ht->table_item[i]->var->offset);
                     printf("\n");
                 }
                 else if(pom_table->var == NULL)
@@ -90,7 +89,7 @@ unsigned i;
                     f_print_type(typ);
                     while( pom_fnc_param != NULL)
                     {
-                        printf(" %s,",ht->table_item[i]->func->param->name);
+                        printf(" %s,",pom_fnc_param->name);
                         pom_fnc_param= pom_fnc_param->next;
                     }
                     printf("\n");
@@ -117,7 +116,7 @@ void f_print_type(int TOKENIKTYPE)
         case 39:
             printf("int\t type_num: %d\n",TOKENIKTYPE);
             break;
-        case 40:
+        case 49:
             printf("String\t type_num: %d\n",TOKENIKTYPE);
             break;
         case 41:
@@ -140,8 +139,107 @@ void list_print(T_instr_list *L)
     while (tmp != NULL)
     {
         operations=(tmp->Instruction.operation);
-        printf("ins:%d\t operations:%c\n",i,int_to_operator(operations+1));
-        tmp= (tmp->next_item);
+        printf("num:%d\t instruction/operation:",i);
+        switch(operations)
+        {
+            case token_add:
+                fprintf(stderr," add\n");
+                break;
+            case token_inc:
+                fprintf(stderr," inc\n");
+                break;
+            case token_sub:
+                fprintf(stderr," sub\n");
+                break;
+            case token_dec:
+                fprintf(stderr," dec\n");
+                break;
+            case token_mul:
+                fprintf(stderr," mul\n");
+                break;
+            case token_div:
+                fprintf(stderr," div\n");
+                break;
+            case token_and:
+                fprintf(stderr," and\n");
+                break;
+            case token_or:
+                fprintf(stderr," or\n");
+                break;
+            case token_not:
+                fprintf(stderr," not \n");
+                break;
+            case token_equ:
+                fprintf(stderr," equ\n");
+                break;
+            case token_loe:
+                fprintf(stderr," loe\n");
+                break;
+            case token_goe:
+                fprintf(stderr," goe\n");
+                break;
+            case token_neq:
+                fprintf(stderr," neq\n");
+                break;
+            case token_gre:
+                fprintf(stderr," gre\n");
+                break;
+            case token_les:
+                fprintf(stderr," les\n");
+                break;
+            case 100:
+                fprintf(stderr," T_IN \n");
+                break;
+            case 101:
+                fprintf(stderr," T_out \n");
+                break;
+            case token_if:
+                fprintf(stderr," if \n");
+                break;
+            case token_while:
+                fprintf(stderr," while\n");
+                break;
+            case 99:
+                fprintf(stderr," Function\n");
+                break;
+            case token_return:
+                fprintf(stderr," return\n");
+                break;
+            case token_label:
+                fprintf(stderr," label\n");
+                break;
+            case token_jmpzd:
+                fprintf(stderr," jmpzd\n");
+                break;
+            case token_jmpd:
+                fprintf(stderr," jmpd\n");
+                break;
+            case token_fstart:
+                fprintf(stderr," fstart\n");
+                break;
+            case token_fjmp:
+                fprintf(stderr," jmp\n");
+                break;
+            case token_flabel:
+                fprintf(stderr," flabel \n");
+                break;
+            case token_pull:
+                fprintf(stderr," POP \n");
+                break;
+            case token_push:
+                fprintf(stderr," PUSH \n");
+                break;
+            case token_mov:
+                fprintf(stderr," MOVE \n");
+                break;
+            default:
+                fprintf(stderr," I dont know \n");
+                break;
+        }
+        fprintf(stderr,"Adresa1: %d", tmp->Instruction.address1);
+        fprintf(stderr," ,Adresa2: %d", tmp->Instruction.address2);
+        fprintf(stderr," ,Adresa3: %d\n\n", tmp->Instruction.result);
+        tmp = (tmp->next_item);
         i++;
     }
     return;
@@ -167,6 +265,12 @@ void print_VStack_data(VariableStack *s)
                 break;
             case BOOLEAN:
                 printf("BOOLEAN value: %d", s->data[i].value);
+                break;
+            case ADRESS_G:
+                printf("ADRESS_G value: %d", s->data[i].value);
+                break;
+            default:
+                printf("ADRESS_L value: %d", s->data[i].value);
                 break;
         }
 
