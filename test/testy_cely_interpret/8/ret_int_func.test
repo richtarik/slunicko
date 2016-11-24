@@ -1,0 +1,11 @@
+class Main
+{
+    static void run(){
+        pocitej();
+    }
+
+    static int pocitej(){
+        int i = 4;
+        int vysledek = 5 + i;   
+    }
+}

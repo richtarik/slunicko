@@ -1,0 +1,69 @@
+class Main
+{
+	static int pokracuj = 1;
+	
+	static void run()
+	{
+		int cislo1;
+		int cislo2;
+		int vysledek;
+		String operace;
+	
+		ifj16.print("Kalkulacka\n");
+		while(Main.pokracuj != 0)
+		{
+			ifj16.print("Zadej prvni cislo: ");
+			cislo1 = ifj16.readInt();
+			ifj16.print("\n");
+			
+			ifj16.print("Zadej druhe cislo: ");
+			cislo2 = ifj16.readInt();
+			ifj16.print("\n");
+			
+			ifj16.print("Zadej znak operace (+,-,*,/): ");
+			operace = ifj16.readString();
+			ifj16.print("\n");
+			
+			vysledek = Kalkulacka.vypocet(cislo1, cislo2, operace);
+			
+			ifj16.print("\nVysledek: " + vysledek + "\n");
+			
+			ifj16.print("Pokracovat? 'n' pro konec: ");
+			String x = ifj16.readString();
+			ifj16.print("\n");
+			
+			Main.pokracuj = ifj16.compare(x, "n");
+		}
+		ifj16.print("Konec\n");
+    }
+}
+
+class Kalkulacka
+{
+	static int vypocet(int a, int b, String s)
+	{
+		int ret;
+		ret = ifj16.compare(s, "*");
+		
+		if(ret == 0)
+		{
+			return a * b;
+		}
+		
+		ret = ifj16.compare(s, "/");
+		
+		if(ret == 0)
+		{
+			return a / b;
+		}
+		
+		ret = ifj16.compare(s, "-");
+		
+		if(ret == 0)
+		{
+			return a - b;
+		}
+		
+		return a + b;
+	}
+}

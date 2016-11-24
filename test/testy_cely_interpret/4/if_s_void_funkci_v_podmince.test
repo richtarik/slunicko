@@ -1,0 +1,12 @@
+class Main
+{
+	static void run(){
+    
+		if(fce()){
+		}else{}
+    }
+    
+    static void fce(){
+    
+    }
+}

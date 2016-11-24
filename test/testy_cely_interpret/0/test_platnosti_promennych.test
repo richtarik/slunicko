@@ -1,0 +1,15 @@
+class Main
+{
+	static int i = 0;
+	
+    static void run(){
+    
+        ifj16.print("Static int i (pristup pres Main.i) = " + Main.i + "\n");
+        ifj16.print("Static int i (pristup pres i) = " + i + "\n");
+        
+        int i = 1;
+        
+        ifj16.print("Definuji promennou i s hodnotou: " + i + "\n");
+        ifj16.print("Static int i (pristup pres Main.i) = " + Main.i + "\n");
+    }
+}

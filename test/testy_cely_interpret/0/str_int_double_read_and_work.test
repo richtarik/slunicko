@@ -1,0 +1,48 @@
+class Main
+{
+	static int static_i;
+	static double static_d;
+	static String static_s;
+
+	static void run()
+	{
+		ifj16.print("Zadej retezec: ");
+		String s = ifj16.readString();
+		ifj16.print("\n");
+		ifj16.print(s);
+
+		ifj16.print("\nZadej podretezec k vyhledani: ");
+		String s1 = ifj16.readString();
+		ifj16.print("\n");
+		int ret = ifj16.find(s, s1);
+
+		if(ret > -1)
+		{
+			ifj16.print("Retezec: '" + s1 + "' se nachazi na " + ret + " pozici.\n");
+		}
+		else
+		{
+			ifj16.print("Neni podretezec retezce '" + s + "'.\n");
+		}
+
+		String s2 = ifj16.sort(s1);
+		ifj16.print("Serazeny podretezec: ");
+		ifj16.print(s2);
+		ifj16.print("\n");
+
+		ifj16.print("Zadej cislo int: ");
+		int i = ifj16.readInt();
+		ifj16.print("\n");
+		ifj16.print(i);
+
+		ifj16.print("\nZadej cislo double: ");
+		double d = ifj16.readDouble();
+		ifj16.print(d);
+
+		Main.static_i = i;
+		Main.static_d = d;
+		Main.static_s = s;
+
+		ifj16.print("\nString: " + static_s + "\nint: " + static_i + "\ndouble: " + static_d + "\n");
+	}
+}

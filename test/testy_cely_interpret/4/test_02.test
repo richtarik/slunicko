@@ -1,0 +1,13 @@
+class Main
+{
+    static void run(){
+        double a = 12.6;
+        int b = 2;
+        pocitej(a, b);
+    }
+    static int pocitej(int a, int b){
+        int vysledek = 0;
+        vysledek = a + b;
+        return vysledek;
+    }
+}

@@ -1,0 +1,56 @@
+class Main
+{
+	static void run(){
+    
+		int i = 1;
+		int j = 2;
+		
+		ifj16.print("Test aritmetickych operatoru.\n");
+		
+		if(i < j)
+		{
+			if(i <= j)
+			{
+				if(j > i)
+				{
+					if(j != i)
+					{
+						i = 2;
+						
+						if(j == i)
+						{
+							if(j >= i)
+							{
+								ifj16.print("OK\n");
+							}
+							else
+							{
+								ifj16.print("Chyba\n");
+							}
+						}
+						else
+						{
+							ifj16.print("Chyba\n");
+						}
+					}
+					else
+					{
+						ifj16.print("Chyba\n");
+					}
+				}
+				else
+				{
+					ifj16.print("Chyba\n");
+				}
+			}
+			else
+			{
+				ifj16.print("Chyba\n");
+			}
+		}
+		else
+		{
+			ifj16.print("Chyba\n");
+		}
+    }
+}
