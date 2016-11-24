@@ -211,13 +211,13 @@ int generator(T_instr_list *L, bool isRoot) {
 		}
 		listNext(L);
 	}
-	stackDelete_and_free(func_stack);
 	listFree(L);
 	memory_manager_free_one(T);
 	memory_manager_free_one(S);
 	memory_manager_free_one(R);
 	if (isRoot) {
 		error = interpret(iList);
+        stackDelete_and_free(func_stack);
 		if (error)
 			error_f(ERROR_INTERN);
 		return error;

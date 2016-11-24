@@ -22,10 +22,11 @@ int interpret(T_instr_list *L) {
 	T_variable *A2;
 	T_variable *A3;
 	T_address *POM;
+	IntStack* offset_stack;
 
 	bool ZeroFlag = false;
 	int frame = 0;
-	IntStack* offset_stack;
+	offset_stack = memory_manager_malloc(sizeof(IntStack));
 	stackInit(offset_stack, 99);
 	T = memory_manager_malloc(sizeof(T_address_code));
 	S = memory_manager_malloc(sizeof(T_address_code));
