@@ -1,0 +1,22 @@
+class Main
+{
+    static void run(){
+	int i = 0;
+	int j = 10;
+        
+	ifj16.print("i = " + i + "\n");
+	ifj16.print("j = " + j + "\n");
+
+	++i;
+	--j;
+
+	ifj16.print("++i = " + i + "\n");
+	ifj16.print("--j = " + j + "\n");
+
+	i++;
+	j--;
+
+	ifj16.print("i++ = " + i + "\n");
+	ifj16.print("j-- = " + j + "\n");
+    }
+}

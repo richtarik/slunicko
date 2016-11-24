@@ -1,0 +1,14 @@
+class Main
+{
+	static void run()
+	{
+		ifj16.print("Spravna delka: 3\n");
+		int delka = ifj16.length("x\nz");
+		ifj16.print("Vracena delka: " + delka + "\n");
+		
+		ifj16.print("\nSpravna delka: 3\n");
+		String s = "x\nz";
+		delka = ifj16.length(s);
+		ifj16.print("Vracena delka: " + delka + "\n");
+	}
+}

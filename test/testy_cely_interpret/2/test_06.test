@@ -1,0 +1,7 @@
+class Main{
+    stati int static_i;
+
+    static void run(){
+    
+    }
+}

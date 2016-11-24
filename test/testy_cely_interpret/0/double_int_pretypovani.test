@@ -1,0 +1,29 @@
+class Main
+{
+
+	static void run()
+	{
+		double d2;
+		int i2;
+
+		ifj16.print("Zadej cislo int: ");
+		int i = ifj16.readInt();
+		ifj16.print("\n");
+		ifj16.print(i);
+
+		ifj16.print("\nZadej cislo double: ");
+		double d = ifj16.readDouble();
+		ifj16.print("\n");
+		ifj16.print(d);
+
+		d2 = i;
+		i2 = d;
+
+		ifj16.print("Double pretypovan na int: " + i2 + "\nint pretypovan na double: " + d2 + "\n");
+
+		double d3 = i + i2;
+		int i3 = d * d2;
+
+		ifj16.print("Soucet dvou typu int pretypovan na double: " + d3 + "\nvynasoubeni dvou typu double pretypovano na int: " + i3 + "\n");
+	}
+}

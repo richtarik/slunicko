@@ -1,0 +1,28 @@
+class Main
+{
+    static void run(){
+	int i = 0;
+	int j = 10;
+        
+	ifj16.print("i = " + i + "\n");
+	ifj16.print("j = " + j + "\n");
+
+	int k = i++ + --j;
+
+	ifj16.print("k = i++ + --j <=> " + k + "\n");
+	ifj16.print("i = " + i + "\n");
+	ifj16.print("j = " + j + "\n");
+
+	k = --i * j++ + k;
+
+	ifj16.print("k = --i * j++ + k <=> " + k + "\n");
+	ifj16.print("i = " + i + "\n");
+	ifj16.print("j = " + j + "\n");
+
+	k = (--j + j--) / ++i;
+
+	ifj16.print("k = (--j + j--) / ++i <=> " + k + "\n");
+	ifj16.print("i = " + i + "\n");
+	ifj16.print("j = " + j + "\n");
+    }
+}
