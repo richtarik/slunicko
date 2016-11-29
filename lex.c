@@ -1,7 +1,9 @@
 ///* File: token.h             */
 ///* Autors: Milos Molitoris,  */
-///*         Lukas Richtarik   */
-///* Login: xmolit00, xricht25 */
+///*         Lukas Richtarik,  */
+///*         Jiří Čechák	   */
+///* Login: xmolit00, xricht25,*/
+///* 		xcecha04		   */
 ///*                           */
 ///*       IFJ-Projekt         */
 ///* Datum: 29.09.2016         */
@@ -42,8 +44,10 @@ void get_token(T_token *token,FILE* sourceFile)
 {
     lexikal_state state=state_Start;
     int actChar;
-    int nty;
     token->valActsize=0;
+    bool number_flag = false;
+    bool only_dec_octal_number = false;
+    char str[50];
 
     if(token_buffer != NULL)
     {
@@ -167,11 +171,6 @@ void get_token(T_token *token,FILE* sourceFile)
                          break;
                      default:
 						error_f(ERROR_LEX);
-                         //free_token(token);
-                         //token->type= token_error;
-                         //return;
-                         //TODO iny znak chyba
-                         // break;
                      }
                  }
                  //new read - fgetc
@@ -279,10 +278,6 @@ void get_token(T_token *token,FILE* sourceFile)
                 {
                     ungetc(actChar,sourceFile); // ?? je to potreba ??
                     error_f(ERROR_LEX);
-                    //free_token(token);
-                    //token->type= token_error;
-                    //fprintf(stderr, "ERROR nepovoleny znak | nieje ||\n");
-                    //return;
                 }
             case state_And:
                 if(actChar == '&')
@@ -294,34 +289,61 @@ void get_token(T_token *token,FILE* sourceFile)
                 {
                     ungetc(actChar,sourceFile); // ?? je to potreba ??
                     error_f(ERROR_LEX);
-                    //free_token(token);
-                    //fprintf(stderr, "ERROR nepovoleny znak & nieje &&\n");
-                    //token->type= token_error;
-                    //TODO chyba alebo bitove operacie
-                    //return;
                 }
 
             case state_Number: //TODO pocitadlo cislic - rozdelovat int a double ??
-
-                if( isdigit(actChar) )
+				
+                if(isdigit(actChar))
                 {
-                    if(token->value[0] == '0')  //TODO vymaz to pre rozsirenie oktal inak ok
-                        token->valActsize=0;
+					// osmickove cislo
+                    if(token->value[0] == '0')
+                    {
+						if(actChar > '7')
+						{
+							error_f(ERROR_LEX);
+						}
+						
+						if(actChar == '0')
+						{
+							state = state_Octal_prepare;
+							break;
+						}
+						
+						state = state_Octal;
+						token->value[0] = '\0';
+						token->valActsize = 0;
+					}
 
                     f_addChar(actChar,token);
                 }
+                // binarni cislo
+                else if(token->value[0] == '0' && actChar == 'b' && !only_dec_octal_number)
+                {
+					state = state_Bin_first;
+					token->value[0] = '\0';
+					token->valActsize = 0;
+				}
+				// sestnactkove cislo
+				else if(token->value[0] == '0' && actChar == 'x' && !only_dec_octal_number)
+                {
+					state = state_Hex;
+					token->value[0] = '\0';
+					token->valActsize = 0;
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					only_dec_octal_number = true;
+					break;
+				}
                 else if (actChar == 'e' || actChar == 'E')
                 {
                     state=state_Double_exp_1;
 					f_addChar(actChar,token);
                 }
-                else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
+                else if ( isalpha(actChar) || actChar == '$')
                 {
 					error_f(ERROR_LEX);
-                    //free_token(token);
-                    //fprintf(stderr, "ERROR znak nieje sucast cisla state_Number\n");
-                    //token->type=token_error;
-                    //return;
                 }
                 else if (actChar == '.')
                 {
@@ -330,35 +352,40 @@ void get_token(T_token *token,FILE* sourceFile)
                 }
                 else
                 {// iny -> nepovolenz znak v dalsom nacitany nastane chyba ak bude nejaky operator vsetko je ok
+                    
+                    if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+                    
                     ungetc(actChar,sourceFile);
                     token->type=token_number_int;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
                     return;
                 }
+                number_flag = false;
+                break;
+                
             case state_Double_dot:
                 if( isdigit(actChar) )
                 {
                     state=state_Double;
                     f_addChar(actChar,token);
-                } // TODO skontroluj ci po bodke musi ist znak
-                else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
+                }
+                else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+                else
                 {
 					error_f(ERROR_LEX);
-                    //free_token(token);
-                    //fprintf(stderr, "ERROR znak nieje sucast cisla state_Double_dot\n");
-                    //token->type=token_error;
-                    //return;
 
                 }
-                else
-                {  // TODO chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
-                    ungetc(actChar,sourceFile);
-                    token->type=token_number_double;
-                    token->value[token->valActsize] = '\0';
-                    token->valActsize=0;
-                    return;
-                }
+                number_flag = false;
+                break;
+                
             case state_Double:
                 if( isdigit(actChar) )
                 {
@@ -369,31 +396,48 @@ void get_token(T_token *token,FILE* sourceFile)
                     state=state_Double_exp_1;
                     f_addChar(actChar,token);
                 }
-                else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
+                else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+                else if ( isalpha(actChar) || actChar == '$')
                 {
 					error_f(ERROR_LEX);
-                    //free_token(token);
-                    //fprintf(stderr, "ERROR znak nieje sucast cisla state_Double\n");
-                    //token->type=token_error;
-                    //return;
-
                 }
                 else
                 {  //ak pride operator ok je to cislo ale ak pride iny znaky -> error
+					
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
                     ungetc(actChar,sourceFile);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
                     return;
                 }
+                number_flag = false;
+                break;
+                
             case state_Double_exp_1:
-	    // musi byt nejake cislo alebo znak inak chyba!!
-		        nty=token->valActsize;
-                if(isdigit(actChar) )
+				if(actChar == '0')
+				{
+					state = state_Double_sign_zero;
+					f_addChar(actChar,token);
+				}
+                else if(isdigit(actChar) )
                 {
                     state=state_Double_exp;
                     f_addChar(actChar,token);
                 }
+                else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
                 else if (actChar == '+' || actChar == '-')
                 {
                     state=state_Double_exp_sign;
@@ -402,69 +446,596 @@ void get_token(T_token *token,FILE* sourceFile)
                 else
                 {
 					error_f(ERROR_LEX);
-                    //free_token(token);
-                    //fprintf(stderr, "ERROR po znaku E/e musi ist cislo alebo znamienko state_Double_exp_1\n");
-                    //token->type=token_error;
-                    //return;
                 }
+                number_flag = false;
+				break;
 
             case state_Double_exp:
                 if(isdigit(actChar) )
                 {
-                    state=state_Double_exp;
-		            if(token->value[nty] == '0') //todo Ok? preskakuje 0 za e-/+
-                        token->valActsize-=1;
                     f_addChar(actChar,token);
                 }
-                else if ( isalpha(actChar) || actChar == '$'|| actChar == '_' )
+                else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+                else if ( isalpha(actChar) || actChar == '$')
                 {
-                    //free_token(token);
-                    fprintf(stderr, "ERROR nepovoleny znak state_Double_exp\n");
-                    return;
+                    error_f(ERROR_LEX);
                 }
                 else
                 {  // TODO chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
+					
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
                     ungetc(actChar,sourceFile);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
                     return;
                 }
-            case state_Double_exp_sign:
-		        nty++;
-                if(isdigit(actChar) )
+                number_flag = false;
+				break;
+			
+			case state_Double_sign_zero:
+				if(actChar == '0')
+				{
+					break;
+				}
+				else if(isdigit(actChar))
+				{
+					state = state_Double_exp;
+					token->value[--token->valActsize] = '\0';
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if(isalpha(actChar) || actChar == '$')
+				{
+					error_f(ERROR_LEX);
+                }
+                else
                 {
-                    state=state_Double_exp;
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_double;
+					
+					return;
+				}
+				number_flag = false;
+				break;
+				
+            case state_Double_exp_sign:
+				if(actChar == '0')
+				{
+					state = state_Double_sign_zero;
+                    f_addChar(actChar,token);
+				}
+                else if(isdigit(actChar))
+                {
+                    state = state_Double_exp;
                     f_addChar(actChar,token);
                 }
-                else // if( isalpha(actChar) || actChar == '$'|| actChar == '_' )
-                {
+                else if(!(actChar == '_' || actChar == '0'))
+				{
 					error_f(ERROR_LEX);
-		            //free_token(token);
-                    //fprintf(stderr, "ERROR po znaku +/- musi ist cislo state_Double_exp_sign\n");
-                    //token->type=token_error;
-                    //return;
-
                 }
-                /*else
-                {  // TODO chyba ak pride operator ok je to cislo ale ak pride abcd alebo ostatne znaky -> error
-                    ungetc(actChar,sourceFile);
-                    token->type=token_number_double;
-                    token->value[token->valActsize] = '\0';
-                    token->valActsize=0;
-                    return;
-                }*/
+                break;
+                
             case state_String:
                 //f_addChar(actChar,token);
                 ungetc(actChar,sourceFile);
                 check_String(sourceFile,token);
                 token->type=token_String;
                 return;
+                
+            case state_Octal_prepare:
+				if(isdigit(actChar))
+				{
+					if(actChar == '8' || actChar == '9')
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					if(actChar != '0')
+					{
+						state = state_Octal;
+						token->value[0] = '\0';
+						token->valActsize = 0;
+						f_addChar(actChar,token);
+					}
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if (isalpha(actChar) || actChar == '$')
+				{
+					error_f(ERROR_LEX);
+				}
+				else
+				{
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_int;
+					return;
+				}
+				number_flag = false;
+				break;
+				
+			case state_Octal:
+				if(isdigit(actChar))
+				{
+					if(actChar == '8' || actChar == '9')
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if (isalpha(actChar) || actChar == '$')
+				{
+					error_f(ERROR_LEX);
+				}
+				else
+				{
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_int;
+                    
+                    // prevod na desitkove cislo
+                    
+                    long int number = strtol(token->value, NULL, 8);
+                    
+                    if(number > INT_MAX || 
+                    sprintf(str, "%li", number) < 0) // prevod na retezec
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					token->value[0] = '\0';
+					token->valActsize = 0;
+					int i = 0;
+					while(str[i] != '\0')
+					{
+						f_addChar(str[i],token);
+						i++;
+					}
+                    
+                    return;
+				}
+				number_flag = false;
+				break;
+			
+			case state_Bin_first:
+				if(actChar == '0' || actChar == '1')
+				{
+					state = state_Bin;
+					f_addChar(actChar,token);
+				}
+				else if(!(actChar == '_'))
+				{
+					error_f(ERROR_LEX);
+				}
+				break;
+				
+			case state_Bin:
+				if(actChar == '0' || actChar == '1')
+				{
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if (isalpha(actChar) || actChar == '$')
+				{
+					error_f(ERROR_LEX);
+				}
+				else
+				{
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_int;
+                    
+                    // prevod na desitkove cislo
+                    
+                    long int number = strtol(token->value, NULL, 2);
+					
+                    if(number > INT_MAX || 
+                    sprintf(str, "%li", number) < 0) // prevod na retezec
+					{
+						error_f(ERROR_LEX);
+					}
+                    
+                    token->value[0] = '\0';
+					token->valActsize = 0;
+					int i = 0;
+					while(str[i] != '\0')
+					{
+						f_addChar(str[i],token);
+						i++;
+					}
+                    
+                    return;
+				}
+				number_flag = false;
+				break;
+			
+			case state_Hex:
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					state = state_Hex_continue;
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else
+				{
+					error_f(ERROR_LEX);
+				}
+				number_flag = false;
+				break;
+				
+			case state_Hex_continue:
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if (actChar == 'p' || actChar == 'P')
+                {
+                    state = state_Hex_Pp;
+					f_addChar(actChar, token);
+                }
+                else if (actChar == '.')
+                {
+                    state = state_Hex_dot;
+					f_addChar(actChar,token);
+                }
+				else if (isalpha(actChar) || actChar == '$')
+				{
+					error_f(ERROR_LEX);
+				}
+				else
+				{
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_int;
+                    
+                    // prevod na desitkove cislo
+                    
+                    long int number = strtol(token->value, NULL, 16);
+					
+                    if(number > INT_MAX || 
+                    sprintf(token->value, "%li", number) < 0) // prevod na retezec
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					return;
+				}
+				number_flag = false;
+				break;
+			
+			case state_Hex_Pp:
+				if(actChar == '0')
+				{
+					state = state_Hex_Pp_sign_zero;
+					f_addChar(actChar,token);
+				}
+				else if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					state = state_Hex_Pp_exp;
+					f_addChar(actChar,token);
+				}
+				else if (actChar == '+' || actChar == '-')
+                {
+                    state = state_Hex_Pp_sign;
+                    f_addChar(actChar,token);
+                }
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else
+				{
+					error_f(ERROR_LEX);
+				}
+				number_flag = false;
+				break;
+			
+			case state_Hex_Pp_sign:
+				if(actChar == '0')
+				{
+					state = state_Hex_Pp_sign_zero;
+					f_addChar(actChar,token);
+				}
+				else if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					state = state_Hex_Pp_exp;
+					f_addChar(actChar,token);
+				}
+				else if(!(actChar == '_'))
+				{
+					error_f(ERROR_LEX);
+                }
+                break;
+            
+            case state_Hex_Pp_sign_zero:
+				if(actChar == '0')
+				{
+					break;
+				}
+				else if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					state = state_Hex_Pp_exp;
+					token->valActsize--;
+					token->value[token->valActsize] = '\0';
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if(isalpha(actChar) || actChar == '$')
+				{
+					error_f(ERROR_LEX);
+                }
+                else
+                {
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_double;
+                    // převod na desítkové
+                    Hex_to_Dec(token);
+					return;
+				}
+				number_flag = false;
+				break;
+				
+			case state_Hex_Pp_exp:
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					f_addChar(actChar,token);
+				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if (isalpha(actChar) || actChar == '$' || actChar == '.')
+				{
+					error_f(ERROR_LEX);
+				}
+				else
+				{
+					if(number_flag) // ukonceno _ (podtrzitkem)
+					{
+						error_f(ERROR_LEX);
+					}
+					
+					ungetc(actChar,sourceFile);
+                    token->type = token_number_double;
+                    // převod na desítkové
+                    Hex_to_Dec(token);
+					return;
+				}
+				number_flag = false;
+				break;
+			
+			case state_Hex_dot:
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					f_addChar(actChar,token);
+				}
+				else if (actChar == 'p' || actChar == 'P')
+                {
+                    state = state_Hex_Pp;
+					f_addChar(actChar, token);
+                }
+				else if(!(actChar == '_'))
+				{
+					error_f(ERROR_LEX);
+				}
+				break;
         }
     }
     return;
 }
 
+/*
+ * Převod čísla v šestnáckové soustavě s exp nebo 
+ * s desetinnou částí a exp do desítkové soustavy
+ */
+void Hex_to_Dec(T_token *token)
+{
+	char str[50];
+	char str2[50];
+	bool dot_flag = false;
+	long int number;
+	long double sum = 0;
+	
+	String *s = (String*) memory_manager_malloc(sizeof(String));
+	strInit(s);
+	String *s1 = (String*) memory_manager_malloc(sizeof(String));
+	strInit(s1);
+	
+	// převod celé části
+	int i = 0;
+	while(1)
+	{
+		if(token->value[i] == '.')
+		{
+			dot_flag = true;
+			break;
+		}
+		else if(token->value[i] == 'p' || token->value[i] == 'P')
+		{
+			break;
+		}
+		strAddChar(s, token->value[i]);
+		i++;
+	}
+	
+	number = strtol(s->str, NULL, 16);
+	
+	// převod desetinné části
+	if(dot_flag)
+	{
+		i++;
+		double m = 16;
+		while(token->value[i] != 'p' && token->value[i] != 'P')
+		{
+			sum += hex_digit_to_dec_digit(token->value[i]) * (1 / m);
+			i++;
+			m *= 16;
+		}
+	}
+	
+	// spojení celé a případné desetinné části
+	sum += number;
+	
+	if(sprintf(str, "%LF", sum) < 0) // prevod na retezec
+	{
+		error_f(ERROR_LEX);
+	}
+	
+	// převod exponentu
+	i++;
+	int sign = 0;
+		
+	if(token->value[i] == '+' || token->value[i] == '-')
+	{
+		sign = token->value[i];
+		i++;
+	}
+	
+	while(token->value[i] != '\0')
+	{
+		strAddChar(s1, token->value[i]);
+		i++;
+	}
+	
+	number = strtol(s1->str, NULL, 16);
+	
+	if(sprintf(str2, "%li", number) < 0) // prevod na retezec
+	{
+		error_f(ERROR_LEX);
+	}
+	
+	// spojení částí a přidání do tokenu
+	token->value[0] = '\0';
+	token->valActsize = 0;
+	
+	i = 0;
+	while(str[i] != '\0')
+	{
+		f_addChar(str[i], token);
+		i++;
+	}
+	
+	f_addChar('e', token);
+	
+	if(sign != 0)
+	{
+		f_addChar(sign, token);
+	}
+	
+	i = 0;
+	while(str2[i] != '\0')
+	{
+		f_addChar(str2[i], token);
+		i++;
+	}
+	
+	strFree(s);
+	strFree(s1);
+}
+
+/*
+ * Převod hexadecimální číslice do decimální
+ */
+int hex_digit_to_dec_digit(char c)
+{
+	switch(c)
+	{
+		case 'a': 
+		case 'A': return 10;
+		case 'b': 
+		case 'B': return 11;
+		case 'c': 
+		case 'C': return 12;
+		case 'd': 
+		case 'D': return 13;
+		case 'e': 
+		case 'E': return 14;
+		case 'f': 
+		case 'F': return 15;
+		default: return c - '0'; // převod znaku číslice na skutečnou číslici
+	}
+}
 
 void comment_in_block (FILE* sourceFile)
 {
@@ -563,43 +1134,41 @@ void check_escape(FILE* sourceFile, T_token* actToken)
             f_addChar('\\',actToken);
             return;
         default:
-            if( (nextChar) >='0' && (nextChar) < '9' )
+            if(nextChar >= '0' && nextChar <= '3')
             {
-		        substring[0]=nextChar;
-                convert_result=(nextChar-48)*8*8; // x*(8^2)
-                nextChar=fgetc(sourceFile);
-                if( (nextChar) >= '0' && (nextChar) < '9' )
-                {
-		            substring[1]=nextChar;
-                    convert_result+=(nextChar-48)*8; // x*(8^1)
-                    nextChar=fgetc(sourceFile);
-                    if( (nextChar) >= '0' && (nextChar) < '9' )
-                    {
-                        convert_result+=nextChar-48; //x* 8^0== x*1
-                        f_addChar( convert_result ,actToken);
-                    }
-                    else
-                    {
-			            f_addChar('\\',actToken);
-                        f_addChar(substring[0],actToken);
-                        f_addChar(substring[1],actToken);
-                        f_addChar(nextChar,actToken);
-                    }
-                }
-                else
-                {
-                    f_addChar('\\',actToken);
-                    f_addChar(substring[0],actToken);
-                    f_addChar(nextChar,actToken);
-                }
+				substring[0] = nextChar;
+				nextChar = fgetc(sourceFile);
+				
+				if(substring[0] == '3' && nextChar > '7')
+				{
+					break;
+				}
+				
+				if(isdigit(nextChar))
+				{
+					substring[1] = nextChar;
+					nextChar = fgetc(sourceFile);
+					
+					if(!isdigit(nextChar) || 
+					(substring[0] == '3' && substring[1] == '7' && nextChar > '7') ||
+					(substring[0] == '0' && substring[1] == '0' && nextChar == '0'))
+					{
+						break;
+					}
+					
+					convert_result = (substring[0] - 48) * 8 * 8 + (substring[1] - 48) * 8 + (nextChar - 48);
+					
+					if(convert_result > 0 && convert_result < 378)
+					{
+						f_addChar(convert_result, actToken);
+						return;
+					}
+				}
             }
-            else
-            {
-                f_addChar('\\',actToken);
-                f_addChar(nextChar,actToken);
-            }
-            return;
+            break;
      }
+     
+     error_f(ERROR_LEX);
 
 }
 

@@ -1,6 +1,8 @@
-///* File: lex.h              */
-///* Autor: Milos Molitoris    */
-///* Login: xmolit00           */
+///* File: lex.h               */
+///* Autors: Milos Molitoris,  */
+///* 		 Jiří Čechák	   */
+///* Login: xmolit00,          */
+///*        xcecha04           */
 ///*                           */
 ///*       IFJ-Projekt         */
 ///* Datum: 29.09.2016         */
@@ -14,10 +16,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h> // isdigit,isspace,...
+#include <limits.h> // INT_MAX
+
+#include "str.h"
 #include "struct.h"
 #include "keywords.h"
 #include "error.h"
 #include "memory_manager.h"
+
 #define ALLOC_BLOCK 20
 #define base_token_size 20
 
@@ -31,6 +37,8 @@ void f_Identifier(FILE* sourceFile, T_token *actToken);
 void f_addChar (char symbol, T_token *token);
 void comment_in_block(FILE* sourceFile);
 void comment_in_line(FILE* sourceFile);
+void Hex_to_Dec(T_token *token);
+int hex_digit_to_dec_digit(char c);
 
 typedef enum
 {
@@ -52,6 +60,18 @@ typedef enum
     state_Double_exp,
     state_Double_exp_1,
     state_Double_exp_sign,
+    state_Double_sign_zero,
+    state_Octal_prepare,
+    state_Octal,
+    state_Bin_first,
+    state_Bin,
+    state_Hex,
+    state_Hex_continue,
+    state_Hex_Pp,
+    state_Hex_Pp_sign,
+    state_Hex_Pp_exp,
+    state_Hex_dot,
+    state_Hex_Pp_sign_zero
 
 } lexikal_state;
 
