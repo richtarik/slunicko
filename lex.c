@@ -336,12 +336,16 @@ void get_token(T_token *token,FILE* sourceFile)
 					only_dec_octal_number = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
                 else if (actChar == 'e' || actChar == 'E')
                 {
                     state=state_Double_exp_1;
 					f_addChar(actChar,token);
                 }
-                else if ( isalpha(actChar) || actChar == '$')
+                else if (isalpha(actChar) || actChar == '$')
                 {
 					error_f(ERROR_LEX);
                 }
@@ -352,12 +356,6 @@ void get_token(T_token *token,FILE* sourceFile)
                 }
                 else
                 {// iny -> nepovolenz znak v dalsom nacitany nastane chyba ak bude nejaky operator vsetko je ok
-                    
-                    if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-                    
                     ungetc(actChar,sourceFile);
                     token->type=token_number_int;
                     token->value[token->valActsize] = '\0';
@@ -368,22 +366,16 @@ void get_token(T_token *token,FILE* sourceFile)
                 break;
                 
             case state_Double_dot:
-                if( isdigit(actChar) )
+                if(isdigit(actChar))
                 {
-                    state=state_Double;
+                    state = state_Double;
                     f_addChar(actChar,token);
                 }
-                else if(actChar == '_')
-				{
-					number_flag = true;
-					break;
-				}
                 else
                 {
 					error_f(ERROR_LEX);
 
                 }
-                number_flag = false;
                 break;
                 
             case state_Double:
@@ -391,29 +383,27 @@ void get_token(T_token *token,FILE* sourceFile)
                 {
                     f_addChar(actChar,token);
                 }
-                else if (actChar == 'e' || actChar == 'E')
-                {
-                    state=state_Double_exp_1;
-                    f_addChar(actChar,token);
-                }
                 else if(actChar == '_')
 				{
 					number_flag = true;
 					break;
 				}
+                else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
+                else if (actChar == 'e' || actChar == 'E')
+                {
+					state=state_Double_exp_1;
+                    f_addChar(actChar,token);
+                }
                 else if ( isalpha(actChar) || actChar == '$')
                 {
 					error_f(ERROR_LEX);
                 }
                 else
                 {  //ak pride operator ok je to cislo ale ak pride iny znaky -> error
-					
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
-                    ungetc(actChar,sourceFile);
+					ungetc(actChar,sourceFile);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
@@ -428,26 +418,20 @@ void get_token(T_token *token,FILE* sourceFile)
 					state = state_Double_sign_zero;
 					f_addChar(actChar,token);
 				}
-                else if(isdigit(actChar) )
+                else if(isdigit(actChar))
                 {
-                    state=state_Double_exp;
+                    state = state_Double_exp;
                     f_addChar(actChar,token);
                 }
-                else if(actChar == '_')
-				{
-					number_flag = true;
-					break;
-				}
                 else if (actChar == '+' || actChar == '-')
                 {
-                    state=state_Double_exp_sign;
+                    state = state_Double_exp_sign;
                     f_addChar(actChar,token);
                 }
                 else
                 {
 					error_f(ERROR_LEX);
                 }
-                number_flag = false;
 				break;
 
             case state_Double_exp:
@@ -460,19 +444,17 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
                 else if ( isalpha(actChar) || actChar == '$')
                 {
                     error_f(ERROR_LEX);
                 }
                 else
                 {  // TODO chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
-					
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
-                    ungetc(actChar,sourceFile);
+					ungetc(actChar,sourceFile);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
@@ -497,17 +479,16 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if(isalpha(actChar) || actChar == '$')
 				{
 					error_f(ERROR_LEX);
                 }
                 else
                 {
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_double;
 					
@@ -527,7 +508,7 @@ void get_token(T_token *token,FILE* sourceFile)
                     state = state_Double_exp;
                     f_addChar(actChar,token);
                 }
-                else if(!(actChar == '_' || actChar == '0'))
+                else
 				{
 					error_f(ERROR_LEX);
                 }
@@ -561,17 +542,16 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if (isalpha(actChar) || actChar == '$')
 				{
 					error_f(ERROR_LEX);
 				}
 				else
 				{
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_int;
 					return;
@@ -594,17 +574,16 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if (isalpha(actChar) || actChar == '$')
 				{
 					error_f(ERROR_LEX);
 				}
 				else
 				{
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_int;
                     
@@ -638,7 +617,7 @@ void get_token(T_token *token,FILE* sourceFile)
 					state = state_Bin;
 					f_addChar(actChar,token);
 				}
-				else if(!(actChar == '_'))
+				else
 				{
 					error_f(ERROR_LEX);
 				}
@@ -654,17 +633,16 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if (isalpha(actChar) || actChar == '$')
 				{
 					error_f(ERROR_LEX);
 				}
 				else
 				{
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_int;
                     
@@ -700,16 +678,10 @@ void get_token(T_token *token,FILE* sourceFile)
 					state = state_Hex_continue;
 					f_addChar(actChar,token);
 				}
-				else if(actChar == '_')
-				{
-					number_flag = true;
-					break;
-				}
 				else
 				{
 					error_f(ERROR_LEX);
 				}
-				number_flag = false;
 				break;
 				
 			case state_Hex_continue:
@@ -724,14 +696,18 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if (actChar == 'p' || actChar == 'P')
                 {
-                    state = state_Hex_Pp;
+					state = state_Hex_Pp;
 					f_addChar(actChar, token);
                 }
                 else if (actChar == '.')
                 {
-                    state = state_Hex_dot;
+					state = state_Hex_dot_first;
 					f_addChar(actChar,token);
                 }
 				else if (isalpha(actChar) || actChar == '$')
@@ -740,11 +716,6 @@ void get_token(T_token *token,FILE* sourceFile)
 				}
 				else
 				{
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_int;
                     
@@ -776,16 +747,20 @@ void get_token(T_token *token,FILE* sourceFile)
 					state = state_Hex_Pp_exp;
 					f_addChar(actChar,token);
 				}
-				else if (actChar == '+' || actChar == '-')
-                {
-                    state = state_Hex_Pp_sign;
-                    f_addChar(actChar,token);
-                }
 				else if(actChar == '_')
 				{
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
+				else if (actChar == '+' || actChar == '-')
+                {
+                    state = state_Hex_Pp_sign;
+                    f_addChar(actChar,token);
+                }
 				else
 				{
 					error_f(ERROR_LEX);
@@ -831,19 +806,19 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if(isalpha(actChar) || actChar == '$')
 				{
 					error_f(ERROR_LEX);
                 }
                 else
                 {
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_double;
+                    
                     // převod na desítkové
                     Hex_to_Dec(token);
 					return;
@@ -863,19 +838,19 @@ void get_token(T_token *token,FILE* sourceFile)
 					number_flag = true;
 					break;
 				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if (isalpha(actChar) || actChar == '$' || actChar == '.')
 				{
 					error_f(ERROR_LEX);
 				}
 				else
 				{
-					if(number_flag) // ukonceno _ (podtrzitkem)
-					{
-						error_f(ERROR_LEX);
-					}
-					
 					ungetc(actChar,sourceFile);
                     token->type = token_number_double;
+                    
                     // převod na desítkové
                     Hex_to_Dec(token);
 					return;
@@ -883,6 +858,20 @@ void get_token(T_token *token,FILE* sourceFile)
 				number_flag = false;
 				break;
 			
+			case state_Hex_dot_first:
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
+				(actChar >= 'A' && actChar <= 'F'))
+				{
+					state = state_Hex_dot;
+					f_addChar(actChar,token);
+				}
+				else
+				{
+					error_f(ERROR_LEX);
+				}
+				break;
+				
 			case state_Hex_dot:
 				if(isdigit(actChar) || 
 				(actChar >= 'a' && actChar <= 'f') || 
@@ -890,15 +879,25 @@ void get_token(T_token *token,FILE* sourceFile)
 				{
 					f_addChar(actChar,token);
 				}
+				else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
+				else if(number_flag) // předchozí znak bylo podtržítko
+				{
+					error_f(ERROR_LEX);
+				}
 				else if (actChar == 'p' || actChar == 'P')
                 {
                     state = state_Hex_Pp;
 					f_addChar(actChar, token);
                 }
-				else if(!(actChar == '_'))
+				else
 				{
 					error_f(ERROR_LEX);
 				}
+				number_flag = false;
 				break;
         }
     }

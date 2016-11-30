@@ -70,6 +70,7 @@ typedef enum
     state_Hex_Pp,
     state_Hex_Pp_sign,
     state_Hex_Pp_exp,
+    state_Hex_dot_first,
     state_Hex_dot,
     state_Hex_Pp_sign_zero
 
