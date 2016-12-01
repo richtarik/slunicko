@@ -12,14 +12,6 @@
 
 #include "lex.h"
 
-//TODO free
-//TODO Token init and check reallock ... reallock all token no only data
-
-/*TODO Prebytecné pocátecní císlice  0 v nenulovém císle vedou v rozírení BASE na oktalovou reprezentaci celého císla.
-*/
-// ignotuje pociatecne 0 aj u celych cisel -> problem pri rozsireni na oktal. TODO repair
-// OK Pro celou cást desetinného literálu i exponent platí, e prebytecné pocátecní císlice 0 jsou ignorovány. OK
-
 T_token* token_buffer=NULL; // TODO = NULL ok ?
 
 void get_back_token(T_token *token)
@@ -47,7 +39,7 @@ void get_token(T_token *token,FILE* sourceFile)
     token->valActsize=0;
     bool number_flag = false;
     bool only_dec_octal_number = false;
-    char str[50];
+    char str[1000];
 
     if(token_buffer != NULL)
     {
@@ -357,7 +349,18 @@ void get_token(T_token *token,FILE* sourceFile)
                 else
                 {// iny -> nepovolenz znak v dalsom nacitany nastane chyba ak bude nejaky operator vsetko je ok
                     ungetc(actChar,sourceFile);
-                    token->type=token_number_int;
+                    
+                    long int number = strtol(token->value, NULL, 10);
+                    
+                    if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+                    
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
                     return;
@@ -585,14 +588,21 @@ void get_token(T_token *token,FILE* sourceFile)
 				else
 				{
 					ungetc(actChar,sourceFile);
-                    token->type = token_number_int;
                     
                     // prevod na desitkove cislo
                     
-                    long int number = strtol(token->value, NULL, 8);
+                    double number = to_Dec(token, 8);
                     
-                    if(number > INT_MAX || 
-                    sprintf(str, "%li", number) < 0) // prevod na retezec
+                    if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+                    
+                    if(sprintf(str, "%.0lf", number) < 0) // prevod na retezec
 					{
 						error_f(ERROR_LEX);
 					}
@@ -644,14 +654,21 @@ void get_token(T_token *token,FILE* sourceFile)
 				else
 				{
 					ungetc(actChar,sourceFile);
-                    token->type = token_number_int;
                     
                     // prevod na desitkove cislo
                     
-                    long int number = strtol(token->value, NULL, 2);
+                    double number = to_Dec(token, 2);
 					
-                    if(number > INT_MAX || 
-                    sprintf(str, "%li", number) < 0) // prevod na retezec
+					if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+					
+                    if(sprintf(str, "%.0lf", number) < 0) // prevod na retezec
 					{
 						error_f(ERROR_LEX);
 					}
@@ -717,16 +734,32 @@ void get_token(T_token *token,FILE* sourceFile)
 				else
 				{
 					ungetc(actChar,sourceFile);
-                    token->type = token_number_int;
                     
                     // prevod na desitkove cislo
                     
-                    long int number = strtol(token->value, NULL, 16);
+                    double number = to_Dec(token, 16);
 					
-                    if(number > INT_MAX || 
-                    sprintf(token->value, "%li", number) < 0) // prevod na retezec
+					if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+					
+                    if(sprintf(str, "%.0lf", number) < 0) // prevod na retezec
 					{
 						error_f(ERROR_LEX);
+					}
+					
+					token->value[0] = '\0';
+					token->valActsize = 0;
+					int i = 0;
+					while(str[i] != '\0')
+					{
+						f_addChar(str[i],token);
+						i++;
 					}
 					
 					return;
@@ -905,24 +938,55 @@ void get_token(T_token *token,FILE* sourceFile)
 }
 
 /*
+ * Převod celého čísla do desítkové soustavy
+ */
+double to_Dec(T_token *token, int soustava)
+{
+	double number = 0;
+    int pocet = -1;
+    int i = 0;
+    double m = 1;
+    while(token->value[i] != '\0')
+    {
+		if(m > DBL_MAX) // pojistka
+		{
+			error_f(ERROR_LEX);
+		}
+		pocet++;
+		m *= soustava;
+		i++;
+	}			
+    m /= soustava;
+	i = 0;
+	while(pocet >= 0)
+	{
+		number += hex_digit_to_dec_digit(token->value[i]) * m;
+		pocet--;
+		i++;
+		m /= soustava;
+	}
+	
+	return number;
+}
+
+/*
  * Převod čísla v šestnáckové soustavě s exp nebo 
  * s desetinnou částí a exp do desítkové soustavy
  */
 void Hex_to_Dec(T_token *token)
 {
-	char str[50];
-	char str2[50];
+	char str[1000], str2[20];
+	int cela = -1;
 	bool dot_flag = false;
-	long int number;
-	long double sum = 0;
+	double number = 0;
+	double sum = 0;
 	
 	String *s = (String*) memory_manager_malloc(sizeof(String));
 	strInit(s);
-	String *s1 = (String*) memory_manager_malloc(sizeof(String));
-	strInit(s1);
 	
 	// převod celé části
 	int i = 0;
+	double m = 1;
 	while(1)
 	{
 		if(token->value[i] == '.')
@@ -934,17 +998,35 @@ void Hex_to_Dec(T_token *token)
 		{
 			break;
 		}
-		strAddChar(s, token->value[i]);
 		i++;
+		cela++;
+		if(m > DBL_MAX) // pojistka
+		{
+			error_f(ERROR_LEX);
+		}
+		m *= 16;
 	}
 	
-	number = strtol(s->str, NULL, 16);
+	m /= 16;
+	int j = 0;
+	while(cela >= 0)
+	{
+		number += hex_digit_to_dec_digit(token->value[j]) * m;
+		cela--;
+		j++;
+		m /= 16;
+	}
+	
+	if(number > DBL_MAX)
+	{
+		error_f(ERROR_LEX);
+	}
 	
 	// převod desetinné části
 	if(dot_flag)
 	{
 		i++;
-		double m = 16;
+		m = 16;
 		while(token->value[i] != 'p' && token->value[i] != 'P')
 		{
 			sum += hex_digit_to_dec_digit(token->value[i]) * (1 / m);
@@ -956,7 +1038,12 @@ void Hex_to_Dec(T_token *token)
 	// spojení celé a případné desetinné části
 	sum += number;
 	
-	if(sprintf(str, "%LF", sum) < 0) // prevod na retezec
+	if(sum > DBL_MAX)
+	{
+		error_f(ERROR_LEX);
+	}
+	
+	if(sprintf(str, "%.52lf", sum) < 0) // prevod na retezec
 	{
 		error_f(ERROR_LEX);
 	}
@@ -973,13 +1060,14 @@ void Hex_to_Dec(T_token *token)
 	
 	while(token->value[i] != '\0')
 	{
-		strAddChar(s1, token->value[i]);
+		strAddChar(s, token->value[i]);
 		i++;
 	}
 	
-	number = strtol(s1->str, NULL, 16);
+	number = strtol(s->str, NULL, 16);
 	
-	if(sprintf(str2, "%li", number) < 0) // prevod na retezec
+	if(number > INT_MAX || // jen pojistka
+	sprintf(str2, "%.0lf", number) < 0) // prevod na retezec
 	{
 		error_f(ERROR_LEX);
 	}
@@ -1010,11 +1098,10 @@ void Hex_to_Dec(T_token *token)
 	}
 	
 	strFree(s);
-	strFree(s1);
 }
 
 /*
- * Převod hexadecimální číslice do decimální
+ * Převod hexadecimální číslice na decimální číslo
  */
 int hex_digit_to_dec_digit(char c)
 {
@@ -1039,7 +1126,7 @@ int hex_digit_to_dec_digit(char c)
 void comment_in_block (FILE* sourceFile)
 {
     int c_next;
-    while( ( c_next=fgetc(sourceFile) ) ) // TODO check EOF
+    while( ( c_next=fgetc(sourceFile) ) )
     {
         if(c_next=='*')
         {
@@ -1050,16 +1137,13 @@ void comment_in_block (FILE* sourceFile)
             else
                 continue;
         }
-        else if(c_next==EOF) //TODO printf chybovy stav
+        else if(c_next==EOF)
         {
 			error_f(ERROR_LEX);
-            //fprintf(stderr, "ERROR neukonceny blokovy komentar\n");
         }
         else
             continue;
     }
-    //c_next==EOF
-    //LEX_ERROR - predcasny koniec
 }
 
 void comment_in_line(FILE* sourceFile)
@@ -1071,10 +1155,9 @@ void comment_in_line(FILE* sourceFile)
         {
             return;
         }
-        else if(c_next==EOF) //TODO printf chybovy stav
+        else if(c_next==EOF)
         {
 			error_f(ERROR_LEX);
-            //fprintf(stderr, "ERROR neukonceny komentar\n");
         }
         else
             continue;
@@ -1096,9 +1179,6 @@ void check_String(FILE* sourceFile, T_token *actToken)
         else if(actChar == EOF || actChar == '\n') //nieje to string
 	    {
 			error_f(ERROR_LEX);
-            //free_token(actToken);
-            //fprintf(stderr,"ERROR: -> neukonceny string\n");
-            //return false; //TODO pritf error chybovy stav -> warning
 	    }
 	    else
         {
@@ -1133,6 +1213,7 @@ void check_escape(FILE* sourceFile, T_token* actToken)
             f_addChar('\\',actToken);
             return;
         default:
+			// převod escape sekvence z oktal na decimal
             if(nextChar >= '0' && nextChar <= '3')
             {
 				substring[0] = nextChar;
@@ -1173,7 +1254,7 @@ void check_escape(FILE* sourceFile, T_token* actToken)
 
 void f_addChar (char symbol, T_token* token)
 {
-    if(token->valActsize + 1 >= token->valMaxsize) // TODO ked pridavam posledny znak /0 zmesti sa ??
+    if(token->valActsize + 1 >= token->valMaxsize)
     {
         token->valMaxsize += ALLOC_BLOCK;
         token->value = memory_manager_realloc(token->value, token->valMaxsize); //zvacsenie bloku pre string v tokene
@@ -1197,12 +1278,12 @@ void f_Identifier(FILE* sourceFile, T_token *actToken)
 	    actToken->type=token_class_identifier;
 	    ungetc(actChar,sourceFile);
             break;
-	}
+		}
         else
         {
 	        actToken->type=token_identifier;
             ungetc(actChar,sourceFile);
-            break; //TODOO error bad symbol (pritf actChar)-> return false ->free mem
+            break;
         }
 
     }
