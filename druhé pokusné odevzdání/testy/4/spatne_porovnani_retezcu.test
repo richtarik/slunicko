@@ -1,0 +1,13 @@
+class Main
+{
+	static void run(){
+    
+        String s1 = "Ahoj";
+        String s2 = "Cau";
+        
+        if(s1 == s2)
+        {
+			ifj16.print("WTF?");
+        }
+    }
+}

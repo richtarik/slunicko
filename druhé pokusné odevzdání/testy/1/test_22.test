@@ -1,0 +1,6 @@
+class Main
+{
+	static void run(){ 
+		String var = "ahoj \488 svete"; 
+	}
+}

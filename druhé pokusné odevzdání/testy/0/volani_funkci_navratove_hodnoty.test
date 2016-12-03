@@ -1,0 +1,57 @@
+class Main
+{
+	static void run()
+	{
+		int i = 0;
+		ifj16.print("Ziskej hodnotu 1\n");
+		i = fce();
+		ifj16.print("Ziskana hodnota: " + i + "\n");
+    }
+    
+    static int fce()
+	{
+		int i = 0;
+		i = Trida.fce();
+		return i;
+	}
+	
+	static int funkce()
+	{
+		int i = 0;
+		i = Dalsi_trida.fce();
+		return i;
+	}
+}
+
+class Trida
+{
+	static int fce()
+	{
+		int i = 0;
+		i = Main.funkce();
+		return i;
+	}
+	
+	static int funkce()
+	{
+		int i = 0;
+		i = Dalsi_trida.funkce();
+		return i;
+	}
+}
+
+class Dalsi_trida
+{
+	static int fce()
+	{
+		int i = 0;
+		i = Trida.funkce();
+		return i;
+	}
+	
+	static int funkce()
+	{
+		int i = 1;
+		return i;
+	}
+}

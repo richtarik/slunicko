@@ -1,0 +1,21 @@
+class Main
+{
+    static void run(){
+    
+		int i = 0;
+        fce(i);
+        ifj16.print("\n");
+    }
+    
+    static void fce(int i){
+		
+		if(i > 10)
+		{
+			return;
+		}
+		
+		++i;
+		fce(i);
+		ifj16.print(i + " ");
+    }
+}

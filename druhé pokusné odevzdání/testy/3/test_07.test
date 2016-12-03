@@ -1,0 +1,10 @@
+class Main
+{
+    static void run(){
+		ifj16.print("Zadej retezec:\n");
+                int i = 0;
+                int i = 3;
+    }
+}
+
+

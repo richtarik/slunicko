@@ -1,0 +1,7 @@
+class Main
+{
+    static void run(){
+        int i;
+        int vysledek = 5 + i;
+    }
+}
