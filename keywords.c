@@ -8,16 +8,20 @@
 ///* ------- VUT FIT --------- */
 #include "struct.h"
 #include "keywords.h"
+#include "error.h"
 void f_findKeyW(T_token *token)
 {
     char *keywords[]={"and","boolean", "break", "class", "continue", "do", "double", "else", "false", "for",
-                      "if", "int", "return", "String", "static", "true", "void", "while"};
+                      "if", "int", "return", "String", "static", "true", "void", "while", "ifj16.readInt",
+                       "ifj16.readDouble", "ifj16.readString", "ifj16.print", "ifj16.length", "ifj16.substr",
+                       "ifj16.compare", "ifj16.find" , "ifj16.sort" };
 
     token_type tokens[]={token_and, token_boolean, token_break, token_class, token_continue, token_do, token_double, token_else, token_false, token_for,
-                         token_if, token_int, token_return, token_String_type, token_static, token_true, token_void, token_while};
+                         token_if, token_int, token_return, token_String_type, token_static, token_true, token_void, token_while, token_iin, token_din,
+                         token_sin, token_out, token_length, token_substr, token_compare, token_find, token_sort};
 
     token->type = token_identifier;
-    for(int i=0; i <= 17; i++)
+    for(int i=0; i <= 26; i++)
     {
         if ( ( strcmp(keywords[i],token->value) )== 0)
         {
@@ -93,6 +97,54 @@ void f_find_key_w(T_token *token)
             else if (strcmp(token->value, "int") == 0)
             {
                 token->type=token_int;
+            }
+            else
+            {// strncmp ifj16. else ERROR
+                if( strncmp( token->value,"ifj16.", 6) == 0 )
+                {
+                    if(strcmp(token->value, "ifj16.readInt") == 0)
+                    {
+                        token->type=token_iin;
+                    }
+                    else if (strcmp(token->value, "ifj16.readDouble") == 0)
+                    {
+                        token->type=token_din;
+                    }
+                    else if (strcmp(token->value, "ifj16.readString") == 0)
+                    {
+                        token->type=token_sin;
+                    }
+                    else if (strcmp(token->value, "ifj16.print") == 0)
+                    {
+                        token->type=token_out;
+                    }
+                    else if (strcmp(token->value, "ifj16.length") == 0)
+                    {
+                        token->type=token_length;
+                    }
+                    else if (strcmp(token->value, "ifj16.substr") == 0)
+                    {
+                        token->type=token_substr;
+                    }
+                    else if (strcmp(token->value, "ifj16.compare") == 0)
+                    {
+                        token->type=token_compare;
+                    }
+                    else if (strcmp(token->value, "ifj16.find") == 0)
+                    {
+                        token->type=token_find;
+                    }
+                    else if (strcmp(token->value, "ifj16.sort") == 0)
+                    {
+                        token->type=token_sort;
+                    }
+                    else
+                    {// pouzita trieda ifj16. inak ako na funkcii
+                        error_f(ERROR_LEX);
+                    }
+                }
+                else
+                    return;
             }
             return;
         case 'r':

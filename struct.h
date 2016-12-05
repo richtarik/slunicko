@@ -14,21 +14,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-//#include "ial.h"
-
-/* todo Tokens for: ???
-ifj16
-readInt
-readDouble
-readString
-length
-substr
-compare
-find
-sort
-*/
 
 FILE* sourceFile;
+bool firstScan; //prepinac ci som v prvom alebo druhom zostupe
+int actFunctionOffset;
 
 
 /**
@@ -78,14 +67,11 @@ typedef enum {
     /*boolean, break, class, continue, do, double, else, false, for,
       if, int, return, String, static, true, void, while */
 
-    token_break,        // number 26 //
-    token_continue,     // number 27 //
+    token_break,        // number 26 // TODO
+    token_continue,     // number 27 // TODO
     token_while,        // number 28 //
-    token_for,          // number 29 //
-    token_do,           // number 30 //
-
-    //token_switch,
-    //token_case,
+    token_for,          // number 29 // TODO
+    token_do,           // number 30 // TODO
 
     token_if,           // number 31 //
     token_else,         // number 32 //
@@ -94,7 +80,6 @@ typedef enum {
 
     token_true,         // number 34 //
     token_false,        // number 35 //
-    //token_null,
 
     token_class,        // number 36 //
     token_void,         // number 37 //
@@ -105,9 +90,8 @@ typedef enum {
 
     token_boolean,      // number 41 //
     token_static,       // number 42 //
-  //token_char,
 
-    token_class_identifier,// number 43 //
+    token_class_identifier,// number 43 // TODO zbytocnost
     token_identifier,      // number 44 //
     token_number_int,      // number 45 //
     token_number_double,   // number 46 //
@@ -121,22 +105,23 @@ typedef enum {
 	token_jmpd,
 	token_jmpu,
 	token_fstart,
-	token_fjmp,
+	token_fjmp,          //55
 	token_flabel,
 	token_push,
 	token_pull,
 	token_mov,
-	token_func,
+	token_func,             // number 60 //
 	//vestavene funkce
-	token_iin,
-	token_din,
-	token_sin,
-	token_out,
-	token_length,
-	token_substr,
-	token_compare,
-	token_find,
-	token_sort
+	token_iin,              // number 61 // ifj16.readInt
+	token_din,              // number 62 // ifj16.readDouble
+	token_sin,              // number 63 // ifj16.readString
+	token_out,              // number 64 // ifj16.print
+	token_length,           // number 65 // ifj16.length
+	token_substr,           // number 66 // ifj16.substr
+	token_compare,          // number 67 // ifj16.compare
+	token_find,             // number 68 // ifj16.find
+	token_sort,              // number 70 // ifj16.sort
+	token_unm
 
 } token_type;
 
@@ -158,8 +143,16 @@ typedef enum {
 	STRING,
 	BOOLEAN,
 	ADRESS_L,
-	ADRESS_G
+	ADRESS_G,
+	CONSTANT
 } value_type;
+
+/*typedef enum {
+	ADRESS_L,
+	CONSTANT,
+	ADRESS_G
+} value_type2;
+*/
 
 typedef struct String str;
 //Svaz promennych pro hodnoty ruznych datovych typu
@@ -203,11 +196,29 @@ typedef struct item_list {
     struct item_list *next_item;
 } T_item_list;
 
-//definice obousmerneho seznamu
+//definice jednosmerneho seznamu
 typedef struct {
     struct item_list *First;
     struct item_list *Active;
 } T_instr_list;
+
+
+//seznamy pro funkce v interpretu
+typedef struct {
+	int id;
+	int label;
+	int iteration;
+} T_function_id;
+
+typedef struct function_id_list {
+	T_function_id Function;
+	struct function_id_list *next_item;
+} T_function_id_list;
+
+typedef struct {
+	struct function_id_list *First;
+	struct function_id_list *Active;
+} T_function_list;
 
 T_instr_list* L_ins;
 
@@ -215,7 +226,8 @@ typedef enum
 {
     in_if,
     in_while,
-    in_assign,
+    in_assign_first,
+    in_assign_second,
     in_function,
     in_return,
 }expr_in;

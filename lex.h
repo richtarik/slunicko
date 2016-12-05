@@ -1,6 +1,6 @@
 ///* File: lex.h               */
 ///* Autors: Milos Molitoris,  */
-///* 		 JiÅ™Ã­ ÄŒechÃ¡k	   */
+///*         Jiøí Èechák       */
 ///* Login: xmolit00,          */
 ///*        xcecha04           */
 ///*                           */
@@ -17,7 +17,6 @@
 #include <stdbool.h>
 #include <ctype.h> // isdigit,isspace,...
 #include <limits.h> // INT_MAX
-#include <float.h> // DBL_MAX
 
 #include "str.h"
 #include "struct.h"
@@ -40,7 +39,6 @@ void comment_in_block(FILE* sourceFile);
 void comment_in_line(FILE* sourceFile);
 void Hex_to_Dec(T_token *token);
 int hex_digit_to_dec_digit(char c);
-double to_Dec(T_token *token, int soustava);
 
 typedef enum
 {

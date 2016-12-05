@@ -8,8 +8,9 @@
 ///* ------- VUT FIT --------- */
 
 #include "interpret.h"
-#include "instrList.h"
+#include "instrlist.h"
 #include "generator.h"
+#include "str.h"
 
 //Provadi samotnou interpretaci predanych instrukci - pocetni operaca a instrukce skoku
 int interpret(T_instr_list *L) {
@@ -23,11 +24,17 @@ int interpret(T_instr_list *L) {
 	T_variable *A3;
 	T_address *POM;
 	IntStack* offset_stack;
+	IntStack* func_stack;
 
 	bool ZeroFlag = false;
 	int frame = 0;
+	bool jumpBack = false;
+	bool isVoid = false;
+
 	offset_stack = memory_manager_malloc(sizeof(IntStack));
 	stackInit(offset_stack, 99);
+	func_stack = memory_manager_malloc(sizeof(IntStack));
+	stackInit(func_stack, 99);
 	T = memory_manager_malloc(sizeof(T_address_code));
 	S = memory_manager_malloc(sizeof(T_address_code));
 	A1 = memory_manager_malloc(sizeof(T_variable));
@@ -302,10 +309,16 @@ int interpret(T_instr_list *L) {
 				}
 				if (A1->type == INT) {
 					if (A2->type == INT) {
+						if (A2->value.value_int == 0) {
+							error_f(ERROR_DIV_ZERO);
+						}
 						A3->value.value_int = A1->value.value_int / A2->value.value_int;
 						ZeroFlag = !(A3->value.value_int == 0);
 					}
 					else if (A2->type == DOUBLE) {
+						if (fabs(A2->value.value_double) < 10e-7) {
+							error_f(ERROR_DIV_ZERO);
+						}
 						A3->value.value_double = A1->value.value_int / A2->value.value_double;
 						ZeroFlag = !(A3->value.value_double == 0);
 					}
@@ -315,10 +328,16 @@ int interpret(T_instr_list *L) {
 				}
 				else if (A1->type == DOUBLE) {
 					if (A2->type == INT) {
+						if (A2->value.value_int == 0) {
+							error_f(ERROR_DIV_ZERO);
+						}
 						A3->value.value_double = A1->value.value_double / A2->value.value_int;
 						ZeroFlag = !(A3->value.value_double == 0);
 					}
 					else if (A2->type == DOUBLE) {
+						if (fabs(A2->value.value_double) < 10e-7) {
+							error_f(ERROR_DIV_ZERO);
+						}
 						A3->value.value_double = A1->value.value_double / A2->value.value_double;
 						ZeroFlag = !(A3->value.value_double == 0);
 					}
@@ -334,6 +353,31 @@ int interpret(T_instr_list *L) {
 				}
 				else {
 					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
+				}
+				break;
+
+			case T_UNM:
+				POM = T->address1;
+				if (POM->isGlobal) {
+					A1 = VStackGet(sVariableGlobal, POM->offset);
+				}
+				else {
+					A1 = VStackGet(sVariableLocal, frame + POM->offset);
+				}
+				if (A1->type == INT) {
+					A1->value.value_int = -1 * A1->value.value_int;
+				}
+				else if (A1->type == DOUBLE) {
+					A1->value.value_double = -1 * A1->value.value_double;
+				}
+				else {
+					return -1;
+				}
+				if (POM->isGlobal) {
+					VStackSet(sVariableGlobal, POM->offset, A1->type, A1->value);
+				}
+				else {
+					VStackSet(sVariableLocal, frame + POM->offset, A1->type, A1->value);
 				}
 				break;
 
@@ -1199,9 +1243,13 @@ int interpret(T_instr_list *L) {
 				A1 = T->address1;
 				if (POM->isGlobal) {
 					VStackPush(sVariableGlobal, A1->type, A1->value);
+					printf("\n\nPUSH - Vypis globalneho stacku: \n");
+                    print_VStack_data(sVariableGlobal,stderr);
 				}
 				else {
 					VStackPush(sVariableLocal, A1->type, A1->value);
+					printf("\n\nPUSH - Vypis lokalneho stacku: \n");
+                    print_VStack_data(sVariableLocal,stderr);
 				}
 				break;
 
@@ -1209,9 +1257,13 @@ int interpret(T_instr_list *L) {
 				POM = T->result;
 				if (POM->isGlobal) {
 					VStackPop(sVariableGlobal);
+					printf("\n\nPOP - Vypis globalneho stacku: \n");
+                    print_VStack_data(sVariableGlobal,stderr);
 				}
 				else {
 					VStackPop(sVariableLocal);
+					printf("\n\nPOP - Vypis lokalneho stacku: \n");
+                    print_VStack_data(sVariableLocal,stderr);
 				}
 				break;
 
@@ -1226,9 +1278,13 @@ int interpret(T_instr_list *L) {
 				POM = T->address2;
 				if (POM->isGlobal) {
 					VStackSet(sVariableGlobal, POM->offset, A1->type, A1->value);
+					printf("\n\nMOV - Vypis lokalneho stacku: \n");
+                    print_VStack_data(sVariableGlobal,stderr);
 				}
 				else {
 					VStackSet(sVariableLocal, frame + POM->offset, A1->type, A1->value);
+					printf("\n\nMOV - Vypis lokalneho stacku: \n");
+                    print_VStack_data(sVariableLocal,stderr);
 				}
 				break;
 
@@ -1237,7 +1293,7 @@ int interpret(T_instr_list *L) {
 				break;
 
 			case T_JMPZD:
-				if (!ZeroFlag) {
+				if (ZeroFlag) {
 					break;
 				}
 
@@ -1265,30 +1321,79 @@ int interpret(T_instr_list *L) {
 					if (!(L->Active->next_item)) {
 						return 1;
 					}
+					listNext(L);
 				}
 				ZeroFlag = false;
 				break;
 
 			//Instrukce pro funkcnost uzivatelskych funkci
 			case T_FSTART:
-			    frame = sVariableLocal->top;
+				if (T->address1 != -1) {
+					listFirst(L);
+					while (1) {
+						S = listGetItem(L);
+						if (S->operation == T_FSTART && S->result == T->result) {
+                            break;
+						}
+						if (L->Active->next_item == NULL) {
+                            return -1;
+						}
+						listNext(L);
+					}
+				}
+				stackPush(func_stack, (int) T->address2);
+			    frame = sVariableLocal->top + 1;
 				stackPush(offset_stack, frame);
 				break;
 
 			case T_FJMP:
+				stackTop(func_stack, &i);
+				stackPop(func_stack);
+				if (i != 0) {
+					listFirst(L);
+				}
 				while (1) {
 					listNext(L);
 					S = listGetItem(L);
-					if (S->operation == T_FLABEL && S->result == T->result) {
+					if (S->operation == T_FLABEL && S->result == T->result && S->address1 == i) {
 						break;
 					}
 					if (!(L->Active->next_item)) {
 						return 1;
 					}
 				}
+				jumpBack = true;
 				continue;
 
 			case T_FLABEL:
+			    isVoid = T->address2;
+			    if (!jumpBack && !isVoid) {
+                    error_f(8);
+			    }
+				if (!jumpBack) {
+					stackTop(func_stack, &i);
+					stackPop(func_stack);
+					if (i != 0) {
+						listFirst(L);
+						while (1) {
+							S = listGetItem(L);
+							if (S->operation == T_FLABEL && S->result == T->result && S->address1 == i) {
+								break;
+							}
+							if (!(L->Active->next_item)) {
+								return -1;
+							}
+							listNext(L);
+						}
+						listNext(L);
+					}
+				}
+			    jumpBack = false;
+			    while (sVariableLocal->top > frame) {
+                    VStackPop(sVariableLocal);
+			    }
+			    //if(!VStackEmpty(L)) //pri voide si musim popnut na inom mieste
+                //    VStackPop(sVariableLocal); //implementacny detail
 				stackPop(offset_stack);
 				if (stackEmpty(offset_stack)) {
 					frame = 0;

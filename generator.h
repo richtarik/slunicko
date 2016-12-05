@@ -8,7 +8,7 @@
 ///* ------- VUT FIT --------- */
 
 #include "struct.h"
-#include "instrList.h"
+#include "instrlist.h"
 #include "interpret.h"
 #include "error.h"
 #include "memory_manager.h"
@@ -59,5 +59,6 @@
 #define T_PUSH token_push
 #define T_POP token_pull
 #define T_MOV token_mov
+#define T_UNM token_unm
 
 int generator(T_instr_list *L, bool isRoot);

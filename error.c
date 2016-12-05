@@ -8,7 +8,7 @@ void error_f(int error_num)
 	switch(error_num)
 	{
 		case ERROR_LEX:
-				fprintf(stderr, "Error: lexical analysis error.\n");
+				fprintf(stderr, "Error: lexical analysis error.");
 				break;
 		case ERROR_SYNTAX:
 				fprintf(stderr, "Error: syntax error.\n");
@@ -29,7 +29,7 @@ void error_f(int error_num)
 				fprintf(stderr, "Error: working with uninitialized variables.\n");
 				break;
 		case ERROR_DIV_ZERO:
-				fprintf(stderr, "Error: division by zero.\n");
+				fprintf(stderr, "Error: division by zero\n");
 				break;
 		case ERROR_OTHER:
 				fprintf(stderr, "Error: unspecified error.\n");

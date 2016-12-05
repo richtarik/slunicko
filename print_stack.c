@@ -71,12 +71,12 @@ void print_table(hash_table_ptr ht)
                 printf("Table_indx: %d \t Item:%d \t Key: %s\n",i,item_count,pom_table->key);
                 if(pom_table->func == NULL)
                 {
-                    int initt=ht->table_item[i]->var->inicialized;
+                    int initt=pom_table->var->inicialized;
                     //int defined=ht->table_item[i]->var->defined;
-                    int typ=ht->table_item[i]->var->type;
+                    int typ=pom_table->var->type;
                     printf("VARIABLE: \t \tinit:%d \t token_type:",initt,typ);
                     f_print_type(typ);
-                    printf("\t offset: %d", ht->table_item[i]->var->offset);
+                    printf("\t offset: %d", pom_table->var->offset);
                     printf("\n");
                 }
                 else if(pom_table->var == NULL)
@@ -205,6 +205,9 @@ void list_print(T_instr_list *L)
             case token_return:
                 fprintf(stderr," return\n");
                 break;
+            case token_func:
+                fprintf(stderr," funct\n");
+                break;
             case token_label:
                 fprintf(stderr," label\n");
                 break;
@@ -245,37 +248,37 @@ void list_print(T_instr_list *L)
     return;
 }
 
-void print_VStack_data(VariableStack *s)
+void print_VStack_data(VariableStack *s,FILE* suborik)
 {
     int i = 0;
 
     while(s->top - i >= 0)
     {
-        printf("i:%d type:",i);
+        fprintf(suborik,"i:%d type:",i);
         switch( (s->data[i].type) )
         {
             case INT:
-                printf("INT \t value: %d", s->data[i].value);
+                fprintf(suborik,"INT \t value: %d", s->data[i].value);
                 break;
             case DOUBLE:
-                printf("DOUBLE\t value: %f", s->data[i].value);
+                fprintf(suborik,"DOUBLE\t value: %f", s->data[i].value);
                 break;
             case STRING:
-                printf("STRING\t value: %s", s->data[i].value);
+                fprintf(suborik,"STRING\t value: %s", s->data[i].value);
                 break;
             case BOOLEAN:
-                printf("BOOLEAN value: %d", s->data[i].value);
+                fprintf(suborik,"BOOLEAN value: %d", s->data[i].value);
                 break;
             case ADRESS_G:
-                printf("ADRESS_G value: %d", s->data[i].value);
+                fprintf(suborik,"ADRESS_G value: %d", s->data[i].value);
                 break;
             default:
-                printf("ADRESS_L value: %d", s->data[i].value);
+                fprintf(suborik,"ADRESS_L value: %d", s->data[i].value);
                 break;
         }
 
         i++;
-        printf("\n");
+        fprintf(suborik,"\n");
     }
-    printf("\n");
+    fprintf(suborik,"\n");
 }

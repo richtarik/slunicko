@@ -9,7 +9,7 @@
 #include "error.h"
 #include "memory_manager.h"
 #include "str.h"
-#include "instrList.h"
+#include "instrlist.h"
 
 /*
  * Funkce pro vyhledavani podretezce v retezci
