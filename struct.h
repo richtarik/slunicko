@@ -1,6 +1,6 @@
-///* File: struct.h             */
-///* Autor: Milos Molitoris    */
-///* Login: xmolit00           */
+///* File: struct.h            */
+///* Autor:                    */
+///* Login:                    */
 ///*                           */
 ///*       IFJ-Projekt         */
 ///* Datum: 29.09.2016         */
@@ -25,15 +25,16 @@ int actFunctionOffset;
   */
 typedef enum {
 
-     token_asg,          // number 0 // "=" // Assignment
+    token_asg,          // number 0 // "=" // Assignment
     token_add,          // number 1 // "+" // Addition
     token_sub,          // number 2 // "-" // Subtraction
     token_mul,          // number 3 // "*" // Multiplication
     token_div,          // number 4 // "/" // Division
+///NO USE MODULO (for future)
     token_mod,          // number 5 // "%" // Modulo
-
-    token_inc,          // number 6 // "++" // Increment
-    token_dec,          // number 7 // "--" // Decrement
+///NO USE MODULO (for future)
+    token_inc,          // number 6 // "++" // Increment ///UNARY
+    token_dec,          // number 7 // "--" // Decrement ///UNARY
 
     //Comparison operators/relational operators
 
@@ -86,18 +87,18 @@ typedef enum {
 
     token_double,       // number 38 //
     token_int,          // number 39 //
-    token_String,       // number 40 //
+    token_String_type,  // number 40 //
 
     token_boolean,      // number 41 //
     token_static,       // number 42 //
 
-    token_class_identifier,// number 43 // TODO zbytocnost
+    token_class_identifier,// number 43 // TODO NO USE HISTRORY
     token_identifier,      // number 44 //
     token_number_int,      // number 45 //
     token_number_double,   // number 46 //
     token_error,           // number 47 //
     token_EOF,             // number 48 //
-    token_String_type,     // number 49 //
+    token_String,          // number 49 //
 
 	//enumy pouze pro generator-interpret
 	token_label,
@@ -105,7 +106,7 @@ typedef enum {
 	token_jmpd,
 	token_jmpu,
 	token_fstart,
-	token_fjmp,          //55
+	token_fjmp,             //55
 	token_flabel,
 	token_push,
 	token_pull,
@@ -120,8 +121,8 @@ typedef enum {
 	token_substr,           // number 66 // ifj16.substr
 	token_compare,          // number 67 // ifj16.compare
 	token_find,             // number 68 // ifj16.find
-	token_sort,              // number 70 // ifj16.sort
-	token_unm
+	token_sort,             // number 70 // ifj16.sort
+	token_unm               // number 71 // unarne minus - UNARY
 
 } token_type;
 
@@ -134,29 +135,17 @@ typedef struct T_Token {
 
 T_token * token;
 
-
-
 //Enum typu promennych pro interpret
 typedef enum {
-	INT,
-	DOUBLE,
-	STRING,
-	BOOLEAN,
-	ADRESS_L,
-	ADRESS_G,
-	CONSTANT
+    DOUBLE=38,
+    INT,
+    STRING,
+    BOOLEAN,
 } value_type;
-
-/*typedef enum {
-	ADRESS_L,
-	CONSTANT,
-	ADRESS_G
-} value_type2;
-*/
 
 typedef struct String str;
 //Svaz promennych pro hodnoty ruznych datovych typu
-union T_value {
+    union T_value {
 	int value_int;
 	double value_double;
 	str* value_String;
@@ -175,6 +164,26 @@ typedef struct {
 	unsigned int max;
 	int top;
 } VariableStack;
+
+///help stack for expr + sematika
+typedef enum {
+	ADRESS_L,
+	CONSTANT,
+	ADRESS_G
+} value_type_Stack;
+
+
+typedef struct {
+    value_type type;
+    int offset;
+    value_type_Stack GlobLokCons;
+}T_Exp_variable;
+
+typedef struct {
+	T_Exp_variable* data;
+	unsigned int max;
+	int top;
+} ExpStack;
 
 //struktura pro ulozeni offsetu a rozliseni mezi lokalni a globalni promennou
 typedef struct {
@@ -230,6 +239,11 @@ typedef enum
     in_assign_second,
     in_function,
     in_return,
+    in_length_fun,
+    in_substr_fun,
+    in_find_fun,
+    in_sort_fun,
+    in_compare_fun,
 }expr_in;
 
 VariableStack * sVariableGlobal;
