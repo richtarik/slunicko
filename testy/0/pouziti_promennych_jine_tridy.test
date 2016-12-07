@@ -1,0 +1,38 @@
+class Main
+{
+	static int i = 1;
+
+	static void run(){
+    
+		ifj16.print("Trida Main:\n");
+		ifj16.print("Main.i = " + Main.i + "\n");
+		ifj16.print("Main.i (pouze pres i) = " + i + "\n");
+		ifj16.print("Moje_trida.i = " + Moje_trida.i + "\n");
+		
+		int i = 5;
+		
+		ifj16.print("i po definici int i v Main = " + i + "\n");
+		
+		Moje_trida.fce();
+		
+		ifj16.print("\nTrida Main:\n");
+		ifj16.print("i v Main po volani funkce druhe tridy = " + i + "\n");
+    }
+}
+
+class Moje_trida
+{
+	static int i = 2;
+
+	static void fce(){
+	
+		ifj16.print("\nTrida Moje_trida:\n");
+		ifj16.print("Main.i = " + Main.i + "\n");
+		ifj16.print("Moje_trida.i (pouze pres i) = " + i + "\n");
+		ifj16.print("Moje_trida.i = " + Moje_trida.i + "\n");
+		
+		int i = 0;
+		
+		ifj16.print("i po definici int i v Moje_trida = " + i + "\n");
+    }
+}

@@ -1,0 +1,11 @@
+class Main
+{
+    static void run(){
+	int i = 10;
+        while(i>0){
+		ifj16.print(i + " ");
+		i--;
+	}
+	ifj16.print("\n");
+    }
+}

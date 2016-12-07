@@ -1,0 +1,21 @@
+class Main
+{
+	static void run()
+	{
+		String s1 = "ahoj";
+		String s2 = "cau";
+		int cmp = 0;
+		ifj16.print("s1 = " + s1 + "\ns2 = " + s2 + "\n");
+		cmp = ifj16.strCompare(s1, s2);
+		ifj16.print("compare(s1, s2) = " + cmp + "\n");
+		ifj16.strCat(s1, s2);
+		ifj16.print("strCat(s1, s2)\n");
+		ifj16.print("s1 = " + s1 + "\n");
+		s1 = ifj16.strSubstr(s1, 2, 1);
+		ifj16.print("strSubstr(s1, 2, 1)\n");
+		ifj16.print("s1 = " + s1 + "\n");
+		ifj16.strCopy(s1, s2);
+		ifj16.print("strCopy(s1, s2)\n");
+		ifj16.print("s1 = " + s1 + "\n");
+	}
+}

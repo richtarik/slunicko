@@ -1,0 +1,15 @@
+class Main
+{
+	static void run(){
+    
+    }
+}
+
+static int i = 0;
+
+class Druha
+{
+	static void fce(){
+    
+    }
+}

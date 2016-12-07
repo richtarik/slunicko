@@ -1,0 +1,9 @@
+class Main
+{
+	static void run(){
+    
+        int i = 1;
+        
+        int j = i / (i - i);
+    }
+}

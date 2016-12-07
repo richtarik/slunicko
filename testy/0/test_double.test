@@ -1,0 +1,16 @@
+class Main
+{
+	static void run()
+	{
+		double o = 0.0e1;
+		double p = 1.1E5;
+		double q = 2.3E-6;
+		double r = 0.000;
+		double s = 123.123;
+		double t = 9;
+		double u = 7.77e+7;
+		double v = 1e6;
+		double w = 2E+3;
+		double x = 42e-6;
+	}
+}

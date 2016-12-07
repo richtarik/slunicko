@@ -1,0 +1,11 @@
+class Main
+{
+    static void run(){
+        int i = 4;
+        String vysledek = "Ahoj";
+        if(vysledek > i){
+            vysledek = "nazdar";
+        }
+	else {vysledek = "cau";}
+    }
+}
