@@ -1,6 +1,6 @@
 class Main
 {
 	static void run(){ 
-		double var = 1,03; 
+		double var = 1a03; 
 	}
 }
