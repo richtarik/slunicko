@@ -1,10 +1,9 @@
 ///* File: token.h             */
 ///* Autors: Milos Molitoris,  */
 ///*         Lukas Richtarik,  */
-///*         Jiří Čechák       */
-///* Login: xmolit00,          */
-///*        xricht25,          */
-///*        xcecha04           */
+///*         Jiří Čechák	   */
+///* Login: xmolit00, xricht25,*/
+///* 		xcecha04		   */
 ///*                           */
 ///*       IFJ-Projekt         */
 ///* Datum: 29.09.2016         */
@@ -13,12 +12,7 @@
 
 #include "lex.h"
 
-/*TODO Prebytecné pocátecní císlice  0 v nenulovém císle vedou v roZSírení BASE na oktalovou reprezentaci celého císla. !!
-*/
-// ignotuje pociatecne 0 aj u celych cisel -> problem pri rozsireni na oktal. TODO repair 019 -> NO ERROR nejaky flag osetrovat to
-// Pro celou cást desetinného literálu i exponent platí, ze prebytecné pocátecní císlice 0 jsou ignorovány.
-
-T_token* token_buffer=NULL;
+T_token* token_buffer=NULL; // TODO = NULL ok ?
 
 void get_back_token(T_token *token)
 {
@@ -45,7 +39,7 @@ void get_token(T_token *token,FILE* sourceFile)
     token->valActsize=0;
     bool number_flag = false;
     bool only_dec_octal_number = false;
-    char str[50];
+    char str[1000];
 
     if(token_buffer != NULL)
     {
@@ -67,9 +61,9 @@ void get_token(T_token *token,FILE* sourceFile)
                  }
                  else if(isalpha(actChar) || actChar=='$' || actChar=='_')
                  {
-                      f_addChar(actChar,token);
-                      f_Identifier(sourceFile,token);
-                      f_find_key_w(token); //TODO pouzita tato funcia osetruje naviac ifj16. musi ist vestavena fnce inak chyba
+                    f_addChar(actChar,token);
+                    f_Identifier(sourceFile,token);
+                    f_findKeyW(token);
                         return;
 
                  }
@@ -81,6 +75,7 @@ void get_token(T_token *token,FILE* sourceFile)
                  }
                  else if(actChar == EOF)
                  {
+                     //TODO ok ?
                      token->type= token_EOF;
                      return;
                  }
@@ -115,6 +110,7 @@ void get_token(T_token *token,FILE* sourceFile)
                      case '<':
                          state=state_Less;
                          break;
+
                      case ';':
                          token->type= token_sem;
                          return;
@@ -122,18 +118,20 @@ void get_token(T_token *token,FILE* sourceFile)
                          token->type= token_com;
                          return;
                      case '.':
-                         actChar= fgetc(sourceFile);
-                         if( isspace(actChar) )
-                         {
-                            fprintf(stderr,"ERRor space after dot\n"); //todo chybova hlaska;
-                            error_f(ERROR_LEX);
-                         }
-                         else
-                         {
-                             ungetc(actChar,sourceFile);
+			 actChar= fgetc(sourceFile);
+			 if( isspace(actChar) )
+			 {
+				 error_f(ERROR_LEX);
+			    //fprintf(stderr,"ERRor po bodke nesmie ist medzera\n"); //todo chybova hlaska;
+                //free_token(token);
+			    //token->type=token_error;
+			 }
+			 else
+			 {
+			     ungetc(actChar,sourceFile);
                              token->type= token_dot;
                          }
-                         return;
+			 return;
                      case '"':
                           state=state_String;
                           break;
@@ -164,7 +162,7 @@ void get_token(T_token *token,FILE* sourceFile)
                          state=state_And;
                          break;
                      default:
-                         error_f(ERROR_LEX);
+						error_f(ERROR_LEX);
                      }
                  }
                  //new read - fgetc
@@ -270,6 +268,7 @@ void get_token(T_token *token,FILE* sourceFile)
                 }
                 else
                 {
+                    ungetc(actChar,sourceFile); // ?? je to potreba ??
                     error_f(ERROR_LEX);
                 }
             case state_And:
@@ -280,13 +279,12 @@ void get_token(T_token *token,FILE* sourceFile)
                 }
                 else
                 {
+                    ungetc(actChar,sourceFile); // ?? je to potreba ??
                     error_f(ERROR_LEX);
                 }
 
             case state_Number: //TODO pocitadlo cislic - rozdelovat int a double ??
-                                // t.j ak sa prekroci urcity pocet cislic napr 78565585955265946254851 -> cislo
-                                // sa nezmesti do intu hodit ho do state double +- premysliet
-
+				
                 if(isdigit(actChar))
                 {
 					// osmickove cislo
@@ -296,13 +294,13 @@ void get_token(T_token *token,FILE* sourceFile)
 						{
 							error_f(ERROR_LEX);
 						}
-
+						
 						if(actChar == '0')
 						{
 							state = state_Octal_prepare;
 							break;
 						}
-
+						
 						state = state_Octal;
 						token->value[0] = '\0';
 						token->valActsize = 0;
@@ -337,11 +335,11 @@ void get_token(T_token *token,FILE* sourceFile)
                 else if (actChar == 'e' || actChar == 'E')
                 {
                     state=state_Double_exp_1;
-                    f_addChar(actChar,token);
+					f_addChar(actChar,token);
                 }
                 else if (isalpha(actChar) || actChar == '$')
                 {
-                    error_f(ERROR_LEX);
+					error_f(ERROR_LEX);
                 }
                 else if (actChar == '.')
                 {
@@ -351,52 +349,64 @@ void get_token(T_token *token,FILE* sourceFile)
                 else
                 {// iny -> nepovolenz znak v dalsom nacitany nastane chyba ak bude nejaky operator vsetko je ok
                     ungetc(actChar,sourceFile);
-                    token->type=token_number_int;
+                    
+                    long int number = strtol(token->value, NULL, 10);
+                    
+                    if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+                    
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
                     return;
                 }
                 number_flag = false;
                 break;
-
+                
             case state_Double_dot:
                 if(isdigit(actChar))
                 {
                     state = state_Double;
                     f_addChar(actChar,token);
                 }
-                else // TODO  neviem pisal som na fb ?? -> opravit podla povodneho moze byt cislo len 1.
+                else
                 {
-                    error_f(ERROR_LEX);
+					error_f(ERROR_LEX);
+
                 }
                 break;
-
+                
             case state_Double:
                 if( isdigit(actChar) )
                 {
                     f_addChar(actChar,token);
                 }
-                else if(actChar == '_') //TODO OK ?
-                {
-                  number_flag = true;
-                  break;
-                }
+                else if(actChar == '_')
+				{
+					number_flag = true;
+					break;
+				}
                 else if(number_flag) // předchozí znak bylo podtržítko
-                {
-                    error_f(ERROR_LEX);
-                }
+				{
+					error_f(ERROR_LEX);
+				}
                 else if (actChar == 'e' || actChar == 'E')
                 {
-                    state=state_Double_exp_1;
+					state=state_Double_exp_1;
                     f_addChar(actChar,token);
                 }
                 else if ( isalpha(actChar) || actChar == '$')
                 {
-                    error_f(ERROR_LEX);
+					error_f(ERROR_LEX);
                 }
                 else
                 {  //ak pride operator ok je to cislo ale ak pride iny znaky -> error
-                    ungetc(actChar,sourceFile);
+					ungetc(actChar,sourceFile);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
@@ -404,7 +414,7 @@ void get_token(T_token *token,FILE* sourceFile)
                 }
                 number_flag = false;
                 break;
-
+                
             case state_Double_exp_1:
 				if(actChar == '0')
 				{
@@ -446,8 +456,8 @@ void get_token(T_token *token,FILE* sourceFile)
                     error_f(ERROR_LEX);
                 }
                 else
-                {  // chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
-                    ungetc(actChar,sourceFile);
+                {  // TODO chyba ak pride operator ok je to cislo ale ak pride iny znaky -> error
+					ungetc(actChar,sourceFile);
                     token->type=token_number_double;
                     token->value[token->valActsize] = '\0';
                     token->valActsize=0;
@@ -455,7 +465,7 @@ void get_token(T_token *token,FILE* sourceFile)
                 }
                 number_flag = false;
 				break;
-
+			
 			case state_Double_sign_zero:
 				if(actChar == '0')
 				{
@@ -484,12 +494,12 @@ void get_token(T_token *token,FILE* sourceFile)
                 {
 					ungetc(actChar,sourceFile);
                     token->type = token_number_double;
-
+					
 					return;
 				}
 				number_flag = false;
 				break;
-
+				
             case state_Double_exp_sign:
 				if(actChar == '0')
 				{
@@ -506,14 +516,14 @@ void get_token(T_token *token,FILE* sourceFile)
 					error_f(ERROR_LEX);
                 }
                 break;
-
+                
             case state_String:
                 //f_addChar(actChar,token);
                 ungetc(actChar,sourceFile);
                 check_String(sourceFile,token);
                 token->type=token_String;
                 return;
-
+                
             case state_Octal_prepare:
 				if(isdigit(actChar))
 				{
@@ -521,7 +531,7 @@ void get_token(T_token *token,FILE* sourceFile)
 					{
 						error_f(ERROR_LEX);
 					}
-
+					
 					if(actChar != '0')
 					{
 						state = state_Octal;
@@ -551,7 +561,7 @@ void get_token(T_token *token,FILE* sourceFile)
 				}
 				number_flag = false;
 				break;
-
+				
 			case state_Octal:
 				if(isdigit(actChar))
 				{
@@ -559,7 +569,7 @@ void get_token(T_token *token,FILE* sourceFile)
 					{
 						error_f(ERROR_LEX);
 					}
-
+					
 					f_addChar(actChar,token);
 				}
 				else if(actChar == '_')
@@ -578,18 +588,25 @@ void get_token(T_token *token,FILE* sourceFile)
 				else
 				{
 					ungetc(actChar,sourceFile);
-                    token->type = token_number_int;
-
+                    
                     // prevod na desitkove cislo
-
-                    long int number = strtol(token->value, NULL, 8);
-
-                    if(number > INT_MAX ||
-                    sprintf(str, "%li", number) < 0) // prevod na retezec
+                    
+                    double number = to_Dec(token, 8);
+                    
+                    if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+                    
+                    if(sprintf(str, "%.0lf", number) < 0) // prevod na retezec
 					{
 						error_f(ERROR_LEX);
 					}
-
+					
 					token->value[0] = '\0';
 					token->valActsize = 0;
 					int i = 0;
@@ -598,12 +615,12 @@ void get_token(T_token *token,FILE* sourceFile)
 						f_addChar(str[i],token);
 						i++;
 					}
-
+                    
                     return;
 				}
 				number_flag = false;
 				break;
-
+			
 			case state_Bin_first:
 				if(actChar == '0' || actChar == '1')
 				{
@@ -615,7 +632,7 @@ void get_token(T_token *token,FILE* sourceFile)
 					error_f(ERROR_LEX);
 				}
 				break;
-
+				
 			case state_Bin:
 				if(actChar == '0' || actChar == '1')
 				{
@@ -637,18 +654,25 @@ void get_token(T_token *token,FILE* sourceFile)
 				else
 				{
 					ungetc(actChar,sourceFile);
-                    token->type = token_number_int;
-
+                    
                     // prevod na desitkove cislo
-
-                    long int number = strtol(token->value, NULL, 2);
-
-                    if(number > INT_MAX ||
-                    sprintf(str, "%li", number) < 0) // prevod na retezec
+                    
+                    double number = to_Dec(token, 2);
+					
+					if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+					
+                    if(sprintf(str, "%.0lf", number) < 0) // prevod na retezec
 					{
 						error_f(ERROR_LEX);
 					}
-
+                    
                     token->value[0] = '\0';
 					token->valActsize = 0;
 					int i = 0;
@@ -657,15 +681,15 @@ void get_token(T_token *token,FILE* sourceFile)
 						f_addChar(str[i],token);
 						i++;
 					}
-
+                    
                     return;
 				}
 				number_flag = false;
 				break;
-
+			
 			case state_Hex:
-				if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					state = state_Hex_continue;
@@ -676,10 +700,10 @@ void get_token(T_token *token,FILE* sourceFile)
 					error_f(ERROR_LEX);
 				}
 				break;
-
+				
 			case state_Hex_continue:
-				if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					f_addChar(actChar,token);
@@ -710,31 +734,47 @@ void get_token(T_token *token,FILE* sourceFile)
 				else
 				{
 					ungetc(actChar,sourceFile);
-                    token->type = token_number_int;
-
+                    
                     // prevod na desitkove cislo
-
-                    long int number = strtol(token->value, NULL, 16);
-
-                    if(number > INT_MAX ||
-                    sprintf(token->value, "%li", number) < 0) // prevod na retezec
+                    
+                    double number = to_Dec(token, 16);
+					
+					if(number > INT_MAX)
+                    {
+						token->type=token_number_double;
+					}
+					else
+					{
+						token->type=token_number_int;
+					}
+					
+                    if(sprintf(str, "%.0lf", number) < 0) // prevod na retezec
 					{
 						error_f(ERROR_LEX);
 					}
-
+					
+					token->value[0] = '\0';
+					token->valActsize = 0;
+					int i = 0;
+					while(str[i] != '\0')
+					{
+						f_addChar(str[i],token);
+						i++;
+					}
+					
 					return;
 				}
 				number_flag = false;
 				break;
-
+			
 			case state_Hex_Pp:
 				if(actChar == '0')
 				{
 					state = state_Hex_Pp_sign_zero;
 					f_addChar(actChar,token);
 				}
-				else if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				else if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					state = state_Hex_Pp_exp;
@@ -760,15 +800,15 @@ void get_token(T_token *token,FILE* sourceFile)
 				}
 				number_flag = false;
 				break;
-
+			
 			case state_Hex_Pp_sign:
 				if(actChar == '0')
 				{
 					state = state_Hex_Pp_sign_zero;
 					f_addChar(actChar,token);
 				}
-				else if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				else if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					state = state_Hex_Pp_exp;
@@ -779,14 +819,14 @@ void get_token(T_token *token,FILE* sourceFile)
 					error_f(ERROR_LEX);
                 }
                 break;
-
+            
             case state_Hex_Pp_sign_zero:
 				if(actChar == '0')
 				{
 					break;
 				}
-				else if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				else if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					state = state_Hex_Pp_exp;
@@ -811,17 +851,17 @@ void get_token(T_token *token,FILE* sourceFile)
                 {
 					ungetc(actChar,sourceFile);
                     token->type = token_number_double;
-
+                    
                     // převod na desítkové
                     Hex_to_Dec(token);
 					return;
 				}
 				number_flag = false;
 				break;
-
+				
 			case state_Hex_Pp_exp:
-				if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					f_addChar(actChar,token);
@@ -843,17 +883,17 @@ void get_token(T_token *token,FILE* sourceFile)
 				{
 					ungetc(actChar,sourceFile);
                     token->type = token_number_double;
-
+                    
                     // převod na desítkové
                     Hex_to_Dec(token);
 					return;
 				}
 				number_flag = false;
 				break;
-
+			
 			case state_Hex_dot_first:
-				if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					state = state_Hex_dot;
@@ -864,10 +904,10 @@ void get_token(T_token *token,FILE* sourceFile)
 					error_f(ERROR_LEX);
 				}
 				break;
-
+				
 			case state_Hex_dot:
-				if(isdigit(actChar) ||
-				(actChar >= 'a' && actChar <= 'f') ||
+				if(isdigit(actChar) || 
+				(actChar >= 'a' && actChar <= 'f') || 
 				(actChar >= 'A' && actChar <= 'F'))
 				{
 					f_addChar(actChar,token);
@@ -898,24 +938,55 @@ void get_token(T_token *token,FILE* sourceFile)
 }
 
 /*
- * Převod čísla v šestnáckové soustavě s exp nebo
+ * Převod celého čísla do desítkové soustavy
+ */
+double to_Dec(T_token *token, int soustava)
+{
+	double number = 0;
+    int pocet = -1;
+    int i = 0;
+    double m = 1;
+    while(token->value[i] != '\0')
+    {
+		if(m > DBL_MAX) // pojistka
+		{
+			error_f(ERROR_LEX);
+		}
+		pocet++;
+		m *= soustava;
+		i++;
+	}			
+    m /= soustava;
+	i = 0;
+	while(pocet >= 0)
+	{
+		number += hex_digit_to_dec_digit(token->value[i]) * m;
+		pocet--;
+		i++;
+		m /= soustava;
+	}
+	
+	return number;
+}
+
+/*
+ * Převod čísla v šestnáckové soustavě s exp nebo 
  * s desetinnou částí a exp do desítkové soustavy
  */
 void Hex_to_Dec(T_token *token)
 {
-	char str[50];
-	char str2[50];
+	char str[1000], str2[20];
+	int cela = -1;
 	bool dot_flag = false;
-	long int number;
-	long double sum = 0;
-
+	double number = 0;
+	double sum = 0;
+	
 	String *s = (String*) memory_manager_malloc(sizeof(String));
 	strInit(s);
-	String *s1 = (String*) memory_manager_malloc(sizeof(String));
-	strInit(s1);
-
+	
 	// převod celé části
 	int i = 0;
+	double m = 1;
 	while(1)
 	{
 		if(token->value[i] == '.')
@@ -927,17 +998,35 @@ void Hex_to_Dec(T_token *token)
 		{
 			break;
 		}
-		strAddChar(s, token->value[i]);
 		i++;
+		cela++;
+		if(m > DBL_MAX) // pojistka
+		{
+			error_f(ERROR_LEX);
+		}
+		m *= 16;
 	}
-
-	number = strtol(s->str, NULL, 16);
-
+	
+	m /= 16;
+	int j = 0;
+	while(cela >= 0)
+	{
+		number += hex_digit_to_dec_digit(token->value[j]) * m;
+		cela--;
+		j++;
+		m /= 16;
+	}
+	
+	if(number > DBL_MAX)
+	{
+		error_f(ERROR_LEX);
+	}
+	
 	// převod desetinné části
 	if(dot_flag)
 	{
 		i++;
-		double m = 16;
+		m = 16;
 		while(token->value[i] != 'p' && token->value[i] != 'P')
 		{
 			sum += hex_digit_to_dec_digit(token->value[i]) * (1 / m);
@@ -945,85 +1034,90 @@ void Hex_to_Dec(T_token *token)
 			m *= 16;
 		}
 	}
-
+	
 	// spojení celé a případné desetinné části
 	sum += number;
-
-	if(sprintf(str, "%LF", sum) < 0) // prevod na retezec
+	
+	if(sum > DBL_MAX)
 	{
 		error_f(ERROR_LEX);
 	}
-
+	
+	if(sprintf(str, "%.52lf", sum) < 0) // prevod na retezec
+	{
+		error_f(ERROR_LEX);
+	}
+	
 	// převod exponentu
 	i++;
 	int sign = 0;
-
+		
 	if(token->value[i] == '+' || token->value[i] == '-')
 	{
 		sign = token->value[i];
 		i++;
 	}
-
+	
 	while(token->value[i] != '\0')
 	{
-		strAddChar(s1, token->value[i]);
+		strAddChar(s, token->value[i]);
 		i++;
 	}
-
-	number = strtol(s1->str, NULL, 16);
-
-	if(sprintf(str2, "%li", number) < 0) // prevod na retezec
+	
+	number = strtol(s->str, NULL, 16);
+	
+	if(number > INT_MAX || // jen pojistka
+	sprintf(str2, "%.0lf", number) < 0) // prevod na retezec
 	{
 		error_f(ERROR_LEX);
 	}
-
+	
 	// spojení částí a přidání do tokenu
 	token->value[0] = '\0';
 	token->valActsize = 0;
-
+	
 	i = 0;
 	while(str[i] != '\0')
 	{
 		f_addChar(str[i], token);
 		i++;
 	}
-
+	
 	f_addChar('e', token);
-
+	
 	if(sign != 0)
 	{
 		f_addChar(sign, token);
 	}
-
+	
 	i = 0;
 	while(str2[i] != '\0')
 	{
 		f_addChar(str2[i], token);
 		i++;
 	}
-
+	
 	strFree(s);
-	strFree(s1);
 }
 
 /*
- * Převod hexadecimální číslice do decimální
+ * Převod hexadecimální číslice na decimální číslo
  */
 int hex_digit_to_dec_digit(char c)
 {
 	switch(c)
 	{
-		case 'a':
+		case 'a': 
 		case 'A': return 10;
-		case 'b':
+		case 'b': 
 		case 'B': return 11;
-		case 'c':
+		case 'c': 
 		case 'C': return 12;
-		case 'd':
+		case 'd': 
 		case 'D': return 13;
-		case 'e':
+		case 'e': 
 		case 'E': return 14;
-		case 'f':
+		case 'f': 
 		case 'F': return 15;
 		default: return c - '0'; // převod znaku číslice na skutečnou číslici
 	}
@@ -1043,10 +1137,9 @@ void comment_in_block (FILE* sourceFile)
             else
                 continue;
         }
-        else if(c_next==EOF) //printf chybovy stav
+        else if(c_next==EOF)
         {
-            error_f(ERROR_LEX);
-            //fprintf(stderr, "ERROR neukonceny blokovy komentar\n");
+			error_f(ERROR_LEX);
         }
         else
             continue;
@@ -1062,10 +1155,9 @@ void comment_in_line(FILE* sourceFile)
         {
             return;
         }
-        else if(c_next==EOF) //printf chybovy stav
+        else if(c_next==EOF)
         {
-            error_f(ERROR_LEX);
-            //fprintf(stderr, "ERROR neukonceny komentar\n");
+			error_f(ERROR_LEX);
         }
         else
             continue;
@@ -1085,10 +1177,10 @@ void check_String(FILE* sourceFile, T_token *actToken)
             continue;
         }
         else if(actChar == EOF || actChar == '\n') //nieje to string
-        {
-            error_f(ERROR_LEX);
-        }
-        else
+	    {
+			error_f(ERROR_LEX);
+	    }
+	    else
         {
             f_addChar(actChar,actToken);
         }
@@ -1099,7 +1191,7 @@ void check_String(FILE* sourceFile, T_token *actToken)
 }
 
 void check_escape(FILE* sourceFile, T_token* actToken)
-{
+{//TODO '\ddd'
      //'\"' '\n'  '\t'  '\\'  '\ddd'
      int nextChar;
      nextChar=fgetc(sourceFile);
@@ -1121,40 +1213,41 @@ void check_escape(FILE* sourceFile, T_token* actToken)
             f_addChar('\\',actToken);
             return;
         default:
+			// převod escape sekvence z oktal na decimal
             if(nextChar >= '0' && nextChar <= '3')
             {
-                substring[0] = nextChar;
-                nextChar = fgetc(sourceFile);
-
-                if(substring[0] == '3' && nextChar > '7')
-                {
-                    break;
-                }
-
-                if(isdigit(nextChar))
-                {
-                    substring[1] = nextChar;
-                    nextChar = fgetc(sourceFile);
-
-                    if(!isdigit(nextChar) ||
-                    (substring[0] == '3' && substring[1] == '7' && nextChar > '7') ||
-                    (substring[0] == '0' && substring[1] == '0' && nextChar == '0'))
-                    {
-                      break;
-                    }
-
-                    convert_result = (substring[0] - '0') * 8 * 8 + (substring[1] - '0') * 8 + (nextChar - '0'); //TODO opravil som no magic num 48 lepsie '0' vymazat tento komentar opravit magic num na 'znak'
-
-                    if(convert_result > 0 && convert_result < 378)
-                    {
-                      f_addChar(convert_result, actToken);
-                      return;
-                    }
-                }
+				substring[0] = nextChar;
+				nextChar = fgetc(sourceFile);
+				
+				if(substring[0] == '3' && nextChar > '7')
+				{
+					break;
+				}
+				
+				if(isdigit(nextChar))
+				{
+					substring[1] = nextChar;
+					nextChar = fgetc(sourceFile);
+					
+					if(!isdigit(nextChar) || 
+					(substring[0] == '3' && substring[1] == '7' && nextChar > '7') ||
+					(substring[0] == '0' && substring[1] == '0' && nextChar == '0'))
+					{
+						break;
+					}
+					
+					convert_result = (substring[0] - 48) * 8 * 8 + (substring[1] - 48) * 8 + (nextChar - 48);
+					
+					if(convert_result > 0 && convert_result < 378)
+					{
+						f_addChar(convert_result, actToken);
+						return;
+					}
+				}
             }
             break;
      }
-
+     
      error_f(ERROR_LEX);
 
 }
@@ -1180,23 +1273,19 @@ void f_Identifier(FILE* sourceFile, T_token *actToken)
         {
             f_addChar(actChar,actToken);
         }
-        else if( actChar == '.')
+	    else if( actChar == '.')
         {
-            if( strcmp("ifj16",token->value) == 0)
-                f_addChar(actChar,actToken);
-            else
-            {
-                actToken->type=token_class_identifier;
-                ungetc(actChar,sourceFile);
-                break;
-            }
-        }
+	    actToken->type=token_class_identifier;
+	    ungetc(actChar,sourceFile);
+            break;
+		}
         else
         {
-            actToken->type=token_identifier;
+	        actToken->type=token_identifier;
             ungetc(actChar,sourceFile);
-            break; //TODO error bad symbol (pritf actChar)-> return false ->free mem TODO neviem co som tym myslel davnejsie
+            break;
         }
+
     }
     actToken->value[actToken->valActsize] = '\0';
 }
