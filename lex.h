@@ -37,6 +37,7 @@ void f_Identifier(FILE* sourceFile, T_token *actToken);
 void f_addChar (char symbol, T_token *token);
 void comment_in_block(FILE* sourceFile);
 void comment_in_line(FILE* sourceFile);
+double to_Dec(T_token *token, int soustava);
 void Hex_to_Dec(T_token *token);
 int hex_digit_to_dec_digit(char c);
 

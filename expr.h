@@ -54,7 +54,7 @@ typedef enum{
 
 
 
-int fn_expression(expr_in help,value_type * result_type, ht_item_func_ptr fnce, T_instr_list  ** instrList);
+int fn_expression(expr_in help,value_type result_type, ht_item_func_ptr fnce, T_instr_list  ** instrList);
 operators fn_token_to_operators( expr_in help, int *count_paranthesis, String * key_identifier, IntStack *stack);
 precedence_symbol fn_char_to_numsymbol(char c);
 void is_TOP_symbol_less_POP_and_PUSH_Nonterm(IntStack* stack);
@@ -62,9 +62,10 @@ void add_less_operator_to_stack(IntStack* stack);
 operators get_Top_operator_from_stack(IntStack* stack);
 void create_const(T_token* tokenik, T_variable* var);
 void gen_code(int operation, void *address1, void *address2, void *result,T_instr_list *L_ins);
-void set_adress_and_gen_code(token_type lool, VariableStack* Help_VSstack, T_instr_list  * MyinstrList);
-void UNARY_gen_prefix(VariableStack* Help_VSstack,T_instr_list *instrList,int topik);
-
+void set_adress_and_gen_code(token_type operation, ExpStack *Help_ExpStack_ptr, T_instr_list  * MyinstrList );
+void UNARY_gen_prefix(ExpStack* Help_ExpStack,T_instr_list *instrList,int topik);
+void gen_NOT_UNM( ExpStack* Help_ExpStack, T_instr_list *instrList, int topik);
+value_type SEM_check_operation_return_Result_Type(value_type sem1,value_type sem2, token_type Operations);
 /*
 02.ruĺe E->E+E
 03.rule E->E-E

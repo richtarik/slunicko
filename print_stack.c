@@ -3,16 +3,16 @@
 #include "print_stack.h"
 #include <stdbool.h>
 
-void print_stack_data(IntStack *s)
+void print_stack_data(IntStack *s, FILE* suborik)
 {
     int i = 0;
 
     while(s->top - i >= 0)
     {
-        printf(" %c ", int_to_operator(s->data[i]) );
+        fprintf(suborik," %c ", int_to_operator(s->data[i]) );
         i++;
     }
-    printf("\n");
+    fprintf(suborik,"\n");
 }
 
 
@@ -49,7 +49,7 @@ char int_to_operator(int i)
     case 20: return'i';      // / ID
     case 21 : return'f';      //  function
     case 22 : return'$';    //  Dollar
-    case 23: return'n';      // Nonterminal
+    case 25: return'n';      // Nonterminal
     case 30: return'=';
     case 31: return'<';
   }
@@ -269,11 +269,8 @@ void print_VStack_data(VariableStack *s,FILE* suborik)
             case BOOLEAN:
                 fprintf(suborik,"BOOLEAN value: %d", s->data[i].value);
                 break;
-            case ADRESS_G:
-                fprintf(suborik,"ADRESS_G value: %d", s->data[i].value);
-                break;
             default:
-                fprintf(suborik,"ADRESS_L value: %d", s->data[i].value);
+                fprintf(suborik,"Defauuult value: %d num_Type:%d", s->data[i].value,s->data[i].type);
                 break;
         }
 

@@ -124,6 +124,9 @@ double strReadDouble()
         }
 
         if(c == '\n' || c == EOF){
+            if(dot_pom == 1){
+                error_f(ERROR_INPUT);
+            }
             buffer[delka] = '\0';
             break;
         }
@@ -131,18 +134,21 @@ double strReadDouble()
         if (isdigit(c))
         {
             buffer[delka] = c;
-            pom = 1;
+            if(dot_pom == 1){
+            dot_pom = 2;
+            }
         }
-        else if(c == 46 && dot_pom == 0) // 46 - tečka
+        else if(pom != 2 && (c == 46 && dot_pom == 0)) // 46 - teÄka
         {
             buffer[delka] = c;
             dot_pom = 1;
         }
-        else if(pom == 1 && (c == 69 || c == 101)){ // E - 69 , e - 101
+       else if(((c == 69 || c == 101) && dot_pom != 1) && pom != 2){ // E - 69 , e - 101
+
             buffer[delka] = c;
             pom = 2;
         }
-        else if (pom == 2 &&  ((buffer[delka - 1] == 69 || buffer[delka - 1] == 101) && (c == 43 || c == 45))){ // 43 - plus , 45 - mínus
+        else if (dot_pom != 1 && (pom == 2 &&  ((buffer[delka - 1] == 69 || buffer[delka - 1] == 101) && (c == 43 || c == 45)))){ // 43 - plus , 45 - mĂ­nus
             buffer[delka] = c;
         }
         else

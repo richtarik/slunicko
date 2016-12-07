@@ -5,7 +5,7 @@
 
 
 
-void print_stack_data(IntStack *s);
+void print_stack_data(IntStack *s,FILE *suborik);
 char int_to_operator(int i);
 void f_print_type(int TOKENIKTYPE);
 void print_table(hash_table_ptr ht);

@@ -36,4 +36,6 @@ int strCompare(String *s1, String *s2);
 void strLoad(String *s, char *c);
 void strCat(String *s, char *c);
 
+String * actTrieda; //v akej triede som aktualne
+
 #endif

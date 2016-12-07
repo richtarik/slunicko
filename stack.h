@@ -7,7 +7,7 @@
 #include "error.h"
 #include "struct.h"
 
-//#define size 20
+#define STACK_SIZE 20
 
 /* ADT zásobník */
 typedef struct
@@ -37,4 +37,12 @@ void VStackPush(VariableStack* s, value_type type, union T_value value);
 void VStackSet(VariableStack* s, int offset, value_type type, union T_value value);
 void VStackDelete_and_free(VariableStack* s);
 
+/// EXPR_STACK///
+void ExpStackInit(ExpStack* s, unsigned int size);
+int ExpStackEmpty(ExpStack* s);
+int ExpStackFull(ExpStack* s);
+void ExpStackTop(ExpStack* s, T_Exp_variable* c);
+void ExpStackPop(ExpStack* s);
+void ExpStackPush(ExpStack* s, value_type type, int offset, value_type_Stack GlobLokCons);
+void ExpStackDelete_and_free(ExpStack* s);
 #endif

@@ -13,34 +13,43 @@
 
 hash_table_ptr global_table;
 hash_table_ptr local_table;
-String * actTrieda; //v akej triede som aktualne
 
 int globalVarsOffset;
-int actFunctionOffset;
-bool firstScan; //prepinac ci som v prvom alebo druhom zostupe
 
-value_type * result_type; //aku hodnotu vracia fn_expression
 
+///premenne pre funkcie
+token_type actFunctionType;
 int nParams; //pocet parametrov aktualnej funkcie
+bool hasResult;
+///premenne pre funkcie
 
-int main()
+int main( int argc, char *argv[])
 {
+
+    if(argc != 2)
+    {
+        fprintf(stderr,"Zly zadany vstup\n");
+        error_f(ERROR_INPUT);
+    }
+     else
+     {
+        sourceFile=fopen(argv[1],"r");
+        if(sourceFile==NULL)
+        {
+            fprintf(stderr,"Cant open file\n");
+            error_f(ERROR_INPUT);
+        }
+     }
+
     firstScan = true;
     global_table = ht_init(100); //////ak to tam spadne, neuvolnim svoju pamet
-    globalVarsOffset=1; //na nultej pozicii je miesto pre vysledok vestavjenej funkcie
+    globalVarsOffset=0;
 
     sVariableGlobal = memory_manager_malloc(sizeof(VariableStack));
     sVariableLocal = memory_manager_malloc(sizeof(VariableStack));
     VStackInit(sVariableGlobal, 50);
     VStackInit(sVariableLocal, 50);
 
-    result_type = memory_manager_malloc(sizeof(value_type));
-
-    //prazdny push pre vestavjene funkcie
-    union T_value hodnota;
-    hodnota.value_int = 0;
-    VStackPush(sVariableGlobal,INT, hodnota);
-    //prazdny push pre vestavjene funkcie
     ht_table_item_ptr runPointer; //zaciatocna funkcia
 
     T_instr_list * instructionList; //instrukcny list
@@ -50,101 +59,94 @@ int main()
     actTrieda = memory_manager_malloc(sizeof(String));
     strInit(actTrieda);
 
+    T_address_code * code;
+
     token = memory_manager_malloc(sizeof(T_token));
-    if(token==NULL)
-        return(-1); //nedostatok pamete
 
-   sourceFile = fopen("vstup.txt","r");
+    Init_token(token);
 
-   if(sourceFile == NULL)
-   {
-        printf(stderr,"Cant open file");
-        return -1;
-   }
+    nontermClass(instructionList);
 
-   Init_token(token);
-
-   if(nontermClass(instructionList) == 1)
-   {
-       // printf("EVERYTHONG OK \n");
-       print_table(global_table);
-      // list_print(instructionList);
-   }
-   else
-   {
-		error_f(ERROR_SYNTAX);
-   }
     fseek(sourceFile,0,0);
     firstScan = false;
-    if(nontermClass(instructionList) == 1)
-   {
-        runPointer = ht_search("Main_run",true, global_table);
-        if(runPointer == NULL)
-            printf("Nenasla sa funkcia run\n");
-        else
-        {
-            if(runPointer->func->type != token_void || runPointer->func->nParams != 0)
-                printf("Zla definicia funkcie run\n");
-            else
-            {
-                printf("SYNTAX OK \n");
 
-                list_print(instructionList);
-                generator(instructionList, true);
-                print_VStack_data(sVariableGlobal);
-            }
+    nontermClass(instructionList);
+
+    runPointer = ht_search("Main_run",true, global_table);
+    if(runPointer == NULL)
+    {
+        fprintf(stderr, "Nenasla sa funkcia run\n");
+        error_f(ERROR_SEM_UNDEFINED);
+    }
+    else
+    {
+        if(runPointer->func->type != token_void || runPointer->func->nParams != 0)
+        {
+            fprintf(stderr, "Zly printf alebo pocet parametrov\n");
+            error_f(ERROR_SEM_UNDEFINED);
         }
-   }
-   else
-   {
-		error_f(ERROR_SYNTAX);
-   }
+        else //generujem zavolanie run
+        {
+            code = memory_manager_malloc(sizeof(T_address_code));
+            code->address1 = runPointer->func->instructionList;
+            T_address * adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=true;
+            code->address2 = adresa;
+            code->operation = T_FUNC;
+            listInsert(instructionList, code);
+            generator(instructionList, true); //zavolanie interpretu
+        }
+    }
 
     free_token(token);
 
     ht_free(global_table);
     fclose(sourceFile);
     memory_manager_free_all();
+    return 0;
 }
-int nontermClass(T_instr_list * instructionList)
+void nontermClass(T_instr_list * instructionList)
 {
-    int result = -1;
-
     get_token(token, sourceFile);
 
-    do
+    if(token->type == token_class)
     {
-        if(token->type == token_class)
+        get_token(token, sourceFile);
+        if(token->type != token_identifier)
+            error_f(ERROR_SYNTAX);
+
+        if(strcmp(token->value,"ifj16") == 0)
+            error_f(ERROR_SEM_UNDEFINED);
+
+        strLoad(actTrieda,token->value);
+        get_token(token, sourceFile);
+
+        if(token->type != token_zlz)
+           error_f(ERROR_SYNTAX);
+
+        nontermVnutroTriedy(instructionList);
+
+        get_token(token, sourceFile);
+        if(token->type != token_zrz)
+           error_f(ERROR_SYNTAX);
+
+        nontermClass(instructionList);
+
+        if(token->type == token_EOF)
         {
-            get_token(token, sourceFile);
-            if(token->type != token_identifier)
-                break;
-
-            strLoad(actTrieda,token->value);
-            get_token(token, sourceFile);
-            if(token->type != token_zlz)
-                break;
-            if(nontermVnutroTriedy(instructionList) != 1)
-                break;
-            get_token(token, sourceFile);
-            if(token->type != token_zrz)
-                break;
-              if(nontermClass(instructionList) != 1)
-                break;
-            if(token->type == token_EOF)
-                result = 1;
+            //OK
         }
-        else if(token->type == token_EOF)
-            result = 1;
-    }while(0);
-
-    return result;
-
+    }
+    else if(token->type == token_EOF)
+    {
+        //koniec
+    }
+    else
+        error_f(ERROR_SYNTAX);
 }
 
-int nontermVnutroTriedy(T_instr_list * instructionList)
+void nontermVnutroTriedy(T_instr_list * instructionList)
 {
-    int result = -1;
     String *key;
     T_instr_list * functionBodyList;
     ht_table_item_ptr tableItem;
@@ -156,23 +158,23 @@ int nontermVnutroTriedy(T_instr_list * instructionList)
        get_token(token, sourceFile);
        if(token->type == token_zrz) //je tam koniec bloku
        {
-            result = 1;
             get_back_token(token);
             break;
        }
        if(token->type != token_static) //povinny static
-            break;
+            error_f(ERROR_SYNTAX);
 
        get_token(token, sourceFile);
        if(token->type == token_void) //osetrenie samostatnej vetvy ak je funkcia void
        {
             get_token(token, sourceFile);
             if(token->type != token_identifier)
-                break;
+                error_f(ERROR_SYNTAX);
+
             strLoad(key, token->value);
             get_token(token, sourceFile);
 
-             ///
+           ///pripravenie identifikatora
                 strLoad(key, actTrieda->str);
                 strCat(key, "_");
                 strCat(key, token->value);
@@ -180,21 +182,19 @@ int nontermVnutroTriedy(T_instr_list * instructionList)
 
             if(token->type == token_pal) //funkcia
             {
+                actFunctionType = token_void;
+                nParams = 0;
                 if(!firstScan)
                 {
                     actFunctionOffset=0;
-                    nParams = 0;
                     local_table = ht_init(100); // pre kazdu funkciu jedna tabulka
                 }
 
-                if(nontermFunctionParams(key, token_void) != 1)
-                    break;
-                //get_token(&token, sourceFile);
-                // if(token->type != token_par) // zatvorku skontrolujem vo functionParams
-                //     break;
+                nontermFunctionParams(key);
+
                 get_token(token, sourceFile);
                 if(token->type != token_zlz)
-                    break;
+                    error_f(ERROR_SYNTAX);
 
                 if(!firstScan)
                 {
@@ -202,38 +202,31 @@ int nontermVnutroTriedy(T_instr_list * instructionList)
                     tableItem = ht_search(key->str, true, global_table);
                     if(tableItem == NULL || tableItem->func == NULL)
                     {
-                        printf("Nedefinovana funkcia\n");
-                        break;
+                        fprintf(stderr,"Nedefinovana funkcia\n");
+                        error_f(ERROR_SEM_UNDEFINED);
                     }
 
                     functionBodyList = tableItem->func->instructionList;
                 }
-                if(nontermVnutroFunkcie(functionBodyList) != 1)
-                    break;
 
+                nontermVnutroFunkcie(functionBodyList);
 
-                if(!firstScan)
-                {
-                  //  printf("Lokalnaaaa\n");
-                 //  print_table(local_table);
-                  //  printf("/Lokalnaaaa\n");
+                if(!firstScan) //vymazanie lokalnej tabulky
                     ht_free(local_table);
-                }
+
                 get_token(token, sourceFile);
                 if(token->type != token_zrz)
-                    break;
-                if(nontermVnutroTriedy(instructionList) != 1)
-                    break;
+                   error_f(ERROR_SYNTAX);
 
-                result = 1;
+                nontermVnutroTriedy(instructionList);
                 break;
             }
             else
-                break;
+                error_f(ERROR_SYNTAX);
 
        }
        if(token->type != token_double && token->type != token_int && token->type != token_String_type && token->type != token_boolean)
-            break;
+            error_f(ERROR_SYNTAX);
 
         token_type actType;
         actType = token->type;
@@ -241,24 +234,21 @@ int nontermVnutroTriedy(T_instr_list * instructionList)
         get_token(token, sourceFile);
 
         if(token->type != token_identifier)
-            break;
+            error_f(ERROR_SYNTAX);
         ///
             strLoad(key, actTrieda->str);
             strCat(key, "_");
             strCat(key, token->value);
         ///pripravenie identifikatora
 
-        if(nontermTriednyClen(key, actType, instructionList) != 1)
-            break;
-        else
-            result = 1;
+        actFunctionType = actType;
+
+        nontermTriednyClen(key, instructionList);
     }while(0);
 
-    return result;
 }
-int nontermTriednyClen(String *key,  token_type actType, T_instr_list * instructionList)
+void nontermTriednyClen(String *key, T_instr_list * instructionList)
 {
-    int result = -1;
     bool premennaDefinition=false;
     bool premennaInit=false;
     T_instr_list * functionBodyList;
@@ -267,201 +257,187 @@ int nontermTriednyClen(String *key,  token_type actType, T_instr_list * instruct
     T_address_code *code;
     T_address *adresa = NULL;
     T_variable * premenna;
-    do
+
+    if(token->type == token_pal) //funkcia
     {
-        if(token->type == token_pal) //funkcia
+        nParams=0;
+        if(!firstScan)
         {
-            if(!firstScan)
-            {
-                actFunctionOffset=0; //na nultom je navratova hodnota funkcie, nastavenie offsetov pre dalsie funkcie
-                nParams=0;
-                local_table = ht_init(100); // pre kazdu funkciu jedna tabulka
-            }
-            if(nontermFunctionParams(key, actType) != 1)
-                break;
-            //get_token(&token, sourceFile);
-            // if(token->type != token_par) // zatvorku skontrolujem vo functionParams
-            //     break;
-            get_token(token, sourceFile);
-            if(token->type != token_zlz)
-                break;
-
-            if(!firstScan)
-            {
-                functionBodyList = memory_manager_malloc(sizeof(T_instr_list));
-                tableItem = memory_manager_malloc(sizeof(ht_table_item_ptr));
-                tableItem = ht_search(key->str, true, global_table);
-                if(tableItem == NULL || tableItem->func == NULL)
-                {
-                    printf("Nedefinovana funkcia\n");
-                    break;
-                }
-
-                functionBodyList = tableItem->func->instructionList;
-            }
-
-            if(nontermVnutroFunkcie(functionBodyList) != 1)
-                break;
-            if(!firstScan)
-            {
-             //   printf("Lokalnaaaa\n");
-             //   print_table(local_table);
-             //   printf("/Lokalnaaaa\n");
-                ht_free(local_table);
-            }
-
-             get_token(token, sourceFile);
-             if(token->type != token_zrz)
-                break;
-
+            actFunctionOffset=0; //na nultom je navratova hodnota funkcie, nastavenie offsetov pre dalsie funkcie
+            hasResult = false;
+            local_table = ht_init(100); // pre kazdu funkciu jedna tabulka
         }
-        else if(token->type == token_asg) //premenna priradenie
+
+        nontermFunctionParams(key);
+
+        get_token(token, sourceFile);
+        if(token->type != token_zlz)
+            error_f(ERROR_SYNTAX);
+
+        if(!firstScan)
         {
-            if(fn_expression(in_assign,result_type,NULL, NULL) != 1)
-                break;
-
-           /* if(result_type == actType) ///treba dorobit konvertovanie typov
+            functionBodyList = memory_manager_malloc(sizeof(T_instr_list));
+            tableItem = memory_manager_malloc(sizeof(ht_table_item_ptr));
+            tableItem = ht_search(key->str, true, global_table);
+            if(tableItem == NULL || tableItem->func == NULL)
             {
+                fprintf(stderr,"Nedefinovana funkcia\n");
+                error_f(ERROR_SEM_UNDEFINED);
+            }
 
+            functionBodyList = tableItem->func->instructionList;
+        }
+
+        nontermVnutroFunkcie(functionBodyList);
+
+        if(!hasResult)
+        {
+            fprintf(stderr,"Chybny return \n");
+            error_f(ERROR_SEM_OTHER);
+        }
+
+        if(!firstScan) //uvolnim lokalnu tabulku
+            ht_free(local_table);
+
+         get_token(token, sourceFile);
+         if(token->type != token_zrz)
+            error_f(ERROR_SYNTAX);
+
+    }
+    else if(token->type == token_asg) //premenna priradenie
+    {
+       premennaDefinition = true;
+       premennaInit = true;
+
+       ///zapis do stacku
+        if(firstScan)
+        {
+            //pushnutie na prazdno
+            code =  memory_manager_malloc(sizeof(T_address_code));
+            premenna = memory_manager_malloc(sizeof(T_variable));
+
+            if(actFunctionType == token_int)
+            {
+                premenna->type = INT;
+                premenna->value.value_int = 0;
+            }
+            else if(actFunctionType == token_double)
+            {
+                premenna->type = DOUBLE;
+                premenna->value.value_double = 0;
+            }
+            else if(actFunctionType == token_String_type)
+            {
+                premenna->type = STRING;
+                premenna->value.value_String = NULL;
             }
             else
-                error_f(ERROR_SEM_TYPE);*/
-
-            get_token(token, sourceFile);
-
-           premennaDefinition = true;
-           premennaInit = true;
-
-           ///zapis do stacku
-            if(firstScan)
             {
-                //pushnutie na prazdno
-                code =  memory_manager_malloc(sizeof(T_address_code));
-                premenna = memory_manager_malloc(sizeof(T_variable));
-
-                if(actType == token_int)
-                {
-                    premenna->type = INT;
-                    premenna->value.value_int = 0;
-                }
-                else if(actType == token_double)
-                {
-                    premenna->type = DOUBLE;
-                    premenna->value.value_double = 0;
-                }
-                else if(actType == token_String_type)
-                {
-                    premenna->type = STRING;
-                    premenna->value.value_String = NULL;
-                }
-                else
-                {
-                    premenna->type = BOOLEAN;
-                    premenna->value.value_bool = true;
-                }
-
-                code->address1 = premenna;
-                code->address2 = NULL;
-                adresa = memory_manager_malloc(sizeof(T_address));
-                adresa->isGlobal=true; //s ktorym zasobnikom pracuje
-                code->result = adresa;
-                code->operation = T_PUSH;
-                listInsert(instructionList, code);
-                //pushnutie na prazdno
-
-                code =  memory_manager_malloc(sizeof(T_address_code));
-                adresa = memory_manager_malloc(sizeof(T_address));
-
-                adresa->isGlobal=false;
-                adresa->offset = 0; //na zaciatku lokalneho zasobnika
-                code->address1 = adresa;
-
-                adresa = memory_manager_malloc(sizeof(T_address));
-                adresa->isGlobal=true;
-                adresa->offset = globalVarsOffset;
-                code->address2 = adresa;
-                code->operation = T_MOV;
-                listInsert(instructionList, code);
-
-                //popnem vyraz z lokalneho zasobnika
-                adresa = memory_manager_malloc(sizeof(T_address));
-                adresa->isGlobal=false;
-                code->result = adresa;
-
-                code = memory_manager_malloc(sizeof(T_address_code));
-                code->operation = T_POP;
-                listInsert(instructionList, code);
+                premenna->type = BOOLEAN;
+                premenna->value.value_bool = 1;
             }
-           ///zapis do stacku
-            if(token->type != token_sem)
-                break;
+
+            code->address1 = premenna;
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=true; //s ktorym zasobnikom pracuje
+            code->result = adresa;
+            code->operation = T_PUSH;
+            listInsert(instructionList, code);
+            //pushnutie na prazdno
         }
-        else if(token->type == token_sem) //len definicia -> pushnem naprazdno na zasobnik
+
+        fn_expression(in_assign_first,actFunctionType, NULL, &instructionList);
+
+        get_token(token, sourceFile);
+
+        if(firstScan)
         {
-            premennaDefinition = true;
-            if(firstScan)
-            {
-                code =  memory_manager_malloc(sizeof(T_address_code));
-                premenna = memory_manager_malloc(sizeof(T_variable));
-                if(actType == token_int)
-                {
-                    premenna->type = INT;
-                    premenna->value.value_int = 0;
-                }
-                else if(actType == token_double)
-                {
-                    premenna->type = DOUBLE;
-                    premenna->value.value_double = 0;
-                }
-                else if(actType == token_String_type)
-                {
-                    premenna->type = STRING;
-                    premenna->value.value_String = NULL;
-                }
-                else
-                {
-                    premenna->type = BOOLEAN;
-                    premenna->value.value_bool = true;
-                }
+            code =  memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
 
-                code->address1 = premenna;
-                code->address2 = NULL;
-                adresa = memory_manager_malloc(sizeof(T_address));
-                adresa->isGlobal=true; //s ktorym zasobnikom pracuje
-                code->result = adresa;
-                code->operation = T_PUSH;
-                listInsert(instructionList, code);
-            }
+            adresa->isGlobal=false;
+            adresa->offset = 0; //na zaciatku lokalneho zasobnika
+            code->address1 = adresa;
+
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=true;
+            adresa->offset = globalVarsOffset;
+            code->address2 = adresa;
+            code->operation = T_MOV;
+            listInsert(instructionList, code);
+
+            //popnem vyraz z lokalneho zasobnika
+            code = memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=false;
+            code->result = adresa;
+            code->operation = T_POP;
+            listInsert(instructionList, code);
         }
-        else
-            break;
 
-        ///zapis globalnej premennej do tabulky
-        if(premennaDefinition && firstScan)
+       ///zapis do stacku
+        if(token->type != token_sem)
+            error_f(ERROR_SYNTAX);
+    }
+    else if(token->type == token_sem) //len definicia -> pushnem naprazdno na zasobnik
+    {
+        premennaDefinition = true;
+        if(firstScan)
         {
-            ht_item_var_ptr item = ht_create_item_var(actType,globalVarsOffset,premennaInit);
-            if(ht_insert_item_var(item, key->str, global_table) == false)
+            code =  memory_manager_malloc(sizeof(T_address_code));
+            premenna = memory_manager_malloc(sizeof(T_variable));
+            if(actFunctionType == token_int)
             {
-                printf("Redeklaracia globalnej premennej\n");
-                result = -1;
-                break;
+                premenna->type = INT;
+                premenna->value.value_int = 0;
+            }
+            else if(actFunctionType == token_double)
+            {
+                premenna->type = DOUBLE;
+                premenna->value.value_double = 0;
+            }
+            else if(actFunctionType == token_String_type)
+            {
+                premenna->type = STRING;
+                premenna->value.value_String = NULL;
+            }
+            else
+            {
+                premenna->type = BOOLEAN;
+                premenna->value.value_bool = 1;
             }
 
-             globalVarsOffset++;
+            code->address1 = premenna;
+            code->address2 = NULL;
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=true; //s ktorym zasobnikom pracuje
+            code->result = adresa;
+            code->operation = T_PUSH;
+            listInsert(instructionList, code);
         }
-        ///zapis premennej do tabulky
+    }
+    else
+        error_f(ERROR_SYNTAX); ///nesom si isty
 
-        if(nontermVnutroTriedy(instructionList) != 1)
-                break;
-        result = 1;
+    ///zapis globalnej premennej do tabulky
+    if(premennaDefinition && firstScan)
+    {
+        ht_item_var_ptr item = ht_create_item_var(actFunctionType,globalVarsOffset,premennaInit);
+        if(ht_insert_item_var(item, key->str, global_table) == false)
+        {
+            fprintf(stderr,"Redeklaracia globalnej premennej\n");
+            error_f(ERROR_SEM_UNDEFINED);
+        }
 
-    }while(0);
+         globalVarsOffset++;
+    }
+    ///zapis premennej do tabulky
 
-    return result;
+    nontermVnutroTriedy(instructionList);
 }
-int nontermFunctionParams(String *key,  token_type actType)
+
+void nontermFunctionParams(String *key)
 {
-    int result = -1;
     ht_params_ptr ht_param = NULL;
     ht_params_ptr ht_next = NULL;
     ht_params_ptr ht_firstParam = NULL;
@@ -475,21 +451,18 @@ int nontermFunctionParams(String *key,  token_type actType)
     do
     {
         if(token->type == token_par)
-        {
-            result = 1;
             break;
-        }
 
         //prvy parameter
 
         if(token->type != token_double && token->type != token_int && token->type != token_String_type && token->type != token_boolean)
-            break;
+            error_f(ERROR_SYNTAX);
 
-            param_type = token->type;
+        param_type = token->type;
 
         get_token(token, sourceFile);
         if(token->type != token_identifier)
-            break;
+            error_f(ERROR_SYNTAX);
 
         //ulozenie prveho parametra do tabulky funkcie
         if(firstScan)
@@ -504,8 +477,8 @@ int nontermFunctionParams(String *key,  token_type actType)
             ht_param->next=NULL;
 
             ht_firstParam = ht_param;
-            nParams++;
         }
+        nParams++;
         //ulozenie prveho parametra do tabulky funkcie
 
         ///zapis parametra do lokalnej tabulky
@@ -518,8 +491,8 @@ int nontermFunctionParams(String *key,  token_type actType)
             ht_item_var_ptr item = ht_create_item_var(param_type,paramsOffset,true);
             if(ht_insert_item_var(item, strParName->str, local_table) == false)
             {
-                printf("Redeklaracia lokalnej premennej");
-                result = -1;
+                fprintf(stderr,"Redeklaracia lokalnej premennej\n");
+                error_f(ERROR_SEM_UNDEFINED);
             }
         }
              paramsOffset--;
@@ -531,23 +504,21 @@ int nontermFunctionParams(String *key,  token_type actType)
         {
             get_token(token, sourceFile);
             if(token->type == token_par)
-            {
-                result = 1;
                 break;
-            }
+
             if(token->type != token_com)
-                break;
+                error_f(ERROR_SYNTAX);
             get_token(token, sourceFile);
             if(token->type != token_double && token->type != token_int && token->type != token_boolean && token->type != token_String_type)
-                break;
+                error_f(ERROR_SYNTAX);
             param_type = token->type;
             get_token(token, sourceFile);
             if(token->type != token_identifier)
-                break;
+                error_f(ERROR_SYNTAX);
 
             nParams++;
 
-            //ulozenie dalsieho parametra do tabulky
+            //ulozenie dalsieho parametra do funkcie
             if(firstScan)
             {
                 ht_next = (ht_params_ptr) memory_manager_malloc(sizeof(struct ht_params));
@@ -573,8 +544,8 @@ int nontermFunctionParams(String *key,  token_type actType)
                 ht_item_var_ptr item = ht_create_item_var(param_type,paramsOffset,true);
                 if(ht_insert_item_var(item, strParName->str, local_table) == false)
                 {
-                    printf("Redeklaracia lokalnej premennej");
-                    result = -1;
+                    fprintf(stderr,"Redeklaracia lokalnej premennej\n");
+                    error_f(ERROR_SEM_UNDEFINED);
                 }
             }
              paramsOffset--;
@@ -589,52 +560,45 @@ int nontermFunctionParams(String *key,  token_type actType)
       if(firstScan)
       {
         instructionList = memory_manager_malloc(sizeof(T_instr_list)); //vytvorenie noveho instrukcneho listu pre funkciu
-        ht_item_func_ptr item = ht_create_item_func(actType,instructionList,ht_firstParam, nParams);
+        listInit(instructionList);
+        ht_item_func_ptr item = ht_create_item_func(actFunctionType,instructionList,ht_firstParam, nParams);
         if(ht_insert_item_func(item, key->str, global_table) == false)
         {
-            printf(stderr,"Redeklaracia globalnej funkcie");
-            result = -1;
+            fprintf(stderr,"Redeklaracia globalnej funkcie\n");
+            error_f(ERROR_SEM_UNDEFINED);
         }
       }
-    ///zapis funkcie do globalnej tabulky
-    return result;
 }
-int nontermVnutroFunkcie(T_instr_list * instructionList)
+void nontermVnutroFunkcie(T_instr_list * instructionList)
 {
-    int result = -1;
-
     get_token(token, sourceFile);
+
     do
     {
-
         if(token->type == token_zrz)
         {
-            result = 1;
             get_back_token(token);
             break;
         }
         else
             get_back_token(token);
-        if(nontermStatement(instructionList) != 1)
-            break;
-        if(nontermVnutroFunkcie(instructionList) != 1)
-            break;
-        result = 1;
+        nontermStatement(instructionList);
+
+        nontermVnutroFunkcie(instructionList);
     }while(0);
-    return result;
 }
-int nontermStatement(T_instr_list * instructionList)
+void nontermStatement(T_instr_list * instructionList)
 {
-    int result = -1;
     token_type actType;
     bool premennaInit=false;
     String *key;
-    T_instr_list  * tempInstrList = NULL; //pre if a while
+    T_instr_list * tempInstrList = NULL; //pre if a while
     T_address_code *code;
     String *potencionalClass;
     bool inaTrieda;
-    T_variable premenna;
+    T_variable * premenna;
     T_address * adresa;
+    ht_item_var_ptr item;
 
     if(!firstScan)
     {
@@ -651,61 +615,70 @@ int nontermStatement(T_instr_list * instructionList)
     {
         if(token->type == token_if)
         {
-
             get_token(token, sourceFile);
             if(token->type != token_pal)
-                break;
-            if(fn_expression(in_if,result_type,NULL,tempInstrList) != 1)
-                break;
+                error_f(ERROR_SYNTAX);
+
+            fn_expression(in_if,BOOLEAN,NULL,&tempInstrList);
 
             if(!firstScan)
                 code->address1 = tempInstrList; //podmienka
 
             get_token(token, sourceFile);
             if(token->type != token_par)
-                break;
-            if(nontermStatementBody(tempInstrList) != 1)
-                break;
+                error_f(ERROR_SYNTAX);
+
+            nontermStatementBody(&tempInstrList);
 
             if(!firstScan)
                 code->address2 = tempInstrList; //telo ifu
 
-            if(nontermElse(tempInstrList) != 1)
-                break;
+            nontermElse(&tempInstrList);
 
             if(!firstScan)
                 code->result = tempInstrList;
-
-            result = 1;
 
             if(!firstScan)
             {
                 code->operation = T_IF;
                 listInsert(instructionList, code);
+
+                code = memory_manager_malloc(sizeof(T_address_code));
+                adresa = memory_manager_malloc(sizeof(T_address));
+                adresa->isGlobal=false;
             }
         }
         else if(token->type == token_while)
         {
             get_token(token, sourceFile);
             if(token->type != token_pal)
-                break;
-            if(fn_expression(in_while,result_type,NULL,tempInstrList) != 1)
-                break;
+                error_f(ERROR_SYNTAX);
+
+            fn_expression(in_while,BOOLEAN,NULL,&tempInstrList);
+
 
            if(!firstScan)
                 code->address1 = tempInstrList; //podmienka
 
             get_token(token, sourceFile);
             if(token->type != token_par)
-                break;
-            if(nontermStatementBody(tempInstrList) != 1)
-                break;
+                error_f(ERROR_SYNTAX);
+
+            nontermStatementBody(&tempInstrList);
 
              if(!firstScan)
-                code->address1 = tempInstrList; //podmienka
-
-            result = 1;
+             {
+                code->address2 = tempInstrList; //podmienka
+                code->operation = T_WHILE;
+                listInsert(instructionList, code);
+             }
         }
+        ///vestavjene funkcie
+        else if(isInFunction(instructionList))
+        {
+            break;
+        }
+        ///vestavjene funkcie
         else if(token->type == token_identifier)
         {
             if(!firstScan)
@@ -718,7 +691,7 @@ int nontermStatement(T_instr_list * instructionList)
             {
                 get_token(token, sourceFile);
                 if(token->type != token_identifier)
-                    break;
+                    error_f(ERROR_SYNTAX);
 
                  if(!firstScan)
                  {
@@ -739,52 +712,62 @@ int nontermStatement(T_instr_list * instructionList)
                  get_back_token(token);
             }
 
-            if(nontermRozlisenieIdentifikatora(instructionList, key, inaTrieda) != 1)
-                break;
-            result = 1;
+            nontermRozlisenieIdentifikatora(instructionList, key, inaTrieda);
         }
-        else if(token->type == token_double || token->type == token_int || token->type == token_String_type)
+        else if(token->type == token_double || token->type == token_boolean || token->type == token_int || token->type == token_String_type)
         {
             actType = token->type;
             get_token(token, sourceFile);
             if(token->type != token_identifier)
-                break;
-
-            strLoad(key, token->value);
+                error_f(ERROR_SYNTAX);
 
             //generovanie instrukcii
             if(!firstScan)
             {
+                strLoad(key, token->value);
                 code =  memory_manager_malloc(sizeof(T_address_code));
-
+                premenna = memory_manager_malloc(sizeof(T_variable));
                 if(actType == token_int)
                 {
-                    premenna.type = INT;
-                    premenna.value.value_int = 0;
+                    premenna->type = INT;
+                    premenna->value.value_int = 0;
                 }
                 else if(actType == token_double)
                 {
-                    premenna.type = DOUBLE;
-                    premenna.value.value_double = 0;
+                    premenna->type = DOUBLE;
+                    premenna->value.value_double = 0;
                 }
                 else if(actType == token_String_type)
                 {
-                    premenna.type = STRING;
-                    premenna.value.value_String = NULL;
+                    premenna->type = STRING;
+                    premenna->value.value_String = NULL;
                 }
                 else
                 {
-                    premenna.type = BOOLEAN;
-                    premenna.value.value_bool = true;
+                    premenna->type = BOOLEAN;
+                    premenna->value.value_bool = true;
                 }
 
-                code->address1 = &premenna;
+                code->address1 = premenna;
                 code->address2 = NULL;
                 adresa = memory_manager_malloc(sizeof(T_address));
-                adresa->isGlobal = true; //s ktorym zasobnikom pracuje
+                adresa->isGlobal = false; //s ktorym zasobnikom pracuje
                 code->result = adresa;
                 code->operation = T_PUSH;
                 listInsert(instructionList, code);
+
+                ///zapis lokalnej premennej
+                if(!firstScan)
+                {
+                    item = ht_create_item_var(actType,actFunctionOffset,premennaInit);
+                    actFunctionOffset++;
+                    if(ht_insert_item_var(item, key->str, local_table) == false)
+                    {
+                        fprintf(stderr,"Nedeklarovana premenna\n");
+                        error_f(ERROR_SEM_UNDEFINED);
+                    }
+                }
+            ///zapis lokalnej premennej
             }
             //generovanie instrukcii
 
@@ -792,8 +775,9 @@ int nontermStatement(T_instr_list * instructionList)
             if(token->type == token_asg)
             {
                 premennaInit = true;
-                if(fn_expression(in_assign,result_type,NULL, NULL) != 1)
-                    break;
+
+                fn_expression(in_assign_second,actType,NULL, &instructionList);
+
                 if(!firstScan)
                 {
                     code =  memory_manager_malloc(sizeof(T_address_code));
@@ -802,15 +786,23 @@ int nontermStatement(T_instr_list * instructionList)
                     adresa->isGlobal = false;
                     adresa->offset = actFunctionOffset;
                     code->address1 = adresa; //odkial
-                    code->address2 = NULL; //kam
+                    adresa = memory_manager_malloc(sizeof(T_address));
+                    adresa->isGlobal = false;
+                    adresa->offset = actFunctionOffset-1;
+                    code->address2 = adresa; //kam
+                    code->operation = T_MOV;
+
+                    listInsert(instructionList, code);
 
                     adresa = memory_manager_malloc(sizeof(T_address));
-                    adresa->isGlobal=true;
+                    adresa->isGlobal=false;
 
-                    adresa->offset = globalVarsOffset;
+                    code = memory_manager_malloc(sizeof(T_address_code));
+                    code->operation = T_POP;
                     code->result = adresa;
-                    code->operation = T_MOV;
                     listInsert(instructionList, code);
+
+                     item->inicialized = true;
                 }
             }
             else
@@ -818,120 +810,109 @@ int nontermStatement(T_instr_list * instructionList)
 
             get_token(token, sourceFile);
             if(token->type != token_sem)
-                break;
-            result = 1;
-
-            ///zapis lokalnej premennej
-            if(!firstScan)
-            {
-                ht_item_var_ptr item = ht_create_item_var(actType,actFunctionOffset,premennaInit);
-                actFunctionOffset++;
-                if(ht_insert_item_var(item, key->str, local_table) == false)
-                {
-                    printf("Redeklaracia lokalnej premennej");
-                    result = -1;
-                }
-            }
-            ///zapis lokalnej premennej
+                error_f(ERROR_SYNTAX);
         }
-        else if(token->type == token_return)
+        else if(token->type == token_return)  ////////////////////////////nnei dokonceneee
         {
-            if(fn_expression(in_return,result_type,NULL, NULL) != 1)
+            get_token(token, sourceFile); //moznost bez vyrazu
+            if(token->type == token_sem)
+            {
+                if(actFunctionType == token_void)
+                   hasResult = true;
+                else
+                {
+                    fprintf(stderr,"Chyba: Zly return\n");
+                    error_f(ERROR_SEM_UNDEFINED);
+                }
                 break;
+            }
+            else
+                get_back_token(token);
+
+            fn_expression(in_return,actFunctionType,NULL, &instructionList); ///osetrit vooooid (moze mat return;) poslat do result type
+
+            hasResult = true;
 
             if(!firstScan)
             {
+                /// kontrola typov....doplniit!!
+
                 code =  memory_manager_malloc(sizeof(T_address_code));
                 adresa = memory_manager_malloc(sizeof(T_address));
-
                 adresa->isGlobal = false;
-                adresa->offset = actFunctionOffset;
-                code->address1 = adresa; //odkial
+                adresa->offset = actFunctionOffset; //odkial
+                code->address1 = adresa; //kam returnujem
 
                 adresa = memory_manager_malloc(sizeof(T_address));
                 adresa->isGlobal = false;
                 adresa->offset = -(nParams+1); //navratova hodnota je pod parametrami
-
-                code->address2 = adresa; //kam
+                code->address2 = adresa;
                 code->operation = T_MOV;
                 listInsert(instructionList, code);
 
+                adresa = memory_manager_malloc(sizeof(T_address));
+                code = memory_manager_malloc(sizeof(T_address_code));
+                adresa->isGlobal=false;
+                code->operation = T_POP;
+                code->result = adresa;
+                listInsert(instructionList, code);
+
+                code =  memory_manager_malloc(sizeof(T_address_code));
                 code->operation = T_RETURN;
                 listInsert(instructionList, code);
             }
-
             get_token(token, sourceFile);
             if(token->type != token_sem)
-                break;
-            result = 1;
+                error_f(ERROR_SYNTAX);
         }
         else
-            break;
-
+            error_f(ERROR_SYNTAX);
     }while(0);
-
-    return result;
 }
 
-int nontermStatementBody(T_instr_list * instructionList)
+void nontermStatementBody(T_instr_list ** instructionList)
 {
-    int result = -1;
-
-    get_token(token, sourceFile);
-    instructionList = memory_manager_malloc(sizeof(T_instr_list));
-    do
-    {
-        if(token->type == token_zlz) //zaciatok zlozeneho prikazu
-        {
-            if(nontermVnutroFunkcie(instructionList) != 1)
-                break;
-            get_token(token, sourceFile);
-            if(token->type != token_zrz)
-                break;
-            result = 1;
-        } //koniec zlozeneho prikazu
-        else //jednoduchy prikaz
-        {
-            get_back_token(token);
-            if(nontermStatement(instructionList) != 1)
-                break;
-            result = 1;
-        }
-
-
-    }while(0);
-
-    return result;
-}
-
-int nontermElse(T_instr_list * instructionList)
-{
-    int result = -1;
     get_token(token, sourceFile);
 
-    do
+    if(!firstScan)
     {
-        if(token->type == token_else)
-        {
-            if(nontermStatementBody(instructionList) != 1)
-                break;
-            result = 1;
-            break;
-        }
-        else if(token->type == token_while || token->type == token_if || token->type == token_identifier || token->type == token_return || token->type == token_double || token->type == token_int || token->type == token_String_type)
-        {
-            get_back_token(token);
-            instructionList = NULL; //else nieje
-            result = 1;
-        }
-    }while(0);
+        *instructionList = memory_manager_malloc(sizeof(T_instr_list));
+        listInit(*instructionList);
+    }
 
-    return result;
+    if(token->type == token_zlz) //zaciatok zlozeneho prikazu
+    {
+        nontermVnutroFunkcie(*instructionList);
+
+        get_token(token, sourceFile);
+        if(token->type != token_zrz)
+            error_f(ERROR_SYNTAX);
+    } //koniec zlozeneho prikazu
+    else //jednoduchy prikaz
+    {
+        get_back_token(token);
+        nontermStatement(*instructionList);
+    }
 }
 
-int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key, bool otherClass)
+void nontermElse(T_instr_list ** instructionList)
 {
-    int result = -1;
+    get_token(token, sourceFile);
+
+    if(token->type == token_else)
+    {
+        nontermStatementBody(instructionList);
+    }
+    else if(token->type == token_while || token->type == token_zrz || token->type == token_if || token->type == token_identifier || token->type == token_return || token->type == token_double || token->type == token_int || token->type == token_String_type || token->type == token_boolean)
+    {
+        get_back_token(token);
+        *instructionList = NULL; //else nieje
+    }
+
+}
+
+void nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key, bool otherClass)
+{
     ht_table_item_ptr tableItem;
     get_token(token, sourceFile);
     String *findVar;
@@ -939,6 +920,8 @@ int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key,
     bool isGlobal;
     ht_item_func_ptr fnce = NULL;
     T_address * adresa;
+    token_type actType;
+    T_variable * premenna;
 
     if(!firstScan)
     {
@@ -950,9 +933,8 @@ int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key,
     do
     {
         if(token->type == token_sem)
-        {
-            result = 1;
-        }
+            break;
+
         else if(token->type == token_asg)
         {
             ///odtestovanie ci taka premenna existuje
@@ -963,8 +945,8 @@ int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key,
                     tableItem = ht_search(key->str, false, global_table);
                     if(tableItem == NULL)
                     {
-                        printf("Takato globalna premenna neexistuje\n");
-                        break;
+                        fprintf(stderr,"Takato globalna premenna neexistuje\n");
+                        error_f(ERROR_SEM_UNDEFINED);
                     }
                     isGlobal = true;
                 }
@@ -980,56 +962,61 @@ int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key,
                         tableItem = ht_search(findVar->str, false, global_table);
                         if(tableItem == NULL)
                         {
-                            printf("Nedefinovana premenna\n");
-                            break;
+                            fprintf(stderr,"Nedefinovana premenna\n");
+                            error_f(ERROR_SEM_UNDEFINED);
                         }
                         isGlobal = true;
                      }
                      if(tableItem->var == NULL) //pripad kedy je to nazov funkcie, nie premennej
                      {
-                         printf("Nedefinovana premenna\n");
-                         break;
+                         fprintf(stderr,"Nedefinovana premenna\n");
+                         error_f(ERROR_SEM_UNDEFINED);
                      }
                 }
 
             }
-            ///odtestovanie ci taka premenna existuje
-            if(fn_expression(in_assign,result_type,NULL, NULL)  != 1)
-                break;
+
+            ///odtestovanie ci taka premenna existuje ...............
+            if(!firstScan)
+                fn_expression(in_assign_second,tableItem->var->type,NULL, &instructionList);
+            else
+                fn_expression(in_assign_second,0,NULL, &instructionList);
 
             ///generovanie instrukcii
             if(!firstScan)
             {
-
                 code = memory_manager_malloc(sizeof(T_address_code));
                 adresa = memory_manager_malloc(sizeof(T_address));
 
                 adresa->isGlobal = false; //je na vrchole lokalneho stacku (vysledok po expression)
                 adresa->offset = actFunctionOffset; /// !!!!!!! vrchol zasobnika
-
                 code->address1 = adresa;
 
                 adresa = memory_manager_malloc(sizeof(T_address));
-
                 adresa->isGlobal = isGlobal;
-                tableItem->var->inicialized = true;
                 adresa->offset = tableItem->var->offset;
+                code->address2 = adresa;
 
-                code->operation = T_FUNC;
+                code->operation = T_MOV;
                 listInsert(instructionList, code);
-
+                tableItem->var->inicialized = true;
                 //este zahodenie vysledku po expression
+
+                adresa = memory_manager_malloc(sizeof(T_address));
+                adresa->isGlobal=false;
+
                 code = memory_manager_malloc(sizeof(T_address_code));
                 code->operation = T_POP;
+                code->result = adresa;
                 listInsert(instructionList, code);
             }
             ///generovanie instrukcii
 
             get_token(token, sourceFile);
             if(token->type != token_sem)
-                break;
+               error_f(ERROR_SYNTAX);
 
-            result = 1;
+            break;
         }
         else if(token->type == token_pal)
         {
@@ -1041,8 +1028,8 @@ int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key,
                     tableItem = ht_search(key->str, true, global_table);
                     if(tableItem == NULL)
                     {
-                        printf("Takato globalna funkcia neexistuje\n");
-                        break;
+                        fprintf(stderr,"Takato globalna funkcia neexistuje\n");
+                        error_f(ERROR_SEM_UNDEFINED);
                     }
                     isGlobal = true;
                 }
@@ -1058,116 +1045,433 @@ int nontermRozlisenieIdentifikatora(T_instr_list * instructionList, String* key,
                         tableItem = ht_search(findVar->str, true, global_table);
                         if(tableItem == NULL)
                         {
-                            printf("Nedefinovana premenna\n");
-                            break;
+                            fprintf(stderr,"Nedefinovana premenna\n");
+                            error_f(ERROR_SEM_UNDEFINED);
                         }
                         isGlobal = true;
                      }
                      if(tableItem->func == NULL) //pripad kedy je to nazov premennej, nie funkcie
                      {
-                         printf("Nedefinovana funkcia\n");
-                         break;
+                         fprintf(stderr,"Nedefinovana funkcia\n");
+                         error_f(ERROR_SEM_UNDEFINED);
                      }
                 }
                 fnce = tableItem->func;
             }
 
-            if(nontermFunctionsArguments(instructionList, fnce) != 1)
-                break;
-
             ///generovanie instrukcii
              if(!firstScan)
             {
-                code = memory_manager_malloc(sizeof(T_address_code));
-                adresa = memory_manager_malloc(sizeof(T_address));
+                //pushnutie naprazdno pre navratovu hodnotu
+                code =  memory_manager_malloc(sizeof(T_address_code));
+                premenna = memory_manager_malloc(sizeof(T_variable));
+                actType = token_int; /////!!!!!!!!!!!!!!!vycucnut z tabulky
+                if(actType == token_int)
+                {
+                    premenna->type = INT;
+                    premenna->value.value_int = 0;
+                }
+                else if(actType == token_double)
+                {
+                    premenna->type = DOUBLE;
+                    premenna->value.value_double = 0;
+                }
+                else if(actType == token_String_type)
+                {
+                    premenna->type = STRING;
+                    premenna->value.value_String = NULL;
+                }
+                else
+                {
+                    premenna->type = BOOLEAN;
+                    premenna->value.value_bool = true;
+                }
 
-                adresa->isGlobal = false; //je na vrchole lokalneho stacku (vysledok po expression)
-                adresa->offset = actFunctionOffset; /// !!!!!!! vrchol zasobnika
+                code->address1 = premenna;
+                code->address2 = NULL;
+                adresa = memory_manager_malloc(sizeof(T_address));
+                adresa->isGlobal = false; //s ktorym zasobnikom pracuje
+                code->result = adresa;
+                code->operation = T_PUSH;
+                listInsert(instructionList, code);
+               //pushnutie naprazdno pre navratovu hodnotu
+
+               actFunctionOffset++;
+            }
+
+           nontermFunctionsArguments(instructionList, fnce);
+
+            if(!firstScan)
+            {
+                code = memory_manager_malloc(sizeof(T_address_code));
+
                 code->address1 = fnce->instructionList;
                 code->operation = T_FUNC;
-                listInsert(instructionList, code);
+                T_address * adresa = memory_manager_malloc(sizeof(T_address));
 
-                //zahodenie navratovej hodnoty
-                        code = memory_manager_malloc(sizeof(T_address_code));
-                        code->operation = T_POP;
-                        listInsert(instructionList, code);
+                if(actFunctionType == token_void)
+                     adresa->isGlobal=true;
+                else
+                    adresa->isGlobal=false;
+
+                code->address2 = adresa;
+                listInsert(instructionList, code);
 
                 //zahodenie vsetkych parametrov
                 int x;
                 for(x=0; x<fnce->nParams; x++)
                 {
+                    adresa = memory_manager_malloc(sizeof(T_address));
+                    adresa->isGlobal = false;
                     code = memory_manager_malloc(sizeof(T_address_code));
                     code->operation = T_POP;
+                    code->result = adresa;
                     listInsert(instructionList, code);
                 }
+
+                //zahodenie navratovej hodnoty ->vyuzivam len pri vyrazoch
+                    code = memory_manager_malloc(sizeof(T_address_code));
+                    adresa = memory_manager_malloc(sizeof(T_address));
+                    adresa->isGlobal = false;
+                    code->operation = T_POP;
+                    code->result = adresa;
+                    listInsert(instructionList, code);
+
+                    actFunctionOffset--;
             }
             ///generovanie instrukcii
-            get_token(token, sourceFile);
+           /* get_token(token, sourceFile);
             if(token->type != token_par)
-                break;
+                break;*/ //expression skontroluje pravu zatvorku
             get_token(token, sourceFile);
             if(token->type != token_sem)
-                break;
-            result = 1;
+                error_f(ERROR_SYNTAX);
         }
     }while(0);
-
-    return result;
 }
 
-int nontermFunctionsArguments(T_instr_list * instructionList, ht_item_func_ptr fnce)
+void nontermFunctionsArguments(T_instr_list * instructionList, ht_item_func_ptr fnce)
 {
-    int result = -1;
-
-    if(fn_expression(in_function,result_type,fnce, instructionList) == 1) //vyhodnotia sa vsetky argumenty
-        result = 1;
-
-    return result;
+    get_back_token(token);
+    fn_expression(in_function,0,fnce, &instructionList); //vyhodnotia sa vsetky argumenty
 }
 
-bool strToVal(String *retazec, value_type valType, union T_value * valStruct)
+bool isInFunction(T_instr_list * instructionList) ////presuvat hodnotu na lokalnyyy
 {
-    bool result = true;
-    long i;
+    T_address_code * code;
+    T_address * adresa;
 
-    if(valType == INT)
+    if(token->type == token_iin)
     {
-       char *ptr; //ak chcem overit platnost cisla (to kontroluje uz lexikalka)
+        get_token(token, sourceFile);
+        if(token->type != token_pal)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+        if(token->type != token_par)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+        if(token->type != token_sem)
+           error_f(ERROR_SYNTAX);
 
-       i = strtol(retazec->str, &ptr, 10);
-       if(i<(-INT_MAX) || i>INT_MAX)
-            result = false; //pretecenie
+        if(!firstScan)
+        {
+            code =  memory_manager_malloc(sizeof(T_address_code));
+            code->operation = T_IIN;
+            listInsert(instructionList, code);
+
+            code = memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=false;
+            code->result = adresa;
+            code->operation = T_POP;
+            listInsert(instructionList, code);
+        }
+        return true;
+    }
+    else if(token->type == token_din)
+    {
+        get_token(token, sourceFile);
+        if(token->type != token_pal)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+        if(token->type != token_par)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+        if(token->type != token_sem)
+            error_f(ERROR_SYNTAX);
+
+        if(!firstScan)
+        {
+            code =  memory_manager_malloc(sizeof(T_address_code));
+            code->operation = T_DIN;
+            listInsert(instructionList, code);
+
+            code = memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=false;
+            code->result = adresa;
+            code->operation = T_POP;
+            listInsert(instructionList, code);
+        }
+        return true;
+    }
+    else if(token->type == token_sin)
+    {
+        get_token(token, sourceFile);
+        if(token->type != token_pal)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+        if(token->type != token_par)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+        if(token->type != token_sem)
+           error_f(ERROR_SYNTAX);
+
+        if(!firstScan)
+        {
+            code =  memory_manager_malloc(sizeof(T_address_code));
+            code->operation = T_SIN;
+            listInsert(instructionList, code);
+
+            code = memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=false;
+            code->result = adresa;
+            code->operation = T_POP;
+            listInsert(instructionList, code);
+        }
+        return true;
+    }
+    else if(token->type == token_out)
+    {
+        get_token(token, sourceFile);
+        if(token->type != token_pal)
+           error_f(ERROR_SYNTAX);
+
+        functPrintParams(instructionList);
+
+        get_token(token, sourceFile);
+        if(token->type != token_par)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+         if(token->type != token_sem)
+            error_f(ERROR_SYNTAX);
+
+        return true;
+    }
+    else if(token->type == token_length || token->type == token_substr || token->type == token_compare || token->type == token_find || token->type == token_sort)
+    {
+        get_token(token, sourceFile);
+        if(token->type != token_pal)
+            error_f(ERROR_SYNTAX);
+
+        get_back_token(token);
+
+        if(token->type == token_length)
+            fn_expression(in_length_fun,0,NULL,&instructionList);
+        else if(token->type == token_substr)
+            fn_expression(in_substr_fun,0,NULL,&instructionList);
+        else if(token->type == token_compare)
+           fn_expression(in_compare_fun,0,NULL,&instructionList);
+        else if(token->type == token_find)
+            fn_expression(in_find_fun,0,NULL,&instructionList);
+        else if(token->type == token_sort)
+            fn_expression(in_sort_fun,0,NULL,&instructionList);
+
+        if(!firstScan) //nerobim s nou nic
+        {
+            code = memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=false;
+            code->result = adresa;
+            code->operation = T_POP;
+            listInsert(instructionList, code);
+        }
+
+        get_token(token, sourceFile);
+        if(token->type != token_par)
+            error_f(ERROR_SYNTAX);
+        get_token(token, sourceFile);
+         if(token->type != token_sem)
+            error_f(ERROR_SYNTAX);
+
+        return true;
+    }
+
+    return false; //nieje to vestavjena
+}
+
+void functPrintParams(T_instr_list * instructionList)
+{
+    T_address_code * code;
+    T_address * adresa;
+    T_variable * premenna;
+    String *myString;
+    int i=0;
+    bool otherClass;
+    ht_table_item_ptr tableItem;
+    bool isGlobal;
+    String *findVar;
+    char* pEnd;
+
+    do
+    {
+        get_token(token, sourceFile);
+        if(token->type == token_String || token->type == token_number_double || token->type == token_number_int || token->type == token_true || token->type == token_false)
+        {
+            i++;
+            if(!firstScan)
+            {
+                code =  memory_manager_malloc(sizeof(T_address_code));
+                adresa = memory_manager_malloc(sizeof(T_address));
+                premenna = memory_manager_malloc(sizeof(T_variable));
+
+                if(token->type  == token_number_int)
+                {
+                    premenna->type = INT;
+                    premenna->value.value_int = atoi(token->value);
+                }
+                else if(token->type  == token_number_double )
+                {
+                    premenna->type = DOUBLE;
+                    premenna->value.value_double = strtod(token->value, &pEnd);
+                }
+                 else if(token->type  == token_true )
+                {
+                    premenna->type = BOOLEAN;
+                    premenna->value.value_bool = 1;
+                }
+                else if(token->type  == token_false )
+                {
+                    premenna->type = BOOLEAN;
+                    premenna->value.value_bool = 0;
+                }
+                else if(token->type  == token_String)
+                {
+                    myString = memory_manager_malloc(sizeof(String));
+                    strInit(myString);
+                    strLoad(myString, token->value);
+                    premenna->type = STRING;
+                    premenna->value.value_String = myString;
+                }
+
+                code->address1 = premenna;
+                adresa->isGlobal=false; //s ktorym zasobnikom pracuje
+                code->result = adresa;
+                code->operation = T_PUSH;
+                listInsert(instructionList, code);
+
+                code =  memory_manager_malloc(sizeof(T_address_code));
+                adresa = memory_manager_malloc(sizeof(T_address));
+                adresa->isGlobal=false;
+                adresa->offset = actFunctionOffset;
+                code->operation = T_OUT;
+                code->address1 = adresa;
+                listInsert(instructionList, code);
+
+                code = memory_manager_malloc(sizeof(T_address_code));
+                adresa = memory_manager_malloc(sizeof(T_address));
+                adresa->isGlobal=false;
+                code->result = adresa;
+                code->operation = T_POP;
+                listInsert(instructionList, code);
+            }
+        }
+        else if(token->type == token_identifier)
+        {
+            i++;
+            if(!firstScan)
+            {
+                tableItem = memory_manager_malloc(sizeof(struct ht_table_item));
+                myString = memory_manager_malloc(sizeof(String));
+                strInit(myString);
+                strLoad(myString,token->value);
+            }
+
+            get_token(token, sourceFile);
+            if(token->type == token_dot) //rozsireny vyraz
+            {
+                get_token(token, sourceFile);
+                if(token->type != token_identifier)
+                    error_f(ERROR_SYNTAX);
+
+                if(!firstScan)
+                {
+                    strCat(myString,"_");
+                     strCat(myString,token->value);
+                     otherClass = true;
+                }
+            }
+            else
+            {
+                get_back_token(token);
+                otherClass = false;
+            }
+
+            if(!firstScan)
+            {
+                if(otherClass) //testovanie premennej z inej triedy
+                {
+                    tableItem = ht_search(myString->str, false, global_table);
+                    if(tableItem == NULL)
+                        error_f(ERROR_SYNTAX);
+
+                    isGlobal = true;
+                }
+                else //testovanie z aktualnej triedy
+                {
+                     tableItem = ht_search(myString->str, false, local_table);
+                     isGlobal = false;
+                     if(tableItem == NULL) //pozriem este na aktualnu triedu medzi globalne
+                     {
+                        findVar = memory_manager_malloc(sizeof(String));
+                        strInit(findVar);
+
+                        strLoad(findVar, actTrieda->str);
+                        strCat(findVar,"_");
+                        strCat(findVar,myString->str);
+                        tableItem = ht_search(findVar->str, false, global_table);
+                        if(tableItem == NULL)
+                        {
+                            fprintf(stderr,"Nedefinovana premenna\n");
+                            error_f(ERROR_SEM_UNDEFINED);
+                        }
+
+                        isGlobal = true;
+                     }
+                     if(tableItem->var == NULL) //pripad kedy je to nazov funkcie, nie premennej
+                    {
+                        fprintf(stderr,"Nedefinovana premenna\n");
+                        error_f(ERROR_SEM_UNDEFINED);
+                    }
+                }
+
+            code = memory_manager_malloc(sizeof(T_address_code));
+            adresa = memory_manager_malloc(sizeof(T_address));
+            adresa->isGlobal=isGlobal;
+            adresa->offset = tableItem->var->offset;
+            code->operation = T_OUT;
+            code->address1 = adresa;
+            listInsert(instructionList, code);
+            }
+        }
+        else if(token->type == token_par)
+        {
+            get_back_token(token);
+            break;
+        }
+
+        get_token(token, sourceFile);
+        if(token->type == token_add)
+            continue;
         else
-            valStruct->value_int = i;
-    }
-    else if(valType == DOUBLE) //pretecenie nerobim..bo neznam
-    {
-        double x;
-        char *ptr;
-        x = strtod(retazec->str, &ptr);
-        valStruct->value_double = x;
-    }
-    else if(valType == BOOLEAN)
-    {
-        if(retazec->length==1 && retazec->str[0] == '0')
-            valStruct->value_bool = 0;
-        else if(retazec->length==1 && retazec->str[0] == '1')
-            valStruct->value_bool = 1;
-        else if(strcmp(retazec->str, "true")) //velke pismena mozme doriesit potom
-            valStruct->value_bool = 1;
-         else if(strcmp(retazec->str, "false")) //velke pismena mozme doriesit potom
-            valStruct->value_bool = 0;
-        else
-            result = false;
-    }
-    else
-    {
-        String * pomocnyRetazec;
-        pomocnyRetazec = memory_manager_malloc(sizeof(String));
-        strInit(pomocnyRetazec);
-        strLoad(pomocnyRetazec,retazec->str);
-        valStruct->value_String = pomocnyRetazec->str; //neviem ci je to dobre
+        {
+             get_back_token(token);
+             break;
+        }
+    }while(1);
 
-    }
-    return result;
+    if(i==0)
+        error_f(ERROR_SEM_OTHER); ///overit
+
 }

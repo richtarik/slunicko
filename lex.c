@@ -143,11 +143,9 @@ void get_token(T_token *token,FILE* sourceFile)
                          token->type= token_par;
                          return;
                      case '[':
-                         token->type= token_brl;
-                         return;
+                         error_f(ERROR_LEX);
                      case ']':
-                         token->type= token_brr;
-                         return;
+                         error_f(ERROR_LEX);
                     case '{':
                          token->type= token_zlz;
                          return;
@@ -451,7 +449,7 @@ void get_token(T_token *token,FILE* sourceFile)
 				{
 					error_f(ERROR_LEX);
 				}
-                else if ( isalpha(actChar) || actChar == '$')
+                else if (actChar == '.' || isalpha(actChar) || actChar == '$')
                 {
                     error_f(ERROR_LEX);
                 }

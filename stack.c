@@ -31,7 +31,8 @@ void stackTop (IntStack* s, int* c ) {
 */
     if(stackEmpty(s))
     {
-		error_f(ERROR_INTERN);
+        fprintf(stderr,"INT_STACK_ERROR-in expr TOP over empty stack\n");
+        error_f(ERROR_INTERN);
     }
 
     *c=s->data[s->top];
@@ -44,7 +45,8 @@ void stackPop (IntStack* s ) {
 */
     if(stackEmpty(s))
     {
-		error_f(ERROR_INTERN);
+        fprintf(stderr,"INT_STACK_ERROR-in expr POP over empty stack\n");
+        error_f(ERROR_INTERN);
     }
 
     s->top--;
@@ -57,9 +59,10 @@ void stackPush (IntStack* s, int value ) {
 */
     if(stackFull(s))
     {
-        s->data= (int*)memory_manager_realloc(s->data, sizeof(int)*(s->max + s->max) );
+        s->max= s->max+STACK_SIZE;
+        s->data= (int*)memory_manager_realloc(s->data, sizeof(int)*(s->max) );
 
-        s->max+=s->max;
+
     }
 
     s->top++;
@@ -106,9 +109,9 @@ void VStackTop(VariableStack* s, T_variable* c) {
 
 		if (VStackEmpty(s))
 		{
-      // pokus o TOP nad prazdnim stackom neukoncuje program len warrning chybova hlaska na stderr ze niekto je ... a vola Top nad prazdnym stackom
+        fprintf(stderr,"STACK_ERROR TOP over empty stack\n");
       // TODO
-		// ZLE error_f(ERROR_INTERN);
+        error_f(ERROR_INTERN);
 		}
 
 		(*c).type = ((s->data[s->top]).type);
@@ -118,12 +121,11 @@ void VStackTop(VariableStack* s, T_variable* c) {
 
 void VStackPop(VariableStack* s) {
 
-	if (VStackEmpty(s))
-	{
-      // pokus o POP nad prazdnim stackom neukoncuje program len warrning chybova hlaska na stderr ze niekto je ... a popuje prazdny stack
-      // TODO
-		// ZLE error_f(ERROR_INTERN);
-	}
+    if (VStackEmpty(s))
+    {
+        fprintf(stderr,"STACK_ERROR POP over empty stack\n");
+		//error_f(ERROR_INTERN);
+    }
 
 	s->top--;
 }
@@ -132,6 +134,7 @@ T_variable* VStackGet(VariableStack* s, int offset) {
 
     if(offset > s->top)
     {
+        fprintf(stderr,"STACK_ERROR GET variable over top of stack\n");
         return NULL;
     }
     return (&(s->data[offset]));
@@ -140,6 +143,11 @@ T_variable* VStackGet(VariableStack* s, int offset) {
 
 void VStackSet(VariableStack* s, int offset, value_type type, union T_value value) {
 
+if(offset > s->top)
+{
+//push or warning
+    fprintf(stderr,"STACK_ERROR SET variable over top of stack\n");
+}
 	s->data[offset].type = type;
 	s->data[offset].value = value;
 }
@@ -148,7 +156,7 @@ void VStackPush(VariableStack* s, value_type type, union T_value value) {
 
 	if (VStackFull(s))
 	{
-		s->max += s->max;
+		s->max= s->max+ STACK_SIZE;
 		s->data = (T_variable*) memory_manager_realloc(s->data, sizeof(T_variable)*(s->max));
 	}
 
@@ -163,3 +171,78 @@ void VStackDelete_and_free(VariableStack* s)
 	memory_manager_free_one(s->data);
 	s->data = NULL;
 }
+
+
+/// EXPR_STACK///
+///Pomocny stack pre prioritu generovania instrukcii a sematicku kontrolu///
+void ExpStackInit(ExpStack* s, unsigned int size)
+{
+    s->top = -1;
+    s->max = size;
+    s->data = (T_Exp_variable*) memory_manager_malloc(sizeof(T_Exp_variable)*size);
+}
+
+int ExpStackEmpty(ExpStack* s)
+{
+    return (s->top == -1) ? 1 : 0;
+}
+
+int ExpStackFull(ExpStack* s)
+{
+    return (s->top == (int)s->max - 1) ? 1 : 0;
+}
+
+void ExpStackTop(ExpStack* s, T_Exp_variable* c)
+{
+
+    if (ExpStackEmpty(s))
+    {
+        fprintf(stderr,"ExpStack: STACK_ERROR TOP over empty stack\n");
+        // pokus o TOP nad prazdnim stackom neukoncuje program len warrning chybova hlaska na stderr ze niekto je ... a vola Top nad prazdnym stackom
+        // TODO
+       // error_f(ERROR_OTHER);
+    }
+
+		(*c).type = ((s->data[s->top]).type);
+		(*c).offset = ((s->data[s->top]).offset);
+    (*c).GlobLokCons = ((s->data[s->top]).GlobLokCons);
+}
+
+
+void ExpStackPop(ExpStack* s)
+{
+
+    if (ExpStackEmpty(s))
+    {
+        fprintf(stderr,"ExpStack: STACK_ERROR POP over empty stack\n");
+        //error_f(ERROR_INTERN);
+    }
+
+    s->top--;
+}
+
+
+//Ok STACK SIZE
+void ExpStackPush(ExpStack* s, value_type type, int offset, value_type_Stack GlobLokCons)
+{
+
+    if (ExpStackFull(s))
+    {
+      s->max= s->max + STACK_SIZE;
+      s->data = (T_Exp_variable*) memory_manager_realloc(s->data, sizeof(T_Exp_variable)*(s->max));
+    }
+
+    s->top++;
+    s->data[s->top].type = type;
+    s->data[s->top].offset = offset;
+    s->data[s->top].GlobLokCons = GlobLokCons;
+
+}
+
+void ExpStackDelete_and_free(ExpStack* s)
+{
+	s->top = -1;
+	memory_manager_free_one(s->data);
+	s->data = NULL;
+}
+

@@ -243,8 +243,8 @@ int generator(T_instr_list *L, bool isRoot) {
 	if (isRoot) {
         stackDelete_and_free(func_stack);
 
-        printf("\n\nVypis listu2: \n");
-        list_print(iList);
+ //       printf("\n\nVypis listu2: \n");
+//        list_print(iList);
 
 		error = interpret(iList);
 		if (error)

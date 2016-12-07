@@ -1,4 +1,4 @@
-///* File: instlist.h          */
+///* File: instrList.h         */
 ///* Autor: Petr Mynarcik      */
 ///* Login: xmynar05           */
 ///*                           */

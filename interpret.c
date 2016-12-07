@@ -52,6 +52,7 @@ int interpret(T_instr_list *L) {
 
 			//Instrukce pro aritmeticko operace
 			case T_ADD:
+			    fprintf(stderr,"addd\n");
 				POM = T->address1;
 				if (POM->isGlobal) {
 					A1 = VStackGet(sVariableGlobal, POM->offset);
@@ -116,7 +117,6 @@ int interpret(T_instr_list *L) {
 				else {
 					VStackSet(sVariableLocal, frame + POM->offset, A3->type, A3->value);
 				}
-
 				break;
 
 			case T_INC:
@@ -1096,25 +1096,23 @@ int interpret(T_instr_list *L) {
 			//Vestaveny funkce
 			case T_IIN:
 				i = strReadInt();
-				POM = T->address1;
 				A1->type = INT;
 				A1->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
+				VStackPush(sVariableLocal , A1->type, A1->value);
 				break;
 
 			case T_DIN:
 				d = strReadDouble();
 				A1->type = DOUBLE;
 				A1->value.value_double = d;
-				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
+				VStackPush(sVariableLocal, A1->type, A1->value);
 				break;
 
 			case T_SIN:
 				s = strReadString();
-				POM = T->address1;
 				A1->type = STRING;
 				A1->value.value_String = s;
-				VStackSet(sVariableGlobal, 0, A1->type, A1->value);
+				VStackPush(sVariableLocal, A1->type, A1->value);
 				break;
 
 			case T_OUT:
@@ -1132,7 +1130,12 @@ int interpret(T_instr_list *L) {
 					printf("%g", A1->value.value_double);
 				}
 				else if (A1->type == STRING) {
-					strPrintStr(A1->value.value_String);
+					strPrintStr(A1->value.value_String);}
+                else if (A1->type == BOOLEAN) {
+                    if(A1->value.value_bool==true)
+                        printf("%s", "true");
+                    else
+                        printf("%s", "false");
 				}
 				else {
 					return -1;
@@ -1150,7 +1153,7 @@ int interpret(T_instr_list *L) {
 				i = strLength(A1->value.value_String);
 				A2->type = INT;
 				A2->value.value_int = i;
-				VStackSet(sVariableGlobal, 0, A2->type, A2->value);
+				VStackPush(sVariableGlobal, A2->type, A2->value);
 				break;
 
 			case T_SUBSTR:
@@ -1243,12 +1246,12 @@ int interpret(T_instr_list *L) {
 				A1 = T->address1;
 				if (POM->isGlobal) {
 					VStackPush(sVariableGlobal, A1->type, A1->value);
-					printf("\n\nPUSH - Vypis globalneho stacku: \n");
+					fprintf(stderr,"\n\nPUSH - Vypis globalneho stacku: \n");
                     print_VStack_data(sVariableGlobal,stderr);
 				}
 				else {
 					VStackPush(sVariableLocal, A1->type, A1->value);
-					printf("\n\nPUSH - Vypis lokalneho stacku: \n");
+					fprintf(stderr,"\n\nPUSH - Vypis lokalneho stacku: \n");
                     print_VStack_data(sVariableLocal,stderr);
 				}
 				break;
@@ -1257,17 +1260,19 @@ int interpret(T_instr_list *L) {
 				POM = T->result;
 				if (POM->isGlobal) {
 					VStackPop(sVariableGlobal);
-					printf("\n\nPOP - Vypis globalneho stacku: \n");
-                    print_VStack_data(sVariableGlobal,stderr);
+                printf("\n\nPOP - Vypis globalneho stacku: \n");
+                print_VStack_data(sVariableGlobal,stderr);
 				}
 				else {
 					VStackPop(sVariableLocal);
-					printf("\n\nPOP - Vypis lokalneho stacku: \n");
+					fprintf(stderr,"\n\nPOP - Vypis lokalneho stacku: \n");
                     print_VStack_data(sVariableLocal,stderr);
 				}
 				break;
 
 			case T_MOV:
+			  //fprintf(stderr,"som v MOV - Vypis lokalneho stacku: \n");
+       // print_VStack_data(sVariableLocal,stderr);
 				POM = T->address1;
 				if (POM->isGlobal) {
 					A1 = VStackGet(sVariableGlobal, POM->offset);
@@ -1278,12 +1283,12 @@ int interpret(T_instr_list *L) {
 				POM = T->address2;
 				if (POM->isGlobal) {
 					VStackSet(sVariableGlobal, POM->offset, A1->type, A1->value);
-					printf("\n\nMOV - Vypis lokalneho stacku: \n");
+					fprintf(stderr,"\n\nMOV - Vypis Globalneho stacku: \n");
                     print_VStack_data(sVariableGlobal,stderr);
 				}
 				else {
 					VStackSet(sVariableLocal, frame + POM->offset, A1->type, A1->value);
-					printf("\n\nMOV - Vypis lokalneho stacku: \n");
+					fprintf(stderr,"\n\nMOV - Vypis lokalneho stacku: \n");
                     print_VStack_data(sVariableLocal,stderr);
 				}
 				break;
